@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** PFMXPPRF Register Declaration. */
-typedef struct {
+typedef struct pfmxpprf_typedef{
   __IOM uint32_t RFIMDCDCCTRL0;                 /**< New Register                                       */
   __IOM uint32_t RFIMDCDCCTRL1;                 /**< New Register                                       */
   __IOM uint32_t RFIMDCDCCTRL2;                 /**< New Register                                       */

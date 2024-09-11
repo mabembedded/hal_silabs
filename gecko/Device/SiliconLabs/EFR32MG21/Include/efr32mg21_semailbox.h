@@ -3,7 +3,7 @@
  * @brief EFR32MG21 SEMAILBOX register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,12 +41,12 @@
  *****************************************************************************/
 
 /** SEMAILBOX_HOST FIFO Register Group Declaration. */
-typedef struct {
+typedef struct semailbox_fifo_typedef{
   __IOM uint32_t DATA;                               /**< RX/TX FIFO DATA                                    */
 } SEMAILBOX_FIFO_TypeDef;
 
 /** SEMAILBOX_HOST Register Declaration. */
-typedef struct {
+typedef struct semailbox_host_typedef{
   SEMAILBOX_FIFO_TypeDef FIFO[16U];               /**< RX/TX FIFO                                         */
   __IM uint32_t          TX_STATUS;               /**< TX Status                                          */
   __IM uint32_t          RX_STATUS;               /**< RX Status                                          */
@@ -227,7 +227,7 @@ typedef struct {
  *****************************************************************************/
 
 /** SEMAILBOX_SE Register Declaration. */
-typedef struct {
+typedef struct semailbox_se_typedef{
   __IOM uint32_t NEW_REG;                            /**< New Register                                       */
 } SEMAILBOX_SE_TypeDef;
 /** @} End of group EFR32MG21_SEMAILBOX_SE */
@@ -252,4 +252,4 @@ typedef struct {
 /** @} End of group EFR32MG21_SEMAILBOX_SE */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_SEMAILBOX_H */
+#endif // EFR32MG21_SEMAILBOX_H

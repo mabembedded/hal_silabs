@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** DPLL Register Declaration. */
-typedef struct {
+typedef struct dpll_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version                                         */
   __IOM uint32_t EN;                            /**< Enable                                             */
   __IOM uint32_t CFG;                           /**< Config                                             */

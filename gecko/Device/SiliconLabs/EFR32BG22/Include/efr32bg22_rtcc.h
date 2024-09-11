@@ -3,7 +3,7 @@
  * @brief EFR32BG22 RTCC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,14 +42,14 @@
  *****************************************************************************/
 
 /** RTCC CC Register Group Declaration. */
-typedef struct {
+typedef struct rtcc_cc_typedef{
   __IOM uint32_t CTRL;                               /**< CC Channel Control Register                        */
   __IOM uint32_t OCVALUE;                            /**< Output Compare Value Register                      */
   __IM uint32_t  ICVALUE;                            /**< Input Capture Value Register                       */
 } RTCC_CC_TypeDef;
 
 /** RTCC Register Declaration. */
-typedef struct {
+typedef struct rtcc_typedef{
   __IM uint32_t   IPVERSION;                    /**< IP VERSION                                         */
   __IOM uint32_t  EN;                           /**< Module Enable Register                             */
   __IOM uint32_t  CFG;                          /**< Configuration Register                             */
@@ -419,4 +419,4 @@ typedef struct {
 /** @} End of group EFR32BG22_RTCC */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_RTCC_H */
+#endif // EFR32BG22_RTCC_H

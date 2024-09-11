@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SMU Register Declaration. */
-typedef struct {
+typedef struct smu_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version                                         */
   __IM uint32_t  STATUS;                        /**< Status Register                                    */
   __IOM uint32_t LOCK;                          /**< Lock Register                                      */
@@ -1020,7 +1020,7 @@ typedef struct {
  *****************************************************************************/
 
 /** SMU_CFGNS Register Declaration. */
-typedef struct {
+typedef struct smu_cfgns_typedef{
   uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  NSSTATUS;                      /**< Status Register                                    */
   __IOM uint32_t NSLOCK;                        /**< Lock Register                                      */

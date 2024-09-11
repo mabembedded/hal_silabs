@@ -35,9 +35,10 @@
 
 /*******************************************************************************
  * @addtogroup status Status Codes
- * @details Status Codes contains error and status code definitions used by GSDK
- *          software components and stacks. This module also provides routines to
- *          read the string linked with the error and status codes.
+ * @details Status Codes contains error and status code definitions used by
+ *          Simplicity SDK software components and stacks. This module also
+ *          provides routines to read the string linked with the error and
+ *          status codes.
  * @{
  ******************************************************************************/
 
@@ -187,6 +188,21 @@
 #define SL_STATUS_INVALID_CHANNEL_MASK          ((sl_status_t)0x004F)  ///< Invalid channel mask.
 #define SL_STATUS_BAD_SCAN_DURATION             ((sl_status_t)0x0050)  ///< Bad scan duration.
 
+// MAC transmit related status
+#define SL_STATUS_MAC_TRANSMIT_QUEUE_FULL       ((sl_status_t)0x0053)  ///< The MAC transmit queue is full
+#define SL_STATUS_TRANSMIT_SCHEDULER_FAIL       ((sl_status_t)0x0054)  ///< The transmit attempt failed because the radio scheduler could not find a slot to transmit this packet in or a higher priority event interrupted it
+#define SL_STATUS_TRANSMIT_INVALID_CHANNEL      ((sl_status_t)0x0055)  ///< An unsupported channel setting was specified
+#define SL_STATUS_TRANSMIT_INVALID_POWER        ((sl_status_t)0x0056)  ///< An unsupported power setting was specified
+#define SL_STATUS_TRANSMIT_ACK_RECEIVED         ((sl_status_t)0x0057)  ///< The expected ACK was received after the last transmission
+#define SL_STATUS_TRANSMIT_BLOCKED              ((sl_status_t)0x0058)  ///< The transmit attempt was blocked from going over the air. Typically this is due to the Radio Hold Off (RHO) or Coexistence plugins as they can prevent transmits based on external signals.
+
+// NVM3 specific errors
+#define SL_STATUS_NVM3_ALIGNMENT_INVALID             ((sl_status_t)0x0059)  ///< The initialization was aborted as the NVM3 instance is not aligned properly in memory
+#define SL_STATUS_NVM3_SIZE_TOO_SMALL                ((sl_status_t)0x005A)  ///< The initialization was aborted as the size of the NVM3 instance is too small
+#define SL_STATUS_NVM3_PAGE_SIZE_NOT_SUPPORTED       ((sl_status_t)0x005B)  ///< The initialization was aborted as the NVM3 page size is not supported
+#define SL_STATUS_NVM3_TOKEN_INIT_FAILED             ((sl_status_t)0x005C)  ///< The application that there was an error initializing some of the tokens
+#define SL_STATUS_NVM3_OPENED_WITH_OTHER_PARAMETERS  ((sl_status_t)0x005D)  ///< The initialization was aborted as the NVM3 instance was already opened with other parameters
+
 // Bluetooth status codes
 #define SL_STATUS_BT_OUT_OF_BONDS                                                                        ((sl_status_t)0x0402)        ///< Bonding procedure can't be started because device has no space left for bond.
 #define SL_STATUS_BT_UNSPECIFIED                                                                         ((sl_status_t)0x0403)        ///< Unspecified error
@@ -259,7 +275,9 @@
 #define SL_STATUS_BT_CTRL_UNKNOWN_ADVERTISING_IDENTIFIER                                                 ((sl_status_t)0x1042)     ///< A command was sent from the Host that should identify an Advertising or Sync handle, but the Advertising or Sync handle does not exist.
 #define SL_STATUS_BT_CTRL_LIMIT_REACHED                                                                  ((sl_status_t)0x1043)     ///< Number of operations requested has been reached and has indicated the completion of the activity (e.g., advertising or scanning).
 #define SL_STATUS_BT_CTRL_OPERATION_CANCELLED_BY_HOST                                                    ((sl_status_t)0x1044)     ///< A request to the Controller issued by the Host and still pending was successfully canceled.
-#define SL_STATUS_BT_CTRL_PACKET_TOO_LONG                                                                ((sl_status_t)0x1045)     ///< An attempt was made to send or receive a packet that exceeds the maximum allowed packet l
+#define SL_STATUS_BT_CTRL_PACKET_TOO_LONG                                                                ((sl_status_t)0x1045)     ///< An attempt was made to send or receive a packet that exceeds the maximum allowed packet length.
+#define SL_STATUS_BT_CTRL_TOO_LATE                                                                       ((sl_status_t)0x1046)     ///< Information was provided too late to the controller.
+#define SL_STATUS_BT_CTRL_TOO_EARLY                                                                      ((sl_status_t)0x1047)     ///< Information was provided too early to the controller.
 
 // Bluetooth attribute status codes
 #define SL_STATUS_BT_ATT_INVALID_HANDLE                                                                  ((sl_status_t)0x1101)      ///< The attribute handle given was not valid on this server
@@ -372,6 +390,7 @@
 #define SL_STATUS_WIFI_TX_LIFETIME_EXCEEDED                ((sl_status_t)0x0B20)  ///< The request failed because the MSDU life time was exceeded
 
 // -----------------------------------------------------------------------------
+
 // MVP Driver and MVP Math status codes
 #define SL_STATUS_COMPUTE_DRIVER_FAULT                      ((sl_status_t)0x1501)   ///< Critical fault
 #define SL_STATUS_COMPUTE_DRIVER_ALU_NAN                    ((sl_status_t)0x1502)   ///< ALU operation output NaN
@@ -386,6 +405,39 @@
 #define SL_STATUS_COMPUTE_MATH_INFINITY                     ((sl_status_t)0x1513)   ///< MATH Infinity encountered
 #define SL_STATUS_COMPUTE_MATH_OVERFLOW                     ((sl_status_t)0x1514)   ///< MATH numeric overflow
 #define SL_STATUS_COMPUTE_MATH_UNDERFLOW                    ((sl_status_t)0x1515)   ///< MATH numeric underflow
+
+// Zigbee status codes
+
+#define SL_STATUS_ZIGBEE_PACKET_HANDOFF_DROPPED                ((sl_status_t)0x0C01)  ///< Packet is dropped by packet-handoff callbacks
+#define SL_STATUS_ZIGBEE_DELIVERY_FAILED                       ((sl_status_t)0x0C02)  ///< The APS layer attempted to send or deliver a message and failed
+#define SL_STATUS_ZIGBEE_MAX_MESSAGE_LIMIT_REACHED             ((sl_status_t)0x0C03)  ///< The maximum number of in-flight messages ::EMBER_APS_UNICAST_MESSAGE_COUNT has been reached
+#define SL_STATUS_ZIGBEE_BINDING_IS_ACTIVE                     ((sl_status_t)0x0C04)  ///< The application is trying to delete or overwrite a binding that is in use
+#define SL_STATUS_ZIGBEE_ADDRESS_TABLE_ENTRY_IS_ACTIVE         ((sl_status_t)0x0C05)  ///< The application is trying to overwrite an address table entry that is in use
+#define SL_STATUS_ZIGBEE_MOVE_FAILED                           ((sl_status_t)0x0C06)  ///< After moving, a mobile node's attempt to re-establish contact with the network failed
+#define SL_STATUS_ZIGBEE_NODE_ID_CHANGED                       ((sl_status_t)0x0C07)  ///< The local node ID has changed. The application can get the new node ID by calling ::sl_zigbee_get_node_id()
+#define SL_STATUS_ZIGBEE_INVALID_SECURITY_LEVEL                ((sl_status_t)0x0C08)  ///< The chosen security level is not supported by the stack
+#define SL_STATUS_ZIGBEE_IEEE_ADDRESS_DISCOVERY_IN_PROGRESS    ((sl_status_t)0x0C09)  ///< An error occurred when trying to encrypt at the APS Level
+#define SL_STATUS_ZIGBEE_APS_ENCRYPTION_ERROR                  ((sl_status_t)0x0C0A)  ///< An error occurred when trying to encrypt at the APS Level
+#define SL_STATUS_ZIGBEE_SECURITY_STATE_NOT_SET                ((sl_status_t)0x0C0B)  ///< There was an attempt to form or join a network with security without calling ::sl_zigbee_set_initial_security_state() first
+#define SL_STATUS_ZIGBEE_TOO_SOON_FOR_SWITCH_KEY               ((sl_status_t)0x0C0C)  ///< There was an attempt to broadcast a key switch too quickly after broadcasting the next network key. The Trust Center must wait at least a period equal to the broadcast timeout so that all routers have a chance to receive the broadcast of the new network key
+#define SL_STATUS_ZIGBEE_SIGNATURE_VERIFY_FAILURE              ((sl_status_t)0x0C0D)  ///< The received signature corresponding to the message that was passed to the CBKE Library failed verification and is not valid
+#define SL_STATUS_ZIGBEE_KEY_NOT_AUTHORIZED                    ((sl_status_t)0x0C0E)  ///< The message could not be sent because the link key corresponding to the destination is not authorized for use in APS data messages
+#define SL_STATUS_ZIGBEE_BINDING_HAS_CHANGED                   ((sl_status_t)0x0C0F)  ///< The application tried to use a binding that has been remotely modified and the change has not yet been reported to the application
+#define SL_STATUS_ZIGBEE_TRUST_CENTER_SWAP_EUI_HAS_CHANGED     ((sl_status_t)0x0C10)  ///< The EUI of the Trust center has changed due to a successful rejoin after TC Swapout
+#define SL_STATUS_ZIGBEE_TRUST_CENTER_SWAP_EUI_HAS_NOT_CHANGED ((sl_status_t)0x0C11)  ///< A Trust Center Swapout Rejoin has occurred without the EUI of the TC changing
+#define SL_STATUS_ZIGBEE_INSUFFICIENT_RANDOM_DATA              ((sl_status_t)0x0C12)  ///< An attempt to generate random bytes failed because of insufficient random data from the radio
+#define SL_STATUS_ZIGBEE_SOURCE_ROUTE_FAILURE                  ((sl_status_t)0x0C13)  ///< A Zigbee route error command frame was received indicating that a source routed message from this node failed en route
+#define SL_STATUS_ZIGBEE_MANY_TO_ONE_ROUTE_FAILURE             ((sl_status_t)0x0C14)  ///< A Zigbee route error command frame was received indicating that a message sent to this node along a many-to-one route failed en route
+#define SL_STATUS_ZIGBEE_STACK_AND_HARDWARE_MISMATCH           ((sl_status_t)0x0C15)  ///< A critical and fatal error indicating that the version of the stack trying to run does not match with the chip it's running on
+#define SL_STATUS_ZIGBEE_PAN_ID_CHANGED                        ((sl_status_t)0x0C16)  ///< The local PAN ID has changed. The application can get the new PAN ID by calling ::emberGetPanId()
+#define SL_STATUS_ZIGBEE_CHANNEL_CHANGED                       ((sl_status_t)0x0C17)  ///< The channel has changed.
+#define SL_STATUS_ZIGBEE_NETWORK_OPENED                        ((sl_status_t)0x0C18)  ///< The network has been opened for joining.
+#define SL_STATUS_ZIGBEE_NETWORK_CLOSED                        ((sl_status_t)0x0C19)  ///< The network has been closed for joining.
+#define SL_STATUS_ZIGBEE_RECEIVED_KEY_IN_THE_CLEAR             ((sl_status_t)0x0C1A)  ///< An attempt was made to join a Secured Network using a pre-configured key, but the Trust Center sent back a Network Key in-the-clear when an encrypted Network Key was required. (::EMBER_REQUIRE_ENCRYPTED_KEY)
+#define SL_STATUS_ZIGBEE_NO_NETWORK_KEY_RECEIVED               ((sl_status_t)0x0C1B)  ///< An attempt was made to join a Secured Network, but the device did not receive a Network Key.
+#define SL_STATUS_ZIGBEE_NO_LINK_KEY_RECEIVED                  ((sl_status_t)0x0C1C)  ///< After a device joined a Secured Network, a Link Key was requested (::EMBER_GET_LINK_KEY_WHEN_JOINING) but no response was ever received.
+#define SL_STATUS_ZIGBEE_PRECONFIGURED_KEY_REQUIRED            ((sl_status_t)0x0C1D)  ///< An attempt was made to join a Secured Network without a pre-configured key, but the Trust Center sent encrypted data using a pre-configured key.
+#define SL_STATUS_ZIGBEE_EZSP_ERROR                            ((sl_status_t)0x0C1E)  ///< A Zigbee EZSP error has occured. Track the origin and corresponding EzspStatus for more info.
 
 // -----------------------------------------------------------------------------
 // Data Types

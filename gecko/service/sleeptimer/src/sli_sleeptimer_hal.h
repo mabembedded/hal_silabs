@@ -51,6 +51,7 @@ void sleeptimer_hal_init_timer(void);
  *
  * @return Value in ticks of the timer counter.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sleeptimer_hal_get_counter(void);
 
 /*******************************************************************************
@@ -58,6 +59,7 @@ uint32_t sleeptimer_hal_get_counter(void);
  *
  * @return Value in ticks of the timer comparator.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sleeptimer_hal_get_compare(void);
 
 /*******************************************************************************
@@ -65,6 +67,7 @@ uint32_t sleeptimer_hal_get_compare(void);
  *
  * @param value Number of ticks to set.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sleeptimer_hal_set_compare(uint32_t value);
 
 /*******************************************************************************
@@ -73,11 +76,13 @@ void sleeptimer_hal_set_compare(uint32_t value);
  *
  * @param value Number of ticks to set.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sleeptimer_hal_set_compare_prs_hfxo_startup(int32_t value);
 
 /*******************************************************************************
  * Hardware Abstraction Layer to get the timer frequency.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sleeptimer_hal_get_timer_frequency(void);
 
 /*******************************************************************************
@@ -85,6 +90,7 @@ uint32_t sleeptimer_hal_get_timer_frequency(void);
  *
  * @param local_flag Internal interrupt flag.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sleeptimer_hal_enable_int(uint8_t local_flag);
 
 /*******************************************************************************
@@ -92,6 +98,7 @@ void sleeptimer_hal_enable_int(uint8_t local_flag);
  *
  * @param local_flag Internal interrupt flag.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sleeptimer_hal_disable_int(uint8_t local_flag);
 
 /*******************************************************************************
@@ -99,6 +106,7 @@ void sleeptimer_hal_disable_int(uint8_t local_flag);
  *
  * @param local_flag Internal interrupt flag.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sleeptimer_hal_set_int(uint8_t local_flag);
 
 /*******************************************************************************
@@ -115,6 +123,7 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void);
  *
  * @return Capture value.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sleeptimer_hal_get_capture(void);
 
 /*******************************************************************************
@@ -123,6 +132,7 @@ uint32_t sleeptimer_hal_get_capture(void);
  *
  * @note Not supported by all peripherals Sleeptimer can use.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sleeptimer_hal_reset_prs_signal(void);
 
 /*******************************************************************************
@@ -130,6 +140,7 @@ void sleeptimer_hal_reset_prs_signal(void);
  *
  * @note Not supported by all peripherals Sleeptimer can use.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sleeptimer_hal_disable_prs_compare_and_capture_channel(void);
 
 /*******************************************************************************
@@ -137,7 +148,39 @@ void sleeptimer_hal_disable_prs_compare_and_capture_channel(void);
  *
  * @param flags Internal interrupt flag.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void process_timer_irq(uint8_t local_flag);
+
+/***************************************************************************//**
+ * @brief
+ *   Convert prescaler divider to a logarithmic value. It only works for even
+ *   numbers equal to 2^n.
+ *
+ * @param[in] presc
+ *   Prescaler value used to set the frequency divider. The divider is equal to
+ *   ('presc' + 1). If a divider value is passed for 'presc', 'presc' will be
+ *   equal to (divider - 1).
+ *
+ * @return
+ *   Logarithm base 2 (binary) value, i.e. exponent as used by fixed
+ *   2^n prescalers.
+ ******************************************************************************/
+__STATIC_INLINE uint32_t sleeptimer_hal_presc_to_log2(uint32_t presc)
+{
+  uint32_t log2;
+
+  // Integer prescalers take argument less than 32768.
+  EFM_ASSERT(presc < 32768U);
+
+  // Count leading zeroes and "reverse" result. Consider divider value to get
+  // exponent n from 2^n, so ('presc' +1).
+  log2 = 31UL - __CLZ(presc + (uint32_t) 1);
+
+  // Check that prescaler is a 2^n number.
+  EFM_ASSERT(presc == (SL_Log2ToDiv(log2) - 1U));
+
+  return log2;
+}
 
 #ifdef __cplusplus
 }

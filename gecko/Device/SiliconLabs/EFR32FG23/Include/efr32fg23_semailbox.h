@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 /** SEMAILBOX_HOST Register Declaration. */
-typedef struct {
+typedef struct semailbox_host_typedef{
   __IOM uint32_t FIFO;                               /**< ESECURE_MAILBOX_FIFO                               */
   uint32_t       RESERVED0[15U];                     /**< Reserved for future use                            */
   __IM uint32_t  TX_STATUS;                          /**< ESECURE_MAILBOX_TXSTAT                             */
@@ -213,7 +213,7 @@ typedef struct {
  *****************************************************************************/
 
 /** SEMAILBOX_APBSE Register Declaration. */
-typedef struct {
+typedef struct semailbox_apbse_typedef{
   __IOM uint32_t SE_ESECURE_MAILBOX_FIFO;            /**< ESECURE_MAILBOX_FIFO                               */
   uint32_t       RESERVED0[15U];                     /**< Reserved for future use                            */
   __IM uint32_t  SE_ESECURE_MAILBOX_TXSTAT;          /**< ESECURE_MAILBOX_TXSTAT                             */

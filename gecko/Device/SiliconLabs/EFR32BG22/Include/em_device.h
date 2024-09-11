@@ -14,7 +14,7 @@
  * @endverbatim
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -70,6 +70,12 @@
 
 #elif defined(EFR32BG22C224F512IM40)
 #include "efr32bg22c224f512im40.h"
+
+#elif defined(EFR32BG22E224F512IM32)
+#include "efr32bg22e224f512im32.h"
+
+#elif defined(EFR32BG22E224F512IM40)
+#include "efr32bg22e224f512im40.h"
 
 #else
 #error "em_device.h: PART NUMBER undefined"

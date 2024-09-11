@@ -3,7 +3,7 @@
  * @brief EFR32MG21 DEVINFO register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,22 +41,22 @@
  *****************************************************************************/
 
 /** DEVINFO HFRCODPLLCAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcodpllcal_typedef{
   __IM uint32_t HFRCODPLLCAL;                        /**< HFRCODPLL Calibration                              */
 } DEVINFO_HFRCODPLLCAL_TypeDef;
 
 /** DEVINFO HFRCOEM23CAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcoem23cal_typedef{
   __IM uint32_t HFRCOEM23CAL;                        /**< HFRCOEM23 Calibration                              */
 } DEVINFO_HFRCOEM23CAL_TypeDef;
 
 /** DEVINFO HFRCOSECAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcosecal_typedef{
   uint32_t RESERVED0[1U];                            /**< Reserved for future use                            */
 } DEVINFO_HFRCOSECAL_TypeDef;
 
 /** DEVINFO Register Declaration. */
-typedef struct {
+typedef struct devinfo_typedef{
   __IM uint32_t                INFO;                  /**< DI Information                                     */
   __IM uint32_t                PART;                  /**< Part Info                                          */
   __IM uint32_t                MEMINFO;               /**< Memory Info                                        */
@@ -112,7 +112,7 @@ typedef struct {
  *****************************************************************************/
 
 /* Bit fields for DEVINFO INFO */
-#define _DEVINFO_INFO_RESETVALUE                                 0x05000000UL                             /**< Default value for DEVINFO_INFO              */
+#define _DEVINFO_INFO_RESETVALUE                                 0x13000000UL                             /**< Default value for DEVINFO_INFO              */
 #define _DEVINFO_INFO_MASK                                       0xFFFFFFFFUL                             /**< Mask for DEVINFO_INFO                       */
 #define _DEVINFO_INFO_CRC_SHIFT                                  0                                        /**< Shift value for DEVINFO_CRC                 */
 #define _DEVINFO_INFO_CRC_MASK                                   0xFFFFUL                                 /**< Bit mask for DEVINFO_CRC                    */
@@ -124,7 +124,7 @@ typedef struct {
 #define DEVINFO_INFO_PRODREV_DEFAULT                             (_DEVINFO_INFO_PRODREV_DEFAULT << 16)    /**< Shifted mode DEFAULT for DEVINFO_INFO       */
 #define _DEVINFO_INFO_DEVINFOREV_SHIFT                           24                                       /**< Shift value for DEVINFO_DEVINFOREV          */
 #define _DEVINFO_INFO_DEVINFOREV_MASK                            0xFF000000UL                             /**< Bit mask for DEVINFO_DEVINFOREV             */
-#define _DEVINFO_INFO_DEVINFOREV_DEFAULT                         0x00000005UL                             /**< Mode DEFAULT for DEVINFO_INFO               */
+#define _DEVINFO_INFO_DEVINFOREV_DEFAULT                         0x00000013UL                             /**< Mode DEFAULT for DEVINFO_INFO               */
 #define DEVINFO_INFO_DEVINFOREV_DEFAULT                          (_DEVINFO_INFO_DEVINFOREV_DEFAULT << 24) /**< Shifted mode DEFAULT for DEVINFO_INFO       */
 
 /* Bit fields for DEVINFO PART */
@@ -928,4 +928,4 @@ typedef struct {
 /** @} End of group EFR32MG21_DEVINFO */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_DEVINFO_H */
+#endif // EFR32MG21_DEVINFO_H

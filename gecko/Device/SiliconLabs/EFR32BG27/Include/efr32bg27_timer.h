@@ -3,7 +3,7 @@
  * @brief EFR32BG27 TIMER register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** TIMER CC Register Group Declaration. */
-typedef struct {
+typedef struct timer_cc_typedef{
   __IOM uint32_t CFG;                                /**< CC Channel Configuration Register                  */
   __IOM uint32_t CTRL;                               /**< CC Channel Control Register                        */
   __IOM uint32_t OC;                                 /**< OC Channel Value Register                          */
@@ -54,7 +54,7 @@ typedef struct {
 } TIMER_CC_TypeDef;
 
 /** TIMER Register Declaration. */
-typedef struct {
+typedef struct timer_typedef{
   __IM uint32_t    IPVERSION;                   /**< IP version ID                                      */
   __IOM uint32_t   CFG;                         /**< Configuration Register                             */
   __IOM uint32_t   CTRL;                        /**< Control Register                                   */
@@ -1012,4 +1012,4 @@ typedef struct {
 /** @} End of group EFR32BG27_TIMER */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_TIMER_H */
+#endif // EFR32BG27_TIMER_H

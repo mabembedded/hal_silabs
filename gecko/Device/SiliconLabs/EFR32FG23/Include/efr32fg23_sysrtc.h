@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SYSRTC Register Declaration. */
-typedef struct {
+typedef struct sysrtc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP VERSION                                         */
   __IOM uint32_t EN;                            /**< Module Enable Register                             */
   __IOM uint32_t SWRST;                         /**< Software Reset Register                            */

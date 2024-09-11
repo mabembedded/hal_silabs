@@ -3,7 +3,7 @@
  * @brief EFR32BG22 CRYPTOACC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 /** CRYPTOACC Register Declaration. */
-typedef struct {
+typedef struct cryptoacc_typedef{
   __IOM uint32_t FETCHADDR;                     /**< Fetcher Address                                    */
   uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t FETCHLEN;                      /**< Fetcher Length                                     */
@@ -455,7 +455,7 @@ typedef struct {
  *****************************************************************************/
 
 /** CRYPTOACC_PKCTRL Register Declaration. */
-typedef struct {
+typedef struct cryptoacc_pkctrl_typedef{
   __IOM uint32_t POINTER;                            /**< Pointers                                           */
   __IOM uint32_t COMMAND;                            /**< Command                                            */
   __IOM uint32_t PKCTRL;                             /**< Control                                            */
@@ -678,12 +678,12 @@ typedef struct {
  *****************************************************************************/
 
 /** CRYPTOACC_RNGCTRL KEYS Register Group Declaration. */
-typedef struct {
+typedef struct cryptoacc_keys_typedef{
   __IOM uint32_t KEY;                                /**< Key Register                                       */
 } CRYPTOACC_KEYS_TypeDef;
 
 /** CRYPTOACC_RNGCTRL Register Declaration. */
-typedef struct {
+typedef struct cryptoacc_rngctrl_typedef{
   __IOM uint32_t         RNGCTRL;                 /**< RNG Control Register                               */
   __IM uint32_t          FIFOLEVEL;               /**< FIFO Level Register                                */
   __IM uint32_t          FIFOTHRESH;              /**< FIFO Threshold Register                            */
@@ -1019,4 +1019,4 @@ typedef struct {
 /** @} End of group EFR32BG22_CRYPTOACC_RNGCTRL */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_CRYPTOACC_H */
+#endif // EFR32BG22_CRYPTOACC_H

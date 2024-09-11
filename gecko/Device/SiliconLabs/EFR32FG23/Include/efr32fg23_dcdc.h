@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** DCDC Register Declaration. */
-typedef struct {
+typedef struct dcdc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IPVERSION                                          */
   __IOM uint32_t CTRL;                          /**< Control                                            */
   __IOM uint32_t EM01CTRL0;                     /**< EM01 Control                                       */

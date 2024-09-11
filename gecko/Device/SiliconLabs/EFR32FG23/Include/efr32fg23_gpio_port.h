@@ -37,7 +37,7 @@
 /**************************************************************************//**
  * @brief EFR32FG23 GPIO PORT
  *****************************************************************************/
-typedef struct {
+typedef struct gpio_port_typedef{
   __IOM uint32_t CTRL;                          /**< Port control            */
   __IOM uint32_t MODEL;                         /**< mode low                */
   uint32_t       RESERVED0[1];                  /**< Reserved for future use */

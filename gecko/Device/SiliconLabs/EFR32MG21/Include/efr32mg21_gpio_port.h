@@ -3,7 +3,7 @@
  * @brief EFR32MG21 GPIO Port register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -37,7 +37,7 @@
 /**************************************************************************//**
  * @brief EFR32MG21 GPIO PORT
  *****************************************************************************/
-typedef struct {
+typedef struct gpio_port_typedef{
   __IOM uint32_t CTRL;                          /**< Port control            */
   __IOM uint32_t MODEL;                         /**< mode low                */
   uint32_t       RESERVED0[1];                  /**< Reserved for future use */
@@ -342,4 +342,4 @@ typedef struct {
 #define GPIO_P_DIN_DIN_DEFAULT                         (_GPIO_P_DIN_DIN_DEFAULT << 0)   /**< Shifted mode DEFAULT for GPIO_P_DIN         */
 /** @} End of group Parts */
 
-#endif /* GPIO_PORT_H */
+#endif // GPIO_PORT_H

@@ -750,7 +750,7 @@ typedef enum {
   /** Data valid level is 4 before requesting DMA transfer */
   iadcFifoCfgDvl4  = _IADC_SCANFIFOCFG_DVL_VALID4,
 
-#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if !(defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9))
 #if _SILICON_LABS_32B_SERIES_2_CONFIG > 2
   /** Data valid level is 5 before requesting DMA transfer */
   iadcFifoCfgDvl5  = _IADC_SCANFIFOCFG_DVL_VALID5,

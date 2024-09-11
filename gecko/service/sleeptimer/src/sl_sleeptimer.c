@@ -31,7 +31,7 @@
 #include <stdlib.h>
 
 #include "em_device.h"
-#include "em_core_generic.h"
+#include "sl_core.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
 #include "sl_atomic.h"
@@ -86,9 +86,9 @@ static volatile uint16_t overflow_counter;
 
 #if SL_SLEEPTIMER_WALLCLOCK_CONFIG
 // Current time count.
-static sl_sleeptimer_timestamp_64_t second_count;
+static volatile sl_sleeptimer_timestamp_64_t second_count;
 // Tick rest when the frequency is not a divider of the timer width.
-static uint32_t overflow_tick_rest = 0;
+static volatile uint32_t overflow_tick_rest = 0;
 // Current time zone offset.
 static sl_sleeptimer_time_zone_offset_t tz_offset = 0;
 // Precalculated tick rest in case of overflow.
@@ -110,27 +110,34 @@ static volatile sl_sleeptimer_tick_count_t last_delta_update_count;
 static bool is_sleeptimer_initialized = false;
 
 // Flag that indicates if power manager's timer will expire at next compare match.
-static bool next_timer_to_expire_is_power_manager = false;
+static volatile bool next_timer_to_expire_is_power_manager = false;
 
 // Precalculated value to avoid millisecond to tick conversion overflow.
 static uint32_t max_millisecond_conversion;
 
 // Sleep on ISR exit flag.
-static bool sleep_on_isr_exit = false;
+static volatile bool sleep_on_isr_exit = false;
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 static void delta_list_insert_timer(sl_sleeptimer_timer_handle_t *handle,
                                     sl_sleeptimer_tick_count_t timeout);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 static sl_status_t delta_list_remove_timer(sl_sleeptimer_timer_handle_t *handle);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 static void set_comparator_for_next_timer(void);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 static void update_delta_list(void);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE uint32_t div_to_log2(uint32_t div);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE bool is_power_of_2(uint32_t nbr);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
                                 sl_sleeptimer_tick_count_t timeout_initial,
                                 sl_sleeptimer_tick_count_t timeout_periodic,
@@ -139,8 +146,10 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
                                 uint8_t priority,
                                 uint16_t option_flags);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 static void update_next_timer_to_expire_is_power_manager(void);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 static void delay_callback(sl_sleeptimer_timer_handle_t *handle,
                            void *data);
 
@@ -705,7 +714,7 @@ sl_sleeptimer_timestamp_64_t sl_sleeptimer_get_time_64(void)
 sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time)
 {
   // convert 32 bit time to 64 bit time
-  uint64_t temp_time = time + TIME_64_TO_32_EPOCH_OFFSET_SEC;
+  uint64_t temp_time = time + (uint64_t)TIME_64_TO_32_EPOCH_OFFSET_SEC;
   sl_status_t err_code = sl_sleeptimer_set_time_64(temp_time);
   return err_code;
 }

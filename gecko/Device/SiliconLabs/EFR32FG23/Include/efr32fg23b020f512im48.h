@@ -184,6 +184,7 @@ typedef enum IRQn{
 #define _SILICON_LABS_SECURITY_FEATURE_SE                  0                                    /** Mid */
 #define _SILICON_LABS_SECURITY_FEATURE_VAULT               1                                    /** High */
 #define _SILICON_LABS_SECURITY_FEATURE_ROT                 2                                    /** Root of Trust */
+#define _SILICON_LABS_SECURITY_FEATURE_BASE                3                                    /** Base */
 #define _SILICON_LABS_SECURITY_FEATURE                     _SILICON_LABS_SECURITY_FEATURE_VAULT /** Security feature set */
 #define _SILICON_LABS_DCDC_FEATURE_NOTUSED                 0                                    /** Not Used */
 #define _SILICON_LABS_DCDC_FEATURE_DCDC_BUCK               1                                    /** Includes Buck DCDC */
@@ -1459,10 +1460,6 @@ typedef enum IRQn{
                                          : ((ref) == EUSART1) ? 1 \
                                          : ((ref) == EUSART2) ? 2 \
                                          : -1)
-
-#define USART_NUM(ref)                 (((ref) == USART0) ? 0   \
-                                        : -1)
-
 #define EUSART_EM2_CAPABLE(n)           (((n) == 0) ? EUSART0_EM2_CAPABLE   \
                                          : ((n) == 1) ? EUSART1_EM2_CAPABLE \
                                          : ((n) == 2) ? EUSART2_EM2_CAPABLE \

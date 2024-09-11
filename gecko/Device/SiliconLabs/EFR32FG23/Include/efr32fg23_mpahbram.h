@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** MPAHBRAM Register Declaration. */
-typedef struct {
+typedef struct mpahbram_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t CMD;                           /**< Command register                                   */
   __IOM uint32_t CTRL;                          /**< Control register                                   */

@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LCDRF Register Declaration. */
-typedef struct {
+typedef struct lcdrf_typedef{
   __IOM uint32_t RFIMLCDCTRL;                   /**< RF Interference Mitigation LCD Control             */
   uint32_t       RESERVED0[1023U];              /**< Reserved for future use                            */
   __IOM uint32_t RFIMLCDCTRL_SET;               /**< RF Interference Mitigation LCD Control             */

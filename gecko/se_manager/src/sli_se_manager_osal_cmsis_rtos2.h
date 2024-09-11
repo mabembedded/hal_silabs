@@ -44,7 +44,7 @@
     #include <string.h>
   #endif
 #else
-  #include "em_core.h"
+  #include "sl_core.h"
 #endif
 
 #ifdef __cplusplus

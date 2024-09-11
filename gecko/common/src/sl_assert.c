@@ -39,7 +39,7 @@
  * @{
  ******************************************************************************/
 
-#if defined(DEBUG_EFM)
+#if defined(DEBUG_EFM) && !defined(DEBUG_EFM_USER)
 /***************************************************************************//**
  * @brief
  *   EFM internal assert handling.
@@ -71,6 +71,6 @@ void assertEFM(const char *file, int line)
   while (true) {
   }
 }
-#endif /* DEBUG_EFM */
+#endif /* DEBUG_EFM && !DEBUG_EFM_USER */
 
 /** @} (end addtogroup assert) */

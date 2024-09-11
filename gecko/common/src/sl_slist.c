@@ -122,11 +122,10 @@ void sl_slist_remove(sl_slist_node_t **head,
   for (node_ptr = head; *node_ptr != NULL; node_ptr = &((*node_ptr)->node)) {
     if (*node_ptr == item) {
       *node_ptr = item->node;
+      item->node = NULL;
       return;
     }
   }
-
-  EFM_ASSERT(node_ptr != NULL);
 }
 
 /***************************************************************************//**

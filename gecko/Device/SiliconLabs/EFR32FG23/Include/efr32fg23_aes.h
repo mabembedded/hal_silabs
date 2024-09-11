@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 /** AES Register Declaration. */
-typedef struct {
+typedef struct aes_typedef{
   __IOM uint32_t FETCHADDR;                     /**< Fetcher Address                                    */
   uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t FETCHLEN;                      /**< Fetcher Length                                     */

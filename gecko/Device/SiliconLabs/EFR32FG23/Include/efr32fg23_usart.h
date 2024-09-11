@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** USART Register Declaration. */
-typedef struct {
+typedef struct usart_typedef{
   __IM uint32_t  IPVERSION;                     /**< IPVERSION                                          */
   __IOM uint32_t EN;                            /**< USART Enable                                       */
   __IOM uint32_t CTRL;                          /**< Control Register                                   */

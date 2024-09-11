@@ -30,15 +30,16 @@
 #ifndef SL_SE_MANAGER_H
 #define SL_SE_MANAGER_H
 
-#include "sli_se_manager_features.h"
+#if defined(_SILICON_LABS_32B_SERIES_2)
+// Not used by this file, but included for backwards compatibility
+#include "em_se.h"
+#endif
 
+#include "sli_se_manager_features.h"
 #if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 /***************************************************************************//**
- * @addtogroup sl_se_manager Secure Engine Manager
- *
- * @note The APIs are thread-safe.
- *
+ * @addtogroup sl_se_manager SE Manager
  * @{
  ******************************************************************************/
 
@@ -61,7 +62,7 @@
 #endif // SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT
 #include "sl_se_manager_types.h"
 
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_status.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -203,27 +204,23 @@ sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx);
 #endif // SL_SE_MANAGER_H
 
 // THE REST OF THE FILE IS DOCUMENTATION ONLY
-/// @addtogroup sl_se_manager Secure Engine Manager API
-/// @brief Silicon Labs Secure Engine Manager
+/// @addtogroup sl_se_manager
 /// @{
-///
 /// @details
-/// # Introduction
 ///
-/// The Secure Engine (SE) Manager provides thread-safe APIs for the Secure Engine's mailbox interface. Note that PSA Crypto is the main device independant crypto API and should be used
-/// whenever possible. Visit the <a href="https://mbed-tls.readthedocs.io/en/latest/">Mbed TLS & PSA Crypto documentation hub</a> for more details. The SE manager APIs can be used directly
-/// for performance or space constrained applications.
+/// The Secure Engine (SE) Manager provides thread-safe APIs for the Secure Engine's mailbox interface. Note that PSA Crypto is the recommended device independent crypto API and should be used
+/// whenever possible. The SE manager APIs can be used directly for performance or space constrained applications.
 ///
 /// Available functionality will vary between devices: device management, such as secure firmware upgrade, secure boot and secure debug implementation, is available on all series 2 devices.
 /// Devices with the SE subsystem includes a low level crypto API where the SE Manager will use the SE hardware peripherals to accelerate cryptographic operations. Finally, Vault High
 /// devices also include secure key storage functionality, anti-tamper protection, advanced crypto API and attestation.
 ///
 /// @note Below are some of the useful application notes linked with Secure Engine Manager:\n
-/// <a href="https://www.silabs.com/documents/public/application-notes/an1190-efr32-secure-debug.pdf">AN1190: Series 2 Secure Debug</a>\n
-/// <a href="https://www.silabs.com/documents/public/application-notes/an1247-efr32-secure-vault-tamper.pdf">AN1247: Anti-Tamper Protection Configuration and Use</a>\n
-/// <a href="https://www.silabs.com/documents/public/application-notes/an1268-efr32-secure-identity.pdf">AN1268: Authenticating Silicon Labs Devices Using Device Certificates</a>\n
-/// <a href="https://www.silabs.com/documents/public/application-notes/an1271-efr32-secure-key-storage.pdf">AN1271: Secure Key Storage</a>\n
-/// <a href="https://www.silabs.com/documents/public/application-notes/an1218-secure-boot-with-rtsl.pdf">AN1218: Series 2 Secure Boot with RTSL</a>\n
+/// - <a href="https://www.silabs.com/documents/public/application-notes/an1190-efr32-secure-debug.pdf">AN1190: Series 2 Secure Debug</a>\n
+/// - <a href="https://www.silabs.com/documents/public/application-notes/an1247-efr32-secure-vault-tamper.pdf">AN1247: Anti-Tamper Protection Configuration and Use</a>\n
+/// - <a href="https://www.silabs.com/documents/public/application-notes/an1268-efr32-secure-identity.pdf">AN1268: Authenticating Silicon Labs Devices Using Device Certificates</a>\n
+/// - <a href="https://www.silabs.com/documents/public/application-notes/an1271-efr32-secure-key-storage.pdf">AN1271: Secure Key Storage</a>\n
+/// - <a href="https://www.silabs.com/documents/public/application-notes/an1218-secure-boot-with-rtsl.pdf">AN1218: Series 2 Secure Boot with RTSL</a>\n
 ///
 /// # Functionality
 ///
@@ -455,13 +452,7 @@ sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx);
 ///
 /// The SE Manager supports multi-thread safe APIs for MicriumOS and FreeRTOS interfacing with CMSIS RTOS2 APIs.
 ///
-/// For MicriumOS support the user application must define the compile time option SL_CATALOG_MICRIUMOS_KERNEL_PRESENT.
-/// For FreeRTOS support the user application must define the compile time option SL_CATALOG_FREERTOS_KERNEL_PRESENT.
-/// For bare metal mode (non-RTOS) the user must not define SL_CATALOG_MICRIUMOS_KERNEL_PRESENT or SL_CATALOG_FREERTOS_KERNEL_PRESENT.
-///
-/// Applications created using Simplicity Studio 5 need to include the header file called _sl_component_catalog.h_ which will include a macro define for one of the abovementioned RTOSes if present.
-///
-/// In the cases with SL_CATALOG_MICRIUMOS_KERNEL_PRESENT or SL_CATALOG_FREERTOS_KERNEL_PRESENT defined (RTOS-mode), the SE Manager will be configured with threading and yield support.
+/// In the cases where Micrium OS or FreeRTOS are included in the project (RTOS-mode), the SE Manager will be configured with threading and yield support.
 /// Configure ::sl_se_command_context_t with ::sl_se_set_yield to yield the CPU core when the SE Manager is waiting for the Secure Engine to complete a mailbox command.
 ///
 /// For threading support the SE Manager applies an SE lock mechanism to protect the Secure Engine Mailbox interface from being accessed by more than one thread,

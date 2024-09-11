@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** FSRCO Register Declaration. */
-typedef struct {
+typedef struct fsrco_typedef{
   __IM uint32_t IPVERSION;                      /**< IP Version                                         */
   uint32_t      RESERVED0[1023U];               /**< Reserved for future use                            */
   __IM uint32_t IPVERSION_SET;                  /**< IP Version                                         */

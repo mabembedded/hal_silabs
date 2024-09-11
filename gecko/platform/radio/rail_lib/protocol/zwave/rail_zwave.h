@@ -46,9 +46,7 @@ extern "C" {
 ///
 /// To configure Z-Wave functionality, the application must first set up
 /// a RAIL instance with RAIL_Init() and other setup functions.
-///
 /// @code{.c}
-///
 /// RAIL_ZWAVE_NodeId_t gRecentBeamNodeId;
 /// uint8_t gRecentBeamChannelIndex;
 ///
@@ -198,7 +196,7 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_NodeId_t, uint16_t) {
 #define RAIL_ZWAVE_NODE_ID_NONE      ((RAIL_ZWAVE_NodeId_t) RAIL_ZWAVE_NODE_ID_NONE)
 #define RAIL_ZWAVE_NODE_ID_BROADCAST ((RAIL_ZWAVE_NodeId_t) RAIL_ZWAVE_NODE_ID_BROADCAST)
 #define RAIL_ZWAVE_NODE_ID_DEFAULT   ((RAIL_ZWAVE_NodeId_t) RAIL_ZWAVE_NODE_ID_DEFAULT)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /** Defines for subPhyID field in RAIL_RxPacketDetails_t */
@@ -206,7 +204,7 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_NodeId_t, uint16_t) {
 #define RAIL_ZWAVE_RX_SUBPHY_ID_1     (1U)
 #define RAIL_ZWAVE_RX_SUBPHY_ID_2     (2U)
 #define RAIL_ZWAVE_RX_SUBPHY_ID_3     (3U)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @enum RAIL_ZWAVE_HomeId_t
@@ -223,7 +221,7 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_HomeId_t, uint32_t) {
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
 #define RAIL_ZWAVE_HOME_ID_UNKNOWN ((RAIL_ZWAVE_HomeId_t) RAIL_ZWAVE_HOME_ID_UNKNOWN)
 #define RAIL_ZWAVE_HOME_ID_DEFAULT ((RAIL_ZWAVE_HomeId_t) RAIL_ZWAVE_HOME_ID_DEFAULT)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @enum RAIL_ZWAVE_HomeIdHash_t
@@ -250,7 +248,7 @@ RAIL_ENUM(RAIL_ZWAVE_HomeIdHash_t) {
 #define RAIL_ZWAVE_HOME_ID_HASH_ILLEGAL_3 ((RAIL_ZWAVE_HomeIdHash_t) RAIL_ZWAVE_HOME_ID_HASH_ILLEGAL_3)
 #define RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE ((RAIL_ZWAVE_HomeIdHash_t) RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE)
 #define RAIL_ZWAVE_HOME_ID_HASH_DEFAULT   ((RAIL_ZWAVE_HomeIdHash_t) RAIL_ZWAVE_HOME_ID_HASH_DEFAULT)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @struct RAIL_ZWAVE_Config_t
@@ -284,6 +282,35 @@ RAIL_ENUM(RAIL_ZWAVE_Baud_t) {
   RAIL_ZWAVE_BAUD_INVALID   /**< Sentinel value for invalid baud rate*/
 };
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * @enum RAIL_ZWAVE_RegionOptions_t
+ * @brief Region Specific Physical
+ */
+
+RAIL_ENUM(RAIL_ZWAVE_RegionOptions_t)
+{
+  /** Bit shift for US Long Range End Devices */
+  RAIL_ZWAVE_REGION_LONG_RANGE_END_SHIFT = 0,
+  /** Bit shift for special low side config, mostly for Japan and Korea */
+  RAIL_ZWAVE_REGION_LOW_SIDE_SHIFT = 1,
+  /** Bit shift for US long range range configurations */
+  RAIL_ZWAVE_REGION_LONG_RANGE_SHIFT = 2,
+};
+
+/**
+ * RAIL_ZWAVE_RegionOptions_t bitmasks
+ */
+/** A value representing US Long Range regions  */
+#define RAIL_ZWAVE_REGION_LONG_RANGE_MASK  (1u << RAIL_ZWAVE_REGION_LONG_RANGE_SHIFT)
+/** A value representing lowside configurations: JP and KR */
+#define RAIL_ZWAVE_REGION_LOW_SIDE_MASK (1u << RAIL_ZWAVE_REGION_LOW_SIDE_SHIFT)
+/** A value representing Long Range End Device region */
+#define RAIL_ZWAVE_REGION_LONG_RANGE_END_MASK (1u << RAIL_ZWAVE_REGION_LONG_RANGE_END_SHIFT)
+/** A value representing No bit to be enabled */
+#define RAIL_ZWAVE_REGION_SPECIFIC_NONE 0u
+#endif // DOXYGEN SHOULD SKIP THIS
+
 /**
  * Sentinel value to indicate that a channel (and thus its frequency)
  * are invalid.
@@ -298,7 +325,7 @@ RAIL_ENUM(RAIL_ZWAVE_Baud_t) {
 #define RAIL_ZWAVE_LR             ((RAIL_ZWAVE_Baud_t) RAIL_ZWAVE_LR)
 #define RAIL_ZWAVE_ENERGY_DETECT  ((RAIL_ZWAVE_Baud_t) RAIL_ZWAVE_ENERGY_DETECT)
 #define RAIL_ZWAVE_INVALID        ((RAIL_ZWAVE_Baud_t) RAIL_ZWAVE_INVALID)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @enum RAIL_ZWAVE_RegionId_t
@@ -320,6 +347,9 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
   RAIL_ZWAVE_REGIONID_US_LR1,  /**< United States, with first long range PHY*/
   RAIL_ZWAVE_REGIONID_US_LR2,  /**< United States, with second long range PHY*/
   RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE, /**< United States long range end device PHY for both LR frequencies*/
+  RAIL_ZWAVE_REGIONID_EU_LR1,  /**< European Union, with first long range PHY*/
+  RAIL_ZWAVE_REGIONID_EU_LR2,  /**< European Union, with second long range PHY*/
+  RAIL_ZWAVE_REGIONID_EU_LR_END_DEVICE, /**< European Union long range end device PHY for both LR frequencies*/
   RAIL_ZWAVE_REGIONID_COUNT    /**< Count of known regions, must be last*/
 };
 
@@ -340,8 +370,11 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
 #define RAIL_ZWAVE_REGIONID_US_LR1 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_US_LR1)
 #define RAIL_ZWAVE_REGIONID_US_LR2 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_US_LR2)
 #define RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE)
+#define RAIL_ZWAVE_REGIONID_EU_LR1 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_EU_LR1)
+#define RAIL_ZWAVE_REGIONID_EU_LR2 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_EU_LR2)
+#define RAIL_ZWAVE_REGIONID_EU_LR_END_DEVICE ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_EU_LR_END_DEVICE)
 #define RAIL_ZWAVE_REGIONID_COUNT ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_COUNT)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Largest ACK timeout period based on
@@ -355,7 +388,7 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
 #define RAIL_ZWAVE_TIME_IDLE_TO_TX_US        (0U)
 #define RAIL_ZWAVE_TIME_RX_TO_TX_US          (1000U)
 
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * Invalid beam TX power value returned when \ref RAIL_ZWAVE_GetLrBeamTxPower
@@ -379,9 +412,10 @@ typedef struct RAIL_ZWAVE_LrAckData {
 /**
  * @struct RAIL_ZWAVE_BeamRxConfig_t
  * @brief Configuration structure for Z-Wave beam detection.
- * This structure should not be used without direct instruction
- * by Silicon Labs. Appropriate defaults for this are built into
- * the RAIL library.
+ *
+ * @warning This structure should not be used without direct instruction
+ *   by Silicon Labs. Appropriate defaults for this are built into
+ *   the RAIL library.
  */
 typedef struct RAIL_ZWAVE_BeamRxConfig {
   /// Channel hopping pattern to use for beam detection.
@@ -408,6 +442,7 @@ typedef struct RAIL_ZWAVE_RegionConfig {
   RAIL_TxPower_t maxPower[RAIL_NUM_ZWAVE_CHANNELS];                   /**< The maximum power allowed on the channel*/
   RAIL_ZWAVE_Baud_t baudRate[RAIL_NUM_ZWAVE_CHANNELS];                /**< Channel baud rate index*/
   RAIL_ZWAVE_RegionId_t regionId;                                     /**< Identification number for the region*/
+  RAIL_ZWAVE_RegionOptions_t regionSpecific;                                             /**< Encapsulates region specific data*/
 } RAIL_ZWAVE_RegionConfig_t;
 
 /**
@@ -415,7 +450,7 @@ typedef struct RAIL_ZWAVE_RegionConfig {
  * @brief Structure for Z-Wave Image Rejection Calibration.
  *
  * @note Index 0 will hold the low side image rejection calibration value (channel 0),
- * while index 1 will hold the high side image rejection value (channel 1).
+ *   while index 1 will hold the high side image rejection value (channel 1).
  */
 typedef struct RAIL_ZWAVE_IrcalVal {
   RAIL_IrCalValues_t imageRejection[2];      /**< Low side and high side image rejection values*/
@@ -435,9 +470,9 @@ typedef RAIL_RxChannelHoppingParameter_t RAIL_RxChannelHoppingParameters_t[RAIL_
  * @return Status code indicating success of the function call.
  *
  * @note Setting a new Z-Wave Region will default any Low Power values to
- * Normal Power values for the region.
- * Z-Wave Region configuration must always be followed by a Low Power setup
- * in case one desires to have the Low Power ACKing functionality.
+ *   Normal Power values for the region.
+ *   Z-Wave Region configuration must always be followed by a Low Power setup
+ *   in case one desires to have the Low Power ACKing functionality.
  */
 RAIL_Status_t RAIL_ZWAVE_ConfigRegion(RAIL_Handle_t railHandle,
                                       const RAIL_ZWAVE_RegionConfig_t *regionCfg);
@@ -447,19 +482,19 @@ RAIL_Status_t RAIL_ZWAVE_ConfigRegion(RAIL_Handle_t railHandle,
  * Z-Wave region.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in, out] pIrCalVals An application-provided pointer of
- *  type \ref RAIL_ZWAVE_IrcalVal_t. This is populated with image rejection
- *  calibration values, if not NULL or initialized with
- *  \ref RAIL_CAL_INVALID_VALUE or if forceIrcal is true.
+ * @param[in,out] pIrCalVals An application-provided pointer of
+ *   type \ref RAIL_ZWAVE_IrcalVal_t. This is populated with image rejection
+ *   calibration values, if not NULL or initialized with
+ *   \ref RAIL_CAL_INVALID_VALUE or if forceIrcal is true.
  * @param[in] forceIrcal If true, will always perform image rejection calibration
- *  and not use previously cached values.
+ *   and not use previously cached values.
  * @return Status code indicating success of the function call.
  *
- * Note: This function also calibrates for beam detection and should be
- *  called before \ref RAIL_ZWAVE_ReceiveBeam() and after the Z-Wave region
- *  has been configured via \ref RAIL_ZWAVE_ConfigRegion().
- *  Channel hopping must be disabled otherwise this function will return
- *  \ref RAIL_STATUS_INVALID_CALL.
+ * @note This function also calibrates for beam detection and should be
+ *   called before \ref RAIL_ZWAVE_ReceiveBeam() and after the Z-Wave region
+ *   has been configured via \ref RAIL_ZWAVE_ConfigRegion().
+ *   Channel hopping must be disabled otherwise this function will return
+ *   \ref RAIL_STATUS_INVALID_CALL.
  */
 RAIL_Status_t RAIL_ZWAVE_PerformIrcal(RAIL_Handle_t railHandle,
                                       RAIL_ZWAVE_IrcalVal_t *pIrCalVals,
@@ -495,8 +530,8 @@ RAIL_Status_t RAIL_ZWAVE_Deinit(RAIL_Handle_t railHandle);
  * Return whether Z-Wave hardware acceleration is currently enabled.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @return True if Z-Wave hardware acceleration was enabled to start with
- * and false otherwise.
+ * @return true if Z-Wave hardware acceleration was enabled to start with
+ *   and false otherwise.
  */
 bool RAIL_ZWAVE_IsEnabled(RAIL_Handle_t railHandle);
 
@@ -612,7 +647,7 @@ RAIL_Status_t RAIL_ZWAVE_GetBeamChannelIndex(RAIL_Handle_t railHandle,
  *   beam's TX power is provided.
  *
  * @note The following table shows long range beam TX power value to dBm
- *  value mapping:
+ *   value mapping:
  *
  * <table>
  * <tr><th>Tx Power Value <th>Description
@@ -690,7 +725,7 @@ RAIL_Status_t RAIL_ZWAVE_SetTxLowPowerDbm(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return The chip-specific \ref RAIL_TxPowerLevel_t raw value of the low
- * transmit power.
+ *   transmit power.
  *
  * This API returns the low raw power value that was set by
  * \ref RAIL_ZWAVE_SetTxLowPower.
@@ -710,13 +745,26 @@ RAIL_TxPowerLevel_t RAIL_ZWAVE_GetTxLowPower(RAIL_Handle_t railHandle);
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return The chip-specific \ref RAIL_TxPower_t value of the low
- * transmit power in deci-dBm.
+ *   transmit power in deci-dBm.
  */
 RAIL_TxPower_t RAIL_ZWAVE_GetTxLowPowerDbm(RAIL_Handle_t railHandle);
 
 /**
  * Implement beam detection and reception algorithms.
- * It will take care of all configuration and radio setup to
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] beamDetectIndex Indicator of whether or not a beam was detected
+ *   at all, regardless of if it was received, generally for use only by instruction
+ *   from Silicon Labs. Can be NULL.
+ * @param[out] schedulerInfo While Z-Wave is currently not supported in
+ *   RAIL Multiprotocol, this scheduler info is added to future proof
+ *   against any future version of multiprotocol which may support it. For now,
+ *   this argument can be NULL.
+ * @return status indicating whether or not the radio was able to configure
+ *   beam packet detection/reception. Reasons for failure include an un-idled
+ *   radio or a non-Japan non-Korea region configured before calling this function.
+ *
+ * This function takes care of all configuration and radio setup to
  * detect and receive beams in the current Z-Wave region.
  * If a beam is detected, RAIL will provide
  * the usual \ref RAIL_EVENT_ZWAVE_BEAM event during which time users can
@@ -734,28 +782,15 @@ RAIL_TxPower_t RAIL_ZWAVE_GetTxLowPowerDbm(RAIL_Handle_t railHandle);
  * @note: The radio must be idle before calling this function.
  *
  * @note: \ref RAIL_ConfigRxChannelHopping must have been called successfully
- * in Z-Wave before this function is called to provide a valid memory buffer
- * for internal use (see \ref RAIL_RxChannelHoppingConfig_t::buffer).
+ *   in Z-Wave before this function is called to provide a valid memory buffer
+ *   for internal use (see \ref RAIL_RxChannelHoppingConfig_t::buffer).
  *
  * @note: This function alters radio functionality substantially. After calling
- * it, the user should call \ref RAIL_ZWAVE_ConfigRegion,
- * \ref RAIL_ConfigRxChannelHopping, \ref RAIL_EnableRxChannelHopping,
- * and \ref RAIL_SetRxTransitions to reset these parameters to whatever
- * behaviors were desired before calling this function. Additionally,
- * this function will idle the radio upon on exit.
- *
- * @param[in]  railHandle A RAIL instance handle.
- * @param[out] beamDetectIndex Indicator of whether or not a beam was detected
- * at all, regardless of if it was received, generally for use only by instruction
- * from Silicon Labs. Can be NULL.
- * @param[out] schedulerInfo While Z-Wave is currently not supported in
- * RAIL Multiprotocol, this scheduler info is added to future proof
- * against any future version of multiprotocol which may support it. For now,
- * this argument can be NULL.
- *
- * @return status indicating whether or not the radio was able to configure
- * beam packet detection/reception. Reasons for failure include an un-idled
- * radio or a non-Japan non-Korea region configured before calling this function.
+ *   it, the user should call \ref RAIL_ZWAVE_ConfigRegion,
+ *   \ref RAIL_ConfigRxChannelHopping, \ref RAIL_EnableRxChannelHopping,
+ *   and \ref RAIL_SetRxTransitions to reset these parameters to whatever
+ *   behaviors were desired before calling this function. Additionally,
+ *   this function will idle the radio upon on exit.
  */
 RAIL_Status_t RAIL_ZWAVE_ReceiveBeam(RAIL_Handle_t railHandle,
                                      uint8_t *beamDetectIndex,
@@ -763,11 +798,12 @@ RAIL_Status_t RAIL_ZWAVE_ReceiveBeam(RAIL_Handle_t railHandle,
 
 /**
  * Configure the receive algorithm used in \ref RAIL_ZWAVE_ReceiveBeam.
- * This function should not be used without direct instruction by Silicon Labs.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] config Configuration for beam detection algorithm.
  * @return Status code indicating success of the function call.
+ *
+ * @warning This function should not be used without direct instruction by Silicon Labs.
  */
 RAIL_Status_t RAIL_ZWAVE_ConfigBeamRx(RAIL_Handle_t railHandle, RAIL_ZWAVE_BeamRxConfig_t *config);
 
@@ -778,8 +814,8 @@ RAIL_Status_t RAIL_ZWAVE_ConfigBeamRx(RAIL_Handle_t railHandle, RAIL_ZWAVE_BeamR
  * @return Status code indicating success of the function call.
  *
  * @note This function resets any changes made to the beam configuration via
- *  \ref RAIL_ZWAVE_ConfigBeamRx and the default beam configuration will be in effect
- *  on subsequent call(s) to \ref RAIL_ZWAVE_ReceiveBeam.
+ *   \ref RAIL_ZWAVE_ConfigBeamRx and the default beam configuration will be in effect
+ *   on subsequent call(s) to \ref RAIL_ZWAVE_ReceiveBeam.
  */
 RAIL_Status_t RAIL_ZWAVE_SetDefaultRxBeamConfig(RAIL_Handle_t railHandle);
 
@@ -794,21 +830,22 @@ RAIL_Status_t RAIL_ZWAVE_GetRxBeamConfig(RAIL_ZWAVE_BeamRxConfig_t *pConfig);
 
 /**
  * Configure the channel hop timings for use in Z-Wave RX channel hop configuration.
- * This function should not be used without direct instruction by Silicon Labs.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @param[in, out] config Configuration for Z-Wave RX channel hopping.
- * This structure must be allocated in application global read-write memory.
- * RAIL will populate fields within or referenced by this structure during its
- * operation. Be sure to allocate \ref RAIL_RxChannelHoppingConfigEntry_t
- * entries[] for \ref RAIL_NUM_ZWAVE_CHANNELS. Be sure to set \ref
- * RAIL_RxChannelHoppingConfig_t::numberOfChannels to the desired number of
- * channels.
+ * @param[in,out] config Configuration for Z-Wave RX channel hopping.
+ *   This structure must be allocated in application global read-write memory.
+ *   RAIL will populate fields within or referenced by this structure during its
+ *   operation. Be sure to allocate \ref RAIL_RxChannelHoppingConfigEntry_t
+ *   entries[] for \ref RAIL_NUM_ZWAVE_CHANNELS. Be sure to set \ref
+ *   RAIL_RxChannelHoppingConfig_t::numberOfChannels to the desired number of
+ *   channels.
  * @return Status code indicating success of the function call.
  *
+ * @warning This function should not be used without direct instruction by Silicon Labs.
+ *
  * @note: This API must be called before \ref RAIL_EnableRxChannelHopping(). This
- * API must never be called while the radio is on with RX Duty Cycle or Channel
- * Hopping enabled.
+ *   API must never be called while the radio is on with RX Duty Cycle or Channel
+ *   Hopping enabled.
  */
 RAIL_Status_t RAIL_ZWAVE_ConfigRxChannelHopping(RAIL_Handle_t railHandle, RAIL_RxChannelHoppingConfig_t *config);
 
@@ -816,11 +853,11 @@ RAIL_Status_t RAIL_ZWAVE_ConfigRxChannelHopping(RAIL_Handle_t railHandle, RAIL_R
  * Get the Z-Wave region.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return The \ref RAIL_ZWAVE_RegionId_t value
+ * @return The \ref RAIL_ZWAVE_RegionId_t value.
  *
- * @note: \ref RAIL_ZWAVE_ConfigRegion must have been called successfully
- * before this function is called. Otherwise, \ref RAIL_ZWAVE_REGIONID_UNKNOWN
- * is returned.
+ * @note \ref RAIL_ZWAVE_ConfigRegion must have been called successfully
+ *   before this function is called. Otherwise, \ref RAIL_ZWAVE_REGIONID_UNKNOWN
+ *   is returned.
  */
 RAIL_ZWAVE_RegionId_t RAIL_ZWAVE_GetRegion(RAIL_Handle_t railHandle);
 
@@ -829,8 +866,8 @@ RAIL_ZWAVE_RegionId_t RAIL_ZWAVE_GetRegion(RAIL_Handle_t railHandle);
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] pLrAckData An application provided pointer to a const
- * \ref RAIL_ZWAVE_LrAckData_t to populate the noise floor, TX power and receive
- * rssi bytes of the outgoing Z-Wave Long Range ACK packet.
+ *   \ref RAIL_ZWAVE_LrAckData_t to populate the noise floor, TX power and receive
+ *   rssi bytes of the outgoing Z-Wave Long Range ACK packet.
  * @return A status code indicating success of the function call.
  *
  * This function sets the AutoACK data to use in acknowledging the frame
@@ -891,6 +928,15 @@ extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_US_LR2;
 
 /** US-Long Range End Device, RAIL_ZWAVE_REGION_US_LR_END_DEVICE */
 extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_US_LR_END_DEVICE;
+
+/** EU-Long Range 1, RAIL_ZWAVE_REGION_EU_LR1 */
+extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_EU_LR1;
+
+/** EU-Long Range 2, RAIL_ZWAVE_REGION_EU_LR2 */
+extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_EU_LR2;
+
+/** EU-Long Range End Device, RAIL_ZWAVE_REGION_EU_LR_END_DEVICE */
+extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_EU_LR_END_DEVICE;
 
 /** Invalid Region */
 extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_INVALID;

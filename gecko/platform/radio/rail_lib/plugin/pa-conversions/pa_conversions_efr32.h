@@ -73,6 +73,12 @@
 extern "C" {
 #endif
 
+/**
+ * @addtogroup PA_Curve_Conversions PA Curve Conversions
+ * @ingroup PA
+ * @{
+ */
+
 /// The curves to be used when battery voltage powers transmission
 extern const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat;
 
@@ -82,23 +88,19 @@ extern const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc;
 /**
  * Initialize TxPower curves.
  *
- * @param[in] txPowerCurvesConfig Struct containing pointers to custom
- * tx power curves.
- * @return RAIL_Status_t indicating success or an error.
+ * @param[in] config A pointer to the custom TX power curves.
+ * @return Status code indicating success of the function call.
  *
- * @deprecated function will no longer be supported
- * for any chips released after EFRXG1X parts. Please use
- * RAIL_InitTxPowerCurvesAlt instead.
+ * @deprecated function is no longer supported.
+ *   Must use \ref RAIL_InitTxPowerCurvesAlt() instead.
  */
 RAIL_Status_t RAIL_InitTxPowerCurves(const RAIL_TxPowerCurvesConfig_t *config);
 
 /**
  * Initialize TxPower curves.
  *
- * @param[in] txPowerCurvesConfig Struct containing pointers to custom
- * tx power curves.
+ * @param[in] config A pointer to the custom TX power curves.
  * @return RAIL_Status_t indicating success or an error.
- *
  */
 RAIL_Status_t RAIL_InitTxPowerCurvesAlt(const RAIL_TxPowerCurvesConfigAlt_t *config);
 
@@ -110,7 +112,7 @@ RAIL_Status_t RAIL_InitTxPowerCurvesAlt(const RAIL_TxPowerCurvesConfigAlt_t *con
  * @return RAIL_TxPowerCurves_t that should be used for conversion functions.
  *
  * @note: If the mode is not supported by the the chip,
- * then NULL will be returned.
+ *   then NULL will be returned.
  */
 RAIL_TxPowerCurves_t const * RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode);
 
@@ -119,7 +121,7 @@ RAIL_TxPowerCurves_t const * RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode);
  * the segments and to find right curve segment to convert Dbm to raw power
  * level for a specific PA.
  * For the PAs with \ref RAIL_PaConversionAlgorithm_t
- * \ref RAIL_PA_ALGORITHM_PIECEWISE_LINEAR , if the curves are generated with
+ * \ref RAIL_PA_ALGORITHM_PIECEWISE_LINEAR, if the curves are generated with
  * maxPower and increment other than \ref RAIL_TX_POWER_CURVE_DEFAULT_MAX and
  * \ref RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT respectively, then the first
  * \ref RAIL_TxPowerCurveSegment_t has its maxPowerLevel equal to
@@ -128,14 +130,11 @@ RAIL_TxPowerCurves_t const * RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode);
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] mode PA mode whose curves are needed.
- * @param[in] maxpower A pointer to memory allocated to hold the maxpower in
- * deci-dBm used in calculation of curve segments .
- * A NULL configuration will produce undefined behavior.
- * @param[in] increment A pointer to memory allocated to hold the increment in
- * deci-dBm used in calculation of curve segments.
- * A NULL configuration will produce undefined behavior.
- * @return RAIL_Status_t indicating success or an error.
- *
+ * @param[out] maxpower A non-NULL pointer to memory allocated to hold
+ *   the max power in deci-dBm used in calculation of curve segments.
+ * @param[out] increment A non-NULL pointer to memory allocated to hold
+ *   the increment in deci-dBm used in calculation of curve segments.
+ * @return Status code indicating success of the function call.
  */
 RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
                                          RAIL_TxPowerMode_t mode,
@@ -143,34 +142,38 @@ RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
                                          RAIL_TxPower_t *increment);
 
 /**
- * Initialize PA TX Curves
- *
+ * Initialize PA TX Curves.
  */
 void sl_rail_util_pa_init(void);
 
 /**
  * Get a pointer to the TX Power Config 2.4 GHz structure.
  *
- * @return a pointer to the TX Power Config stucture.
- *
+ * @return A pointer to the TX Power Config stucture.
  */
 RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void);
 
 /**
  * Get a pointer to the TX Power Config Sub-GHz structure.
  *
- * @return a pointer to the TX Power Config stucture.
- *
+ * @return A pointer to the TX Power Config stucture.
  */
 RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_subghz(void);
+
+/**
+ * Get a pointer to the TX Power Config OFDM structure.
+ *
+ * @return A pointer to the TX Power Config stucture.
+ */
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_ofdm(void);
 
 /**
  * Provide a channel config change callback capable of configuring the PA
  * correctly.
  *
  * @param[in] rail_handle The RAIL handle being passed into this callback.
- * @param[in] entry The channel config entry being switched to by hardware.
- *
+ * @param[in] entry A pointer to the channel config entry being switched
+ *   to by hardware.
  */
 void sl_rail_util_pa_on_channel_config_change(RAIL_Handle_t rail_handle,
                                               const RAIL_ChannelConfigEntry_t *entry);
@@ -178,5 +181,9 @@ void sl_rail_util_pa_on_channel_config_change(RAIL_Handle_t rail_handle,
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * @}
+ */
 
 #endif // PA_CONVERSIONS_EFR32_H

@@ -33,7 +33,7 @@
 #if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 #include "sli_se_manager_internal.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_assert.h"
 
 #if defined(SLI_SE_MAJOR_VERSION_ONE)
@@ -111,11 +111,11 @@ sl_status_t sl_se_check_se_image(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_CHECK_SE_IMAGE);
 
-  SE_addParameter(se_cmd, (uint32_t)image_addr);
+  sli_se_mailbox_command_add_parameter(se_cmd, (uint32_t)image_addr);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -130,11 +130,11 @@ sl_status_t sl_se_apply_se_image(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_APPLY_SE_IMAGE);
 
-  SE_addParameter(se_cmd, (uint32_t)image_addr);
+  sli_se_mailbox_command_add_parameter(se_cmd, (uint32_t)image_addr);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -150,14 +150,14 @@ sl_status_t sl_se_get_upgrade_status_se_image(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_STATUS_SE_IMAGE);
 
   volatile uint32_t out_buf[2];
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(out_buf,
-                                                       sizeof(out_buf));
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(out_buf,
+                                                               sizeof(out_buf));
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   sl_status_t ret = sli_se_execute_and_wait(cmd_ctx);
 
@@ -180,12 +180,12 @@ sl_status_t sl_se_check_host_image(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_CHECK_HOST_IMAGE);
 
-  SE_addParameter(se_cmd, (uint32_t)image_addr);
-  SE_addParameter(se_cmd, size);
+  sli_se_mailbox_command_add_parameter(se_cmd, (uint32_t)image_addr);
+  sli_se_mailbox_command_add_parameter(se_cmd, size);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -201,12 +201,12 @@ sl_status_t sl_se_apply_host_image(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_APPLY_HOST_IMAGE);
 
-  SE_addParameter(se_cmd, (uint32_t)image_addr);
-  SE_addParameter(se_cmd, size);
+  sli_se_mailbox_command_add_parameter(se_cmd, (uint32_t)image_addr);
+  sli_se_mailbox_command_add_parameter(se_cmd, size);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -223,14 +223,14 @@ sl_se_get_upgrade_status_host_image(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_STATUS_HOST_IMAGE);
 
   volatile uint32_t out_buf[2];
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(out_buf,
-                                                       sizeof(out_buf));
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(out_buf,
+                                                               sizeof(out_buf));
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   sl_status_t ret = sli_se_execute_and_wait(cmd_ctx);
 
@@ -271,7 +271,7 @@ sl_status_t sl_se_init_otp_key(sl_se_command_context_t *cmd_ctx,
   #endif
 
   uint32_t command_word;
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
   uint32_t se_key_type;
   switch (key_type) {
@@ -310,11 +310,11 @@ sl_status_t sl_se_init_otp_key(sl_se_command_context_t *cmd_ctx,
 
   sli_se_command_init(cmd_ctx, (command_word | se_key_type));
 
-  SE_DataTransfer_t parity_data = SE_DATATRANSFER_DEFAULT(&parity, 4);
-  SE_addDataInput(se_cmd, &parity_data);
+  sli_se_datatransfer_t parity_data = SLI_SE_DATATRANSFER_DEFAULT(&parity, 4);
+  sli_se_mailbox_command_add_input(se_cmd, &parity_data);
 
-  SE_DataTransfer_t key_data = SE_DATATRANSFER_DEFAULT(key, num_bytes);
-  SE_addDataInput(se_cmd, &key_data);
+  sli_se_datatransfer_t key_data = SLI_SE_DATATRANSFER_DEFAULT(key, num_bytes);
+  sli_se_mailbox_command_add_input(se_cmd, &key_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -331,7 +331,7 @@ sl_status_t sl_se_read_pubkey(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint32_t se_key_type;
   uint32_t command_word = SLI_SE_COMMAND_READ_PUBKEY;
   switch (key_type) {
@@ -359,8 +359,8 @@ sl_status_t sl_se_read_pubkey(sl_se_command_context_t *cmd_ctx,
   // SE command structures
   sli_se_command_init(cmd_ctx, command_word | se_key_type);
 
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(key, num_bytes);
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(key, num_bytes);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -378,18 +378,18 @@ sl_status_t sl_se_get_se_version(sl_se_command_context_t *cmd_ctx,
   #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
   // SE command structures
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_STATUS_SE_VERSION);
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(version, sizeof(uint32_t));
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(version, sizeof(uint32_t));
 
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 
   #elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
   sl_status_t status = SL_STATUS_OK;
-  SE_Response_t command_response;
+  sli_se_mailbox_response_t command_response;
 
   // Try to acquire SE lock.
   // Need to protect VSE mailbox from being written by e.g. SE_ackCommand()
@@ -399,7 +399,7 @@ sl_status_t sl_se_get_se_version(sl_se_command_context_t *cmd_ctx,
   }
 
   // Read SE version from VSE mailbox.
-  command_response = SE_getVersion(version);
+  command_response = sli_vse_mailbox_get_version(version);
 
   // Release SE lock
   status = sli_se_lock_release();
@@ -408,7 +408,7 @@ sl_status_t sl_se_get_se_version(sl_se_command_context_t *cmd_ctx,
   if (command_response == SLI_SE_RESPONSE_OK) {
     return status;
   } else {
-    // Convert from SE_Response_t to sl_status_t code and return.
+    // Convert from sli_se_mailbox_response_t to sl_status_t code and return.
     return sli_se_to_sl_status(command_response);
   }
 
@@ -439,13 +439,13 @@ sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
   #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   volatile uint32_t status_word = 0;
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(&status_word, 4);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(&status_word, 4);
 
   // Initialize SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_DBG_LOCK_STATUS);
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   sl_status_t ret = sli_se_execute_and_wait(cmd_ctx);
 
@@ -465,19 +465,19 @@ sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
   }
 
   // Read SE version from VSE mailbox.
-  SE_Response_t vse_mbx_status = SE_getVersion(&vse_version);
+  sli_se_mailbox_response_t vse_mbx_status = sli_vse_mailbox_get_version(&vse_version);
 
   // Reading debug lock status is not supported on VSE with versions <= 1.2.2.
-  if ((vse_version <= 0x1010202UL) || (vse_mbx_status != SE_RESPONSE_OK)) {
+  if ((vse_version <= 0x1010202UL) || (vse_mbx_status != SLI_SE_RESPONSE_OK)) {
     sli_se_lock_release();
     return SL_STATUS_COMMAND_IS_INVALID;
   }
 
-  vse_mbx_status = SE_getConfigStatusBits(&debug_lock_flags);
+  vse_mbx_status = sli_vse_mailbox_get_cfg_status(&debug_lock_flags);
   // Release SE lock
   status = sli_se_lock_release();
 
-  if (vse_mbx_status != SE_RESPONSE_OK) {
+  if (vse_mbx_status != SLI_SE_RESPONSE_OK) {
     return sli_se_to_sl_status(vse_mbx_status);
   } else if (status != SL_STATUS_OK) {
     return status;
@@ -501,7 +501,7 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint32_t mcu_settings_flags = 0;
 
   sl_status_t status;
@@ -625,16 +625,16 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
     sizeof(mcu_settings_flags)
     + sizeof(otp_tamper_settings)
   };
-  SE_DataTransfer_t parameters_data = SE_DATATRANSFER_DEFAULT(&parameters, 8);
-  SE_addDataInput(se_cmd, &parameters_data);
+  sli_se_datatransfer_t parameters_data = SLI_SE_DATATRANSFER_DEFAULT(&parameters, 8);
+  sli_se_mailbox_command_add_input(se_cmd, &parameters_data);
 
-  SE_DataTransfer_t mcu_settings_flags_data =
-    SE_DATATRANSFER_DEFAULT((volatile void *)&mcu_settings_flags, sizeof(mcu_settings_flags));
-  SE_addDataInput(se_cmd, &mcu_settings_flags_data);
+  sli_se_datatransfer_t mcu_settings_flags_data =
+    SLI_SE_DATATRANSFER_DEFAULT((volatile void *)&mcu_settings_flags, sizeof(mcu_settings_flags));
+  sli_se_mailbox_command_add_input(se_cmd, &mcu_settings_flags_data);
 
-  SE_DataTransfer_t tamper_settings_data =
-    SE_DATATRANSFER_DEFAULT((volatile void *)&otp_tamper_settings, sizeof(otp_tamper_settings));
-  SE_addDataInput(se_cmd, &tamper_settings_data);
+  sli_se_datatransfer_t tamper_settings_data =
+    SLI_SE_DATATRANSFER_DEFAULT((volatile void *)&otp_tamper_settings, sizeof(otp_tamper_settings));
+  sli_se_mailbox_command_add_input(se_cmd, &tamper_settings_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -649,7 +649,7 @@ sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
 
   #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -673,9 +673,9 @@ sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_READ_OTP);
 
-  SE_DataTransfer_t otp_raw_data =
-    SE_DATATRANSFER_DEFAULT(&otp_raw, sizeof(otp_raw));
-  SE_addDataOutput(se_cmd, &otp_raw_data);
+  sli_se_datatransfer_t otp_raw_data =
+    SLI_SE_DATATRANSFER_DEFAULT(&otp_raw, sizeof(otp_raw));
+  sli_se_mailbox_command_add_output(se_cmd, &otp_raw_data);
 
   status = sli_se_execute_and_wait(cmd_ctx);
 
@@ -725,7 +725,7 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   volatile uint32_t mcu_settings_flags = 0;
 
   if (otp_init->enable_secure_boot) {
@@ -756,14 +756,14 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
     parity,
     sizeof(mcu_settings_flags)
   };
-  SE_DataTransfer_t parameters_data = SE_DATATRANSFER_DEFAULT(&parameters, 8);
-  SE_addDataInput(se_cmd, &parameters_data);
+  sli_se_datatransfer_t parameters_data = SLI_SE_DATATRANSFER_DEFAULT(&parameters, 8);
+  sli_se_mailbox_command_add_input(se_cmd, &parameters_data);
 
-  SE_DataTransfer_t mcu_settings_flags_data =
-    SE_DATATRANSFER_DEFAULT(&mcu_settings_flags, sizeof(mcu_settings_flags));
-  SE_addDataInput(se_cmd, &mcu_settings_flags_data);
+  sli_se_datatransfer_t mcu_settings_flags_data =
+    SLI_SE_DATATRANSFER_DEFAULT(&mcu_settings_flags, sizeof(mcu_settings_flags));
+  sli_se_mailbox_command_add_input(se_cmd, &mcu_settings_flags_data);
 
-  SE_executeCommand(se_cmd);
+  sli_se_mailbox_execute_command(se_cmd); // TODO this should use sli_se_execute_and_wait
   return SL_STATUS_FAIL; // Should never get to this point
 }
 
@@ -783,12 +783,12 @@ sl_status_t sl_se_get_otp_version(sl_se_command_context_t *cmd_ctx,
     return lock_status;
   }
 
-  SE_Response_t otp_status = SE_getOTPVersion(version);
+  sli_se_mailbox_response_t otp_status = sli_vse_mailbox_get_otp_version(version);
 
   // Release SE lock
   sli_se_lock_release();
 
-  if (otp_status == SE_RESPONSE_OK) {
+  if (otp_status == SLI_SE_RESPONSE_OK) {
     return SL_STATUS_OK;
   }
 
@@ -809,12 +809,12 @@ sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
   }
 
   uint32_t mcu_settings_flags = 0;
-  SE_Response_t vse_mbx_status = SE_getConfigStatusBits(&mcu_settings_flags);
+  sli_se_mailbox_response_t vse_mbx_status = sli_vse_mailbox_get_cfg_status(&mcu_settings_flags);
 
   // Release SE lock
   status = sli_se_lock_release();
 
-  if (vse_mbx_status != SE_RESPONSE_OK) {
+  if (vse_mbx_status != SLI_SE_RESPONSE_OK) {
     return sli_se_to_sl_status(vse_mbx_status);
   } else if (status != SL_STATUS_OK) {
     return status;
@@ -860,14 +860,14 @@ sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
   }
 
   // Setup SE command structures
-  SE_Command_t *se_cmd = &cmd_ctx->command;
-  SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT(data, num_bytes);
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(data, num_bytes);
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_WRITE_USER_DATA);
-  SE_addDataInput(se_cmd, &in_data);
+  sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
-  SE_addParameter(se_cmd, offset);
-  SE_addParameter(se_cmd, num_bytes);
+  sli_se_mailbox_command_add_parameter(se_cmd, offset);
+  sli_se_mailbox_command_add_parameter(se_cmd, num_bytes);
 
   // Execute and wait
   return sli_se_execute_and_wait(cmd_ctx);
@@ -883,10 +883,10 @@ sl_status_t sl_se_erase_user_data(sl_se_command_context_t *cmd_ctx)
   }
 
   // SE command structures
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_ERASE_USER_DATA);
 
-  SE_addParameter(se_cmd, SLI_SE_COMMAND_OPTION_ERASE_UD);
+  sli_se_mailbox_command_add_parameter(se_cmd, SLI_SE_COMMAND_OPTION_ERASE_UD);
 
   // Execute and wait.
   return sli_se_execute_and_wait(cmd_ctx);
@@ -902,14 +902,19 @@ sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  volatile uint32_t output[10] = { 0 };
+#else
   volatile uint32_t output[9] = { 0 };
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+#endif
+
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_GET_STATUS);
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(output, 4 * 9);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(output, sizeof(output));
 
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   sl_status_t ret = sli_se_execute_and_wait(cmd_ctx);
 
@@ -930,7 +935,7 @@ sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
     status->secure_boot_enabled =
       ((output[8] & 0x1U) && ((output[8] & ~0x1U) == 0));
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) && (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
     uint32_t active_mode_shift = 16;
 #else
     uint32_t active_mode_shift = 8;
@@ -938,6 +943,11 @@ sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
     status->active_mode_enabled =
       (status->boot_status >> active_mode_shift) & 0x1;
   }
+
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  status->rom_revision = output[9] & 0xFF;
+  status->otp_patch_sequence = (output[9] >> 8) & 0xFF;
+#endif
 
   return ret;
 }
@@ -953,11 +963,11 @@ sl_status_t sl_se_get_serialnumber(sl_se_command_context_t *cmd_ctx,
   }
 
   // SE command structures
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_READ_SERIAL);
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(serial, 16);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(serial, 16);
 
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -973,11 +983,11 @@ sl_status_t sl_se_get_otp_version(sl_se_command_context_t *cmd_ctx,
   }
 
   // SE command structures
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_STATUS_OTP_VERSION);
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(version, sizeof(uint32_t));
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(version, sizeof(uint32_t));
 
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -995,11 +1005,11 @@ sl_status_t sl_se_get_reset_cause(sl_se_command_context_t *cmd_ctx,
   }
 
   // SE command structures
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_STATUS_READ_RSTCAUSE);
-  SE_DataTransfer_t out_data =
-    SE_DATATRANSFER_DEFAULT(reset_cause, sizeof(uint32_t));
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_datatransfer_t out_data =
+    SLI_SE_DATATRANSFER_DEFAULT(reset_cause, sizeof(uint32_t));
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
   return sli_se_execute_and_wait(cmd_ctx);
 }
 #endif // SLI_SE_COMMAND_STATUS_READ_RSTCAUSE_AVAILABLE
@@ -1022,11 +1032,11 @@ sl_status_t sl_se_get_tamper_reset_cause(sl_se_command_context_t *cmd_ctx,
   uint32_t tamper_cause_ret = 0;
 
   // SE command structures
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE);
-  SE_DataTransfer_t out_data =
-    SE_DATATRANSFER_DEFAULT(&tamper_cause_ret, sizeof(uint32_t));
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_datatransfer_t out_data =
+    SLI_SE_DATATRANSFER_DEFAULT(&tamper_cause_ret, sizeof(uint32_t));
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
   sl_status_t status = sli_se_execute_and_wait(cmd_ctx);
   if (status != SL_STATUS_OK) {
     return status;
@@ -1087,7 +1097,7 @@ sl_status_t sl_se_set_debug_options(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint32_t restriction_bits = 0x0;
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_DBG_SET_RESTRICTIONS);
@@ -1098,7 +1108,7 @@ sl_status_t sl_se_set_debug_options(sl_se_command_context_t *cmd_ctx,
   restriction_bits |= debug_options->secure_invasive_debug ? 0 : 1UL << 2;
   restriction_bits |= debug_options->secure_non_invasive_debug ? 0 : 1UL << 3;
 
-  SE_addParameter(se_cmd, restriction_bits);
+  sli_se_mailbox_command_add_parameter(se_cmd, restriction_bits);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1141,13 +1151,13 @@ sl_status_t sl_se_get_challenge(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
-  SE_DataTransfer_t out_data =
-    SE_DATATRANSFER_DEFAULT(challenge, sizeof(sl_se_challenge_t));
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
+  sli_se_datatransfer_t out_data =
+    SLI_SE_DATATRANSFER_DEFAULT(challenge, sizeof(sl_se_challenge_t));
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_GET_CHALLENGE);
 
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1162,11 +1172,11 @@ sl_status_t sl_se_roll_challenge(sl_se_command_context_t *cmd_ctx)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_DataTransfer_t out_data =
-    SE_DATATRANSFER_DEFAULT(new_challenge, sizeof(sl_se_challenge_t));
+  sli_se_datatransfer_t out_data =
+    SLI_SE_DATATRANSFER_DEFAULT(new_challenge, sizeof(sl_se_challenge_t));
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_ROLL_CHALLENGE);
-  SE_addDataOutput(&cmd_ctx->command, &out_data);
+  sli_se_mailbox_command_add_output(&cmd_ctx->command, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1182,14 +1192,14 @@ sl_status_t sl_se_open_debug(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
-  SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT(cert, len);
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(cert, len);
   uint32_t unlock_bits = 1UL << 1;  // Always request to unlock debug access port
 
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_OPEN_DEBUG);
 
-  SE_addDataInput(se_cmd, &in_data);
+  sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
   /** Encode parameter that holds debug options to unlock. */
   unlock_bits |= debug_options->non_secure_invasive_debug     ? 1UL << 2 : 0;
@@ -1197,7 +1207,7 @@ sl_status_t sl_se_open_debug(sl_se_command_context_t *cmd_ctx,
   unlock_bits |= debug_options->secure_invasive_debug         ? 1UL << 4 : 0;
   unlock_bits |= debug_options->secure_non_invasive_debug     ? 1UL << 5 : 0;
 
-  SE_addParameter(se_cmd, unlock_bits);
+  sli_se_mailbox_command_add_parameter(se_cmd, unlock_bits);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1216,15 +1226,15 @@ sl_status_t sl_se_disable_tamper(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
-  SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT(cert, len);
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(cert, len);
 
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_DISABLE_TAMPER);
 
-  SE_addDataInput(se_cmd, &in_data);
+  sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
-  SE_addParameter(se_cmd, tamper_signals);
+  sli_se_mailbox_command_add_parameter(se_cmd, tamper_signals);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1240,12 +1250,12 @@ sl_status_t sl_se_read_cert_size(sl_se_command_context_t *cmd_ctx,
   if (cmd_ctx == NULL || cert_size == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_READ_USER_CERT_SIZE);
 
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(cert_size, 12UL);
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(cert_size, 12UL);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1261,7 +1271,7 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
   if (cmd_ctx == NULL || cert == NULL || num_bytes == 0UL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint32_t se_cert_type;
 
   switch (cert_type) {
@@ -1287,11 +1297,11 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
 
 #if SLI_MINIMUM_REQUIRED_NUMBER_PARAMS == 1
   // One parameter is required, but has no effect
-  SE_addParameter(se_cmd, 0);
+  sli_se_mailbox_command_add_parameter(se_cmd, 0);
 #endif
 
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(cert, num_bytes);
-  SE_addDataOutput(se_cmd, &out_data);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(cert, num_bytes);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }

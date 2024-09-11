@@ -30,14 +30,24 @@
 #ifndef EM_SE_H
 #define EM_SE_H
 
+#if defined(__linux__)
+
+#define SLI_EM_SE_HOST
+
+#else
+
 #include "em_device.h"
+
+#endif // __linux__
+
 #include "sl_common.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#if defined(SLI_EM_SE_HOST) || defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "sli_se_manager_mailbox.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,11 +126,7 @@ extern "C" {
  * SE DMA transfer descriptor. Can be linked to each other to provide
  * scatter-gather behavior.
  */
-typedef struct {
-  volatile void* volatile data; /**< Data pointer */
-  void* volatile next;          /**< Next descriptor */
-  volatile uint32_t length;     /**< Length */
-} SE_DataTransfer_t;
+typedef sli_se_datatransfer_t SE_DataTransfer_t;
 
 /** Default initialization of data transfer struct */
 #define SE_DATATRANSFER_DEFAULT(address, length)                               \
@@ -131,15 +137,9 @@ typedef struct {
   }
 
 /**
- * SE Command structure to which all commands to the SE must adhere.
+ * SE Command structure. See
  */
-typedef struct {
-  uint32_t command;                      /**< SE Command */
-  SE_DataTransfer_t* data_in;            /**< Input data */
-  SE_DataTransfer_t* data_out;           /**< Output data */
-  uint32_t parameters[SE_MAX_PARAMETERS];/**< Parameters */
-  size_t num_parameters;                 /**< Number of parameters */
-} SE_Command_t;
+typedef sli_se_mailbox_command_t SE_Command_t;
 
 /** Default initialization of command struct */
 #define SE_COMMAND_DEFAULT(command)       \
@@ -152,7 +152,7 @@ typedef struct {
   }
 
 /** Possible responses to a command */
-typedef uint32_t SE_Response_t;
+typedef sli_se_mailbox_response_t SE_Response_t;
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -166,11 +166,14 @@ void SE_addDataOutput(SE_Command_t *command,
 
 void SE_addParameter(SE_Command_t *command, uint32_t parameter);
 
+#if !defined(SLI_EM_SE_HOST)
 void SE_executeCommand(SE_Command_t *command);
+#endif // #if !defined(SLI_EM_SE_HOST)
 
 #if defined(CRYPTOACC_PRESENT)
 SE_Response_t SE_getVersion(uint32_t *version);
 SE_Response_t SE_getConfigStatusBits(uint32_t *cfgStatus);
+SE_Response_t SE_getOTPVersion(uint32_t *otpVersion);
 SE_Response_t SE_ackCommand(SE_Command_t *command);
 #endif // #if defined(CRYPTOACC_PRESENT)
 
@@ -184,9 +187,11 @@ uint32_t SE_readExecutedCommand(void);
 SE_Response_t SE_readCommandResponse(void);
 #endif // #if defined(SEMAILBOX_PRESENT)
 
+#if !defined(SLI_EM_SE_HOST)
 __STATIC_INLINE void SE_waitCommandCompletion(void);
 __STATIC_INLINE void SE_disableInterrupt(uint32_t flags);
 __STATIC_INLINE void SE_enableInterrupt(uint32_t flags);
+#endif // #if !defined(SLI_EM_SE_HOST)
 
 #if defined(SEMAILBOX_PRESENT)
 /***************************************************************************//**
@@ -202,22 +207,7 @@ __STATIC_INLINE bool SE_isCommandCompleted(void)
 {
   return (bool)(SEMAILBOX_HOST->RX_STATUS & SEMAILBOX_RX_STATUS_RXINT);
 }
-#endif
-
-/***************************************************************************//**
- * @brief
- *   Wait for completion of the current command.
- *
- * @details
- *   This function "busy"-waits until the execution of the ongoing instruction
- *   has completed.
- ******************************************************************************/
-__STATIC_INLINE void SE_waitCommandCompletion(void)
-{
-  /* Wait for completion */
-  while (!SE_isCommandCompleted()) {
-  }
-}
+#endif // #if defined(SEMAILBOX_PRESENT)
 
 #if defined(SEMAILBOX_PRESENT)
 /***************************************************************************//**
@@ -242,6 +232,22 @@ __STATIC_INLINE SE_Response_t SE_readCommandResponse(void)
   return (SE_Response_t)(SEMAILBOX_HOST->RX_HEADER & SE_RESPONSE_MASK);
 }
 #endif // #if defined(SEMAILBOX_PRESENT)
+
+#if !defined(SLI_EM_SE_HOST)
+/***************************************************************************//**
+ * @brief
+ *   Wait for completion of the current command.
+ *
+ * @details
+ *   This function "busy"-waits until the execution of the ongoing instruction
+ *   has completed.
+ ******************************************************************************/
+__STATIC_INLINE void SE_waitCommandCompletion(void)
+{
+  /* Wait for completion */
+  while (!SE_isCommandCompleted()) {
+  }
+}
 
 /***************************************************************************//**
  * @brief
@@ -279,6 +285,8 @@ __STATIC_INLINE void SE_enableInterrupt(uint32_t flags)
 #endif
 }
 
+#endif // #if !defined(SLI_EM_SE_HOST)
+
 /*******************************************************************************
  *****************************   DEPRECATED    *********************************
  ******************************************************************************/
@@ -299,6 +307,7 @@ __STATIC_INLINE void SE_enableInterrupt(uint32_t flags)
  ******************************   DEFINES    ***********************************
  ******************************************************************************/
 
+#if !defined(SLI_EM_SE_HOST)
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #if defined(SEMAILBOX_PRESENT)
 /* Command words for the Security Engine. */
@@ -514,100 +523,17 @@ __STATIC_INLINE void SE_enableInterrupt(uint32_t flags)
 /** @endcond */
 
 /*******************************************************************************
- ******************************   TYPEDEFS   ***********************************
- ******************************************************************************/
-
-/** SE OTP initialization struct */
-typedef struct {
-  /** Enable secure boot for the host. */
-  bool enableSecureBoot;
-  /** Require certificate based secure boot signing. */
-  bool verifySecureBootCertificate;
-  /** Enable anti-rollback for host application upgrades. */
-  bool enableAntiRollback;
-
-  /** Set flag to enable locking down all flash pages that cover the
-   * secure-booted image, except the last page if end of signature is not
-   * page-aligned. */
-  bool secureBootPageLockNarrow;
-  /** Set flag to enable locking down all flash pages that cover the
-   * secure-booted image, including the last page if end of signature is not
-   * page-aligned. */
-  bool secureBootPageLockFull;
-} SE_OTPInit_t;
-
-/** SE debug status */
-typedef struct {
-  /** Whether debug lock is enabled */
-  bool debugLockEnabled;
-  /** Whether device erase is enabled */
-  bool deviceEraseEnabled;
-  /** Whether secure debug is enabled */
-  bool secureDebugEnabled;
-} SE_DebugStatus_t;
-
-/** SE status */
-typedef struct {
-  /** Boot status code / error code (Bits [7:0]). */
-  uint32_t bootStatus;
-  /** SE firmware version. */
-  uint32_t seFwVersion;
-  /** Host firmware version (if available). */
-  uint32_t hostFwVersion;
-  /** Debug lock status. */
-  SE_DebugStatus_t debugStatus;
-  /** Secure boot enabled. */
-  bool secureBootEnabled;
-} SE_Status_t;
-
-/*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
-SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init) SL_DEPRECATED_API_SDK_3_0;
-
-SE_Response_t SE_initPubkey(uint32_t key_type,
-                            void* pubkey,
-                            uint32_t numBytes,
-                            bool signature)
-SL_DEPRECATED_API_SDK_3_0;
-
-SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init);
-
-SE_Response_t SE_initPubkey(uint32_t key_type,
-                            void* pubkey,
-                            uint32_t numBytes,
-                            bool signature);
-
 #if defined(SEMAILBOX_PRESENT)
-
-// User data commands
-SE_Response_t SE_writeUserData(uint32_t offset,
-                               void *data,
-                               uint32_t numBytes)
-SL_DEPRECATED_API_SDK_3_0;
-
-SE_Response_t SE_eraseUserData(void) SL_DEPRECATED_API_SDK_3_0;
-
 // Initialization commands
 SE_Response_t SE_readPubkey(uint32_t key_type,
                             void* pubkey,
                             uint32_t numBytes,
-                            bool signature);
-
-// Debug commands
-SE_Response_t SE_debugLockStatus(SE_DebugStatus_t *status) SL_DEPRECATED_API_SDK_3_0;
-SE_Response_t SE_debugLockApply(void) SL_DEPRECATED_API_SDK_3_0;
-SE_Response_t SE_debugSecureEnable(void) SL_DEPRECATED_API_SDK_3_0;
-SE_Response_t SE_debugSecureDisable(void) SL_DEPRECATED_API_SDK_3_0;
-SE_Response_t SE_deviceEraseDisable(void) SL_DEPRECATED_API_SDK_3_0;
-SE_Response_t SE_deviceErase(void) SL_DEPRECATED_API_SDK_3_0;
-
-// Device status commands
-SE_Response_t SE_getStatus(SE_Status_t *output) SL_DEPRECATED_API_SDK_3_0;
-SE_Response_t SE_serialNumber(void *serial) SL_DEPRECATED_API_SDK_3_0;
-
+                            bool signature) SL_DEPRECATED_API_SDK_4_4;
 #endif // #if defined(SEMAILBOX_PRESENT)
+#endif // #if !defined(SLI_EM_SE_HOST)
 
 /** @} (end addtogroup se_deprecated) */
 

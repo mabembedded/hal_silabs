@@ -42,12 +42,12 @@
  *****************************************************************************/
 
 /** MAILBOX MSGPTRS Register Group Declaration. */
-typedef struct {
+typedef struct mailbox_msgptrs_typedef{
   __IOM uint32_t MSGPTR;                             /**< Message Pointer                                    */
 } MAILBOX_MSGPTRS_TypeDef;
 
 /** MAILBOX Register Declaration. */
-typedef struct {
+typedef struct mailbox_typedef{
   MAILBOX_MSGPTRS_TypeDef MSGPTRS[4U];          /**< Message Pointers                                   */
   uint32_t                RESERVED0[12U];       /**< Reserved for future use                            */
   __IOM uint32_t          IF;                   /**< Interrupt Flag register                            */

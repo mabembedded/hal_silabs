@@ -31,6 +31,7 @@
 #define SL_DEVICE_INIT_NVIC_H
 
 #include "sl_status.h"
+#include "sl_common.h"
 
 /**
  * @addtogroup device_init
@@ -47,6 +48,10 @@
  * @{
  */
 
+#ifndef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_2024_6
+#warning "This file is deprecated as of Simplicity SDK 2024.6. It is replaced by the public API of sl_interrupt_manager.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,9 +59,11 @@ extern "C" {
 /***************************************************************************//**
  * Sets default priority for all configurable interrupts in NVIC.
  *
+ * @deprecated Will be removed from the Simplicity SDK
+ *
  * @return Status code
  ******************************************************************************/
-sl_status_t sl_device_init_nvic(void);
+sl_status_t sl_device_init_nvic(void) SL_DEPRECATED_API_SDK_2024_6;
 
 #ifdef __cplusplus
 }

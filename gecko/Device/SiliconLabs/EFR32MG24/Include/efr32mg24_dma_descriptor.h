@@ -3,7 +3,7 @@
  * @brief EFR32MG24 DMA descriptor bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -56,4 +56,4 @@ typedef struct {
 
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_DMA_DESCRIPTOR_H */
+#endif // EFR32MG24_DMA_DESCRIPTOR_H

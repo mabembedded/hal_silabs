@@ -27,24 +27,29 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
-
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
 #include "sl_se_manager.h"
 
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 #if !defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
 
 #include "sli_se_manager_internal.h"
-#include "sli_se_manager_osal.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_assert.h"
 #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+#include "sl_hal_bus.h"
+#else
 #include "em_bus.h"
 #endif
+#endif
+#if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
+#include "sli_se_manager_osal.h"
+#endif
+
 #include <string.h>
 
-/// @addtogroup sl_se_manager
+/// @addtogroup sl_se_managers
 /// @{
 
 // -----------------------------------------------------------------------------
@@ -85,7 +90,7 @@ static se_manager_osal_mutex_t se_lock = { 0 };
 static se_manager_osal_completion_t se_command_completion;
 // SE mailbox command response code. This value is read from the SEMAILBOX
 // in ISR in order to clear the command complete interrupt condition.
-static SE_Response_t se_manager_command_response = SLI_SE_RESPONSE_INTERNAL_ERROR;
+static sli_se_mailbox_response_t se_manager_command_response = SLI_SE_RESPONSE_INTERNAL_ERROR;
   #endif // SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION
 
 #endif // #if defined (SL_SE_MANAGER_THREADING)
@@ -205,7 +210,7 @@ sl_status_t sl_se_deinit(void)
  * @return
  *   Status code, @ref sl_status.h.
  ******************************************************************************/
-sl_status_t sli_se_to_sl_status(SE_Response_t res)
+sl_status_t sli_se_to_sl_status(sli_se_mailbox_response_t res)
 {
   switch (res) {
     case SLI_SE_RESPONSE_OK:
@@ -230,7 +235,7 @@ sl_status_t sli_se_to_sl_status(SE_Response_t res)
       return SL_STATUS_INITIALIZATION;
     case SLI_SE_RESPONSE_NOT_INITIALIZED:
       return SL_STATUS_NOT_INITIALIZED;
-#if defined(CRYPTOACC_PRESENT)
+#if defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
     case SLI_SE_RESPONSE_MAILBOX_INVALID:
       return SL_STATUS_COMMAND_IS_INVALID;
 #endif
@@ -254,7 +259,11 @@ sl_status_t sli_se_lock_acquire(void)
   #endif
   #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
   if (status == SL_STATUS_OK) {
+  #if defined(_SILICON_LABS_32B_SERIES_3)
+    sl_hal_bus_reg_write_bit(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 1);
+  #else
     BUS_RegBitWrite(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 1);
+  #endif
   }
   #endif
   return status;
@@ -267,7 +276,11 @@ sl_status_t sli_se_lock_acquire(void)
 sl_status_t sli_se_lock_release(void)
 {
   #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  #if defined(_SILICON_LABS_32B_SERIES_3)
+  sl_hal_bus_reg_write_bit(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 0);
+  #else
   BUS_RegBitWrite(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 0);
+  #endif
   #endif
   #if defined(SL_SE_MANAGER_THREADING)
   return se_manager_osal_give_mutex(&se_lock);
@@ -292,7 +305,7 @@ void SEMBRX_IRQHandler(void)
     EFM_ASSERT(status == SL_STATUS_OK);
   }
   // Get command response (clears interrupt condition in SEMAILBOX)
-  se_manager_command_response = SE_readCommandResponse();
+  se_manager_command_response = sli_se_mailbox_read_response();
   // Clear interrupt condition in NVIC
   NVIC_ClearPendingIRQ(SEMBRX_IRQn);
 }
@@ -329,11 +342,11 @@ sl_status_t sl_se_set_yield(sl_se_command_context_t *cmd_ctx,
  * @return
  *   Status code, @ref sl_status.h.
  ******************************************************************************/
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) && !defined(SLI_SE_MANAGER_HOST_SYSTEM)
 sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
 {
   sl_status_t status;
-  SE_Response_t command_response;
+  sli_se_mailbox_response_t command_response;
 
   if (cmd_ctx == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -346,19 +359,19 @@ sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
   }
 
   // Execute SE mailbox command
-  SE_executeCommand(&cmd_ctx->command);
+  sli_se_mailbox_execute_command(&cmd_ctx->command);
 
   #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
   if (cmd_ctx->yield) {
     // Enable SEMAILBOX RXINT interrupt
-    SE_enableInterrupt(SEMAILBOX_CONFIGURATION_RXINTEN);
+    sli_se_mailbox_enable_interrupt(SEMAILBOX_CONFIGURATION_RXINTEN);
 
     // Yield and Wait for the command completion signal
     status = se_manager_osal_wait_completion(&se_command_completion,
                                              SE_MANAGER_OSAL_WAIT_FOREVER);
 
     // Disable SEMAILBOX RXINT interrupt.
-    SE_disableInterrupt(SEMAILBOX_CONFIGURATION_RXINTEN);
+    sli_se_mailbox_disable_interrupt(SEMAILBOX_CONFIGURATION_RXINTEN);
 
     if (status != SL_STATUS_OK) {
       return status;
@@ -370,15 +383,20 @@ sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
     se_manager_command_response = SLI_SE_RESPONSE_INTERNAL_ERROR;
   } else {
     // Wait for command completion and get command response
-    command_response = SE_readCommandResponse();
+    command_response = sli_se_mailbox_read_response();
   }
 
   #else // #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
 
   // Wait for command completion and get command response
-  command_response = SE_readCommandResponse();
+  command_response = sli_se_mailbox_read_response();
 
   #endif // #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
+
+  #if (_SILICON_LABS_32B_SERIES == 3)
+  // Read the command handle word ( not used ) from the SEMAILBOX FIFO
+  SEMAILBOX_HOST->FIFO;
+  #endif // #if (_SILICON_LABS_32B_SERIES == 3)
 
   // Release SE lock
   status = sli_se_lock_release();
@@ -387,12 +405,12 @@ sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
   if (command_response == SLI_SE_RESPONSE_OK) {
     return status;
   } else {
-    // Convert from SE_Response_t to sl_status_t code and return.
+    // Convert from sli_se_mailbox_response_t to sl_status_t code and return.
     return sli_se_to_sl_status(command_response);
   }
 }
 
-#elif defined(CRYPTOACC_PRESENT) // SEMAILBOX_PRESENT
+#elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED) // SLI_MAILBOX_COMMAND_SUPPORTED
 
 sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
 {
@@ -409,7 +427,7 @@ sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
   }
 
   // Execute SE mailbox command
-  SE_executeCommand(&cmd_ctx->command);
+  sli_se_mailbox_execute_command(&cmd_ctx->command);
 
   return SL_STATUS_FAIL; // Should never get to this point
 }
@@ -432,15 +450,15 @@ sl_status_t sl_se_read_executed_command(sl_se_command_context_t *cmd_ctx)
   }
 
   // Read command
-  cmd_ctx->command.command = SE_readExecutedCommand();
+  cmd_ctx->command.command = sli_vse_mailbox_read_executed_command();
 
   // Release SE lock
   status = sli_se_lock_release();
 
   // Return sl_status_t code.
-  if (cmd_ctx->command.command == SE_RESPONSE_MAILBOX_INVALID) {
-    // Convert from SE_Response_t to sl_status_t code and return.
-    return sli_se_to_sl_status(SE_RESPONSE_MAILBOX_INVALID);
+  if (cmd_ctx->command.command == SLI_SE_RESPONSE_MAILBOX_INVALID) {
+    // Convert from sli_se_mailbox_response_t to sl_status_t code and return.
+    return sli_se_to_sl_status(SLI_SE_RESPONSE_MAILBOX_INVALID);
   } else {
     return status;
   }
@@ -452,7 +470,7 @@ sl_status_t sl_se_read_executed_command(sl_se_command_context_t *cmd_ctx)
 sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx)
 {
   sl_status_t status;
-  SE_Response_t command_response;
+  sl_status_t command_response;
 
   if (cmd_ctx == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -465,7 +483,7 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx)
   }
 
   // Acknowledge VSE mailbox command
-  command_response = SE_ackCommand(&cmd_ctx->command);
+  command_response = sli_vse_mailbox_ack_command(&cmd_ctx->command);
 
   // Release SE lock
   status = sli_se_lock_release();
@@ -479,7 +497,7 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx)
   }
 }
 
-#endif // CRYPTOACC_PRESENT
+#endif // SLI_VSE_MAILBOX_COMMAND_SUPPORTED
 
 #endif // !SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT
 
@@ -512,4 +530,4 @@ sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx)
 
 /** @} (end addtogroup sl_se) */
 
-#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)

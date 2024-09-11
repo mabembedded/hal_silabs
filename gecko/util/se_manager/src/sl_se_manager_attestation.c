@@ -27,23 +27,20 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#include "sl_se_manager.h"
+
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 
 #include "sl_se_manager.h"
 #include "sli_se_manager_internal.h"
 #include "sl_se_manager_attestation.h"
-#include "em_se.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "sli_se_manager_mailbox.h"
 
 /// @addtogroup sl_se_manager
 /// @{
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 // -----------------------------------------------------------------------------
 // Static Functions
 
@@ -135,15 +132,15 @@ static sl_status_t get_attestation_token_size(sl_se_command_context_t *cmd_ctx,
   uint8_t dummy_nonce[SL_SE_ATTESTATION_CHALLENGE_SIZE_64] = { 0 };
 
   // Build and execute the command
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // Or comman word with 0x01 to enable length output only
   sli_se_command_init(cmd_ctx, command_word | 0x01UL);
-  SE_DataTransfer_t noncedata =
-    SE_DATATRANSFER_DEFAULT(dummy_nonce, challenge_size);
-  SE_addDataInput(se_cmd, &noncedata);
-  SE_DataTransfer_t sizedata =
-    SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
-  SE_addDataOutput(se_cmd, &sizedata);
+  sli_se_datatransfer_t noncedata =
+    SLI_SE_DATATRANSFER_DEFAULT(dummy_nonce, challenge_size);
+  sli_se_mailbox_command_add_input(se_cmd, &noncedata);
+  sli_se_datatransfer_t sizedata =
+    SLI_SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
+  sli_se_mailbox_command_add_output(se_cmd, &sizedata);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -212,17 +209,17 @@ static sl_status_t get_attestation_token(sl_se_command_context_t *cmd_ctx,
   }
 
   // Build and execute the command
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, command_word);
-  SE_DataTransfer_t noncedata =
-    SE_DATATRANSFER_DEFAULT(auth_challenge, challenge_size);
-  SE_addDataInput(se_cmd, &noncedata);
-  SE_DataTransfer_t sizedata =
-    SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
-  SE_addDataOutput(se_cmd, &sizedata);
-  SE_DataTransfer_t tokendata =
-    SE_DATATRANSFER_DEFAULT(token_buf, ((*token_size + 0x3) & ~0x3));
-  SE_addDataOutput(se_cmd, &tokendata);
+  sli_se_datatransfer_t noncedata =
+    SLI_SE_DATATRANSFER_DEFAULT(auth_challenge, challenge_size);
+  sli_se_mailbox_command_add_input(se_cmd, &noncedata);
+  sli_se_datatransfer_t sizedata =
+    SLI_SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
+  sli_se_mailbox_command_add_output(se_cmd, &sizedata);
+  sli_se_datatransfer_t tokendata =
+    SLI_SE_DATATRANSFER_DEFAULT(token_buf, ((*token_size + 0x3) & ~0x3));
+  sli_se_mailbox_command_add_output(se_cmd, &tokendata);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -294,12 +291,6 @@ sl_status_t sl_se_attestation_get_config_token_size(sl_se_command_context_t *cmd
                                     SLI_SE_COMMAND_ATTEST_CONFIG);
 }
 
-#endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-
-#ifdef __cplusplus
-}
-#endif
-
 /** @} (end addtogroup sl_se_manager) */
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED && VAULT

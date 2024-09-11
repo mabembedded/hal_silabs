@@ -3,7 +3,7 @@
  * @brief EFR32BG27 DCDC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** DCDC Register Declaration. */
-typedef struct {
+typedef struct dcdc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IPVERSION                                          */
   __IOM uint32_t CTRL;                          /**< Control                                            */
   uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */

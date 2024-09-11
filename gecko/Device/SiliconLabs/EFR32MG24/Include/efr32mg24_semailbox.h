@@ -3,7 +3,7 @@
  * @brief EFR32MG24 SEMAILBOX register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 /** SEMAILBOX_HOST Register Declaration. */
-typedef struct {
+typedef struct semailbox_host_typedef{
   __IOM uint32_t FIFO;                               /**< ESECURE_MAILBOX_FIFO                               */
   uint32_t       RESERVED0[15U];                     /**< Reserved for future use                            */
   __IM uint32_t  TX_STATUS;                          /**< ESECURE_MAILBOX_TXSTAT                             */
@@ -213,7 +213,7 @@ typedef struct {
  *****************************************************************************/
 
 /** SEMAILBOX_APBSE Register Declaration. */
-typedef struct {
+typedef struct semailbox_apbse_typedef{
   __IOM uint32_t SE_ESECURE_MAILBOX_FIFO;            /**< ESECURE_MAILBOX_FIFO                               */
   uint32_t       RESERVED0[15U];                     /**< Reserved for future use                            */
   __IM uint32_t  SE_ESECURE_MAILBOX_TXSTAT;          /**< ESECURE_MAILBOX_TXSTAT                             */
@@ -380,4 +380,4 @@ typedef struct {
 /** @} End of group EFR32MG24_SEMAILBOX_APBSE */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_SEMAILBOX_H */
+#endif // EFR32MG24_SEMAILBOX_H

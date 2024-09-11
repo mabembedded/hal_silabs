@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** EMU Register Declaration. */
-typedef struct {
+typedef struct emu_typedef{
   uint32_t       RESERVED0[4U];                 /**< Reserved for future use                            */
   __IOM uint32_t DECBOD;                        /**< DECOUPLE LVBOD  Control register                   */
   uint32_t       RESERVED1[3U];                 /**< Reserved for future use                            */

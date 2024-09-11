@@ -3,7 +3,7 @@
  * @brief EFR32BG27 SMU register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SMU Register Declaration. */
-typedef struct {
+typedef struct smu_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version                                         */
   __IM uint32_t  STATUS;                        /**< Status                                             */
   __IOM uint32_t LOCK;                          /**< Lock                                               */
@@ -940,7 +940,7 @@ typedef struct {
  *****************************************************************************/
 
 /** SMU_CFGNS Register Declaration. */
-typedef struct {
+typedef struct smu_cfgns_typedef{
   uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  NSSTATUS;                      /**< Non-Secure Status                                  */
   __IOM uint32_t NSLOCK;                        /**< Non-Secure Lock                                    */
@@ -1355,4 +1355,4 @@ typedef struct {
 /** @} End of group EFR32BG27_SMU_CFGNS */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_SMU_H */
+#endif // EFR32BG27_SMU_H

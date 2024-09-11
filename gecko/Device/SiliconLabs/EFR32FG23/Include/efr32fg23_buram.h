@@ -42,12 +42,12 @@
  *****************************************************************************/
 
 /** BURAM RET Register Group Declaration. */
-typedef struct {
+typedef struct buram_ret_typedef{
   __IOM uint32_t REG;                                /**< Retention Register                                 */
 } BURAM_RET_TypeDef;
 
 /** BURAM Register Declaration. */
-typedef struct {
+typedef struct buram_typedef{
   BURAM_RET_TypeDef RET[32U];                   /**< RetentionReg                                       */
   uint32_t          RESERVED0[992U];            /**< Reserved for future use                            */
   BURAM_RET_TypeDef RET_SET[32U];               /**< RetentionReg                                       */

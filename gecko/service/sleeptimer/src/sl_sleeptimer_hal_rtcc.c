@@ -31,8 +31,9 @@
 #include "em_rtcc.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
-#include "em_core.h"
-#include "em_cmu.h"
+#include "sl_core.h"
+#include "sl_clock_manager.h"
+#include "sl_device_peripheral.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
@@ -60,10 +61,10 @@ void sleeptimer_hal_init_timer(void)
   RTCC_Init_TypeDef rtcc_init   = RTCC_INIT_DEFAULT;
   RTCC_CCChConf_TypeDef channel = RTCC_CH_INIT_COMPARE_DEFAULT;
 
-  CMU_ClockEnable(cmuClock_RTCC, true);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_RTCC);
 
   rtcc_init.enable = false;
-  rtcc_init.presc = (RTCC_CntPresc_TypeDef)(CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1));
+  rtcc_init.presc = (RTCC_CntPresc_TypeDef)(sleeptimer_hal_presc_to_log2(SL_SLEEPTIMER_FREQ_DIVIDER - 1));
 #if (SL_SLEEPTIMER_DEBUGRUN == 1)
   rtcc_init.debugRun = true;
 #endif
@@ -243,7 +244,12 @@ void RTCC_IRQHandler(void)
  ******************************************************************************/
 uint32_t sleeptimer_hal_get_timer_frequency(void)
 {
-  return (CMU_ClockFreqGet(cmuClock_RTCC) >> (CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1)));
+  uint32_t frequency;
+  sl_clock_branch_t clock_branch;
+
+  clock_branch = sl_device_peripheral_get_clock_branch(SL_PERIPHERAL_RTCC);
+  sl_clock_manager_get_clock_branch_frequency(clock_branch, &frequency);
+  return (frequency >> (sleeptimer_hal_presc_to_log2(SL_SLEEPTIMER_FREQ_DIVIDER - 1)));
 }
 
 /*******************************************************************************
@@ -270,12 +276,9 @@ __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
  ******************************************************************************/
 uint16_t sleeptimer_hal_get_clock_accuracy(void)
 {
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  return CMU_LF_ClockPrecisionGet(cmuClock_RTCC);
-
-#else
-  return CMU_LF_ClockPrecisionGet(cmuClock_LFE);
-#endif
+  uint16_t precision;
+  sl_clock_manager_get_clock_branch_precision(SL_CLOCK_BRANCH_RTCCCLK, &precision);
+  return precision;
 }
 
 /*******************************************************************************
