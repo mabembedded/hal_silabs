@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** HFRCO Register Declaration. */
-typedef struct {
+typedef struct hfrco_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version ID                                      */
   __IOM uint32_t CTRL;                          /**< Ctrl Register                                      */
   __IOM uint32_t CAL;                           /**< Calibration Register                               */

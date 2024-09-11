@@ -3,7 +3,7 @@
  * @brief EFR32MG21 IADC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** IADC CFG Register Group Declaration. */
-typedef struct {
+typedef struct iadc_cfg_typedef{
   __IOM uint32_t CFG;                                /**< Configuration                                      */
   uint32_t       RESERVED0[1U];                      /**< Reserved for future use                            */
   __IOM uint32_t SCALE;                              /**< Scaling                                            */
@@ -50,12 +50,12 @@ typedef struct {
 } IADC_CFG_TypeDef;
 
 /** IADC SCANTABLE Register Group Declaration. */
-typedef struct {
+typedef struct iadc_scantable_typedef{
   __IOM uint32_t SCAN;                               /**< SCAN Entry                                         */
 } IADC_SCANTABLE_TypeDef;
 
 /** IADC Register Declaration. */
-typedef struct {
+typedef struct iadc_typedef{
   __IM uint32_t          IPVERSION;             /**< IPVERSION                                          */
   __IOM uint32_t         EN;                    /**< Enable                                             */
   __IOM uint32_t         CTRL;                  /**< Control                                            */
@@ -938,4 +938,4 @@ typedef struct {
 /** @} End of group EFR32MG21_IADC */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_IADC_H */
+#endif // EFR32MG21_IADC_H

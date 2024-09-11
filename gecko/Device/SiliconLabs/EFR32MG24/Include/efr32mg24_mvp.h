@@ -3,7 +3,7 @@
  * @brief EFR32MG24 MVP register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,27 +42,27 @@
  *****************************************************************************/
 
 /** MVP PERF Register Group Declaration. */
-typedef struct {
+typedef struct mvp_perf_typedef{
   __IM uint32_t CNT;                                 /**< Run Counter                                        */
 } MVP_PERF_TypeDef;
 
 /** MVP ARRAYST Register Group Declaration. */
-typedef struct {
+typedef struct mvp_arrayst_typedef{
   __IOM uint32_t INDEXSTATE;                         /**< Index State                                        */
 } MVP_ARRAYST_TypeDef;
 
 /** MVP LOOPST Register Group Declaration. */
-typedef struct {
+typedef struct mvp_loopst_typedef{
   __IOM uint32_t STATE;                              /**< Loop State                                         */
 } MVP_LOOPST_TypeDef;
 
 /** MVP ALU Register Group Declaration. */
-typedef struct {
+typedef struct mvp_alu_typedef{
   __IOM uint32_t REGSTATE;                           /**< ALU Rn Register                                    */
 } MVP_ALU_TypeDef;
 
 /** MVP ARRAY Register Group Declaration. */
-typedef struct {
+typedef struct mvp_array_typedef{
   __IOM uint32_t ADDRCFG;                            /**< Array Base Address                                 */
   __IOM uint32_t DIM0CFG;                            /**< Dimension 0 Configuration                          */
   __IOM uint32_t DIM1CFG;                            /**< Dimension 1 Configuration                          */
@@ -70,20 +70,20 @@ typedef struct {
 } MVP_ARRAY_TypeDef;
 
 /** MVP LOOP Register Group Declaration. */
-typedef struct {
+typedef struct mvp_loop_typedef{
   __IOM uint32_t CFG;                                /**< Loop Configuration                                 */
   __IOM uint32_t RST;                                /**< Loop Reset                                         */
 } MVP_LOOP_TypeDef;
 
 /** MVP INSTR Register Group Declaration. */
-typedef struct {
+typedef struct mvp_instr_typedef{
   __IOM uint32_t CFG0;                               /**< Instruction Configuration Word 0                   */
   __IOM uint32_t CFG1;                               /**< Instruction Configuration Word 1                   */
   __IOM uint32_t CFG2;                               /**< Instruction Configuration Word 2                   */
 } MVP_INSTR_TypeDef;
 
 /** MVP Register Declaration. */
-typedef struct {
+typedef struct mvp_typedef{
   __IM uint32_t       IPVERSION;                /**< IP Version                                         */
   __IOM uint32_t      EN;                       /**< Enable                                             */
   __IOM uint32_t      SWRST;                    /**< Software Reset                                     */
@@ -1383,4 +1383,4 @@ typedef struct {
 /** @} End of group EFR32MG24_MVP */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_MVP_H */
+#endif // EFR32MG24_MVP_H

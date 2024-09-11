@@ -3,7 +3,7 @@
  * @brief EFR32MG24 VDAC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** VDAC Register Declaration. */
-typedef struct {
+typedef struct vdac_typedef{
   __IM uint32_t  IPVERSION;                     /**< IPVERSION                                          */
   __IOM uint32_t EN;                            /**< Module Enable                                      */
   __IOM uint32_t SWRST;                         /**< Software Reset Register                            */
@@ -754,4 +754,4 @@ typedef struct {
 /** @} End of group EFR32MG24_VDAC */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_VDAC_H */
+#endif // EFR32MG24_VDAC_H

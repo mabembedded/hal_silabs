@@ -42,17 +42,17 @@
  *****************************************************************************/
 
 /** PRS ASYNC_CH Register Group Declaration. */
-typedef struct {
+typedef struct prs_async_ch_typedef{
   __IOM uint32_t CTRL;                               /**< Async Channel Control Register                     */
 } PRS_ASYNC_CH_TypeDef;
 
 /** PRS SYNC_CH Register Group Declaration. */
-typedef struct {
+typedef struct prs_sync_ch_typedef{
   __IOM uint32_t CTRL;                               /**< Sync Channel Control Register                      */
 } PRS_SYNC_CH_TypeDef;
 
 /** PRS Register Declaration. */
-typedef struct {
+typedef struct prs_typedef{
   __IM uint32_t        IPVERSION;                         /**< PRS IPVERSION                                      */
   uint32_t             RESERVED0[1U];                     /**< Reserved for future use                            */
   __IOM uint32_t       ASYNC_SWPULSE;                     /**< Software Pulse Register                            */

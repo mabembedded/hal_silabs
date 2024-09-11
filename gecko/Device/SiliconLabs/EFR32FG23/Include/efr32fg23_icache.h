@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** ICACHE Register Declaration. */
-typedef struct {
+typedef struct icache_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version                                         */
   __IOM uint32_t CTRL;                          /**< Control Register                                   */
   __IM uint32_t  PCHITS;                        /**< Performance Counter Hits                           */

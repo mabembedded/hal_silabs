@@ -3,7 +3,7 @@
  * @brief EFR32MG21 FSRCO register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** FSRCO Register Declaration. */
-typedef struct {
+typedef struct fsrco_typedef{
   __IM uint32_t IPVERSION;                      /**< IP Version                                         */
   uint32_t      RESERVED0[1023U];               /**< Reserved for future use                            */
   __IM uint32_t IPVERSION_SET;                  /**< IP Version                                         */
@@ -72,4 +72,4 @@ typedef struct {
 /** @} End of group EFR32MG21_FSRCO */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_FSRCO_H */
+#endif // EFR32MG21_FSRCO_H

@@ -36,6 +36,7 @@
 #include <stdbool.h>
 #include "em_device.h"
 #include "sl_sleeptimer_config.h"
+#include "sl_code_classification.h"
 
 #define SLEEPTIMER_EVENT_OF (0x01)
 #define SLEEPTIMER_EVENT_COMP (0x02)
@@ -86,6 +87,7 @@ __WEAK void sli_sleeptimer_hal_hfxo_manager_integration_init(void);
  *
  * @return Boolean indicating if specified interrupt is set.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sli_sleeptimer_hal_is_int_status_set(uint8_t local_flag);
 
 /**************************************************************************//**
@@ -95,6 +97,7 @@ bool sli_sleeptimer_hal_is_int_status_set(uint8_t local_flag);
  * @return true if power manager will expire at next compare match,
  *         false otherwise.
  *****************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sli_sleeptimer_is_power_manager_timer_next_to_expire(void);
 
 /***************************************************************************//**
@@ -105,6 +108,7 @@ bool sli_sleeptimer_is_power_manager_timer_next_to_expire(void);
  *       determined by clock source.
  ******************************************************************************/
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_sleeptimer_set_pm_em_requirement(void);
 #endif
 
@@ -114,6 +118,7 @@ void sli_sleeptimer_set_pm_em_requirement(void);
  *
  * @param flag Boolean value update_sleep_on_isr_exit will be set to.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_sleeptimer_update_sleep_on_isr_exit(bool flag);
 
 /*******************************************************************************
@@ -122,11 +127,13 @@ void sli_sleeptimer_update_sleep_on_isr_exit(bool flag);
  * @return Capture value
  *         0 if capture channel is not valid
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sli_sleeptimer_get_capture(void);
 
 /*******************************************************************************
  * Resets the PRS signal triggered by the associated peripheral.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_sleeptimer_reset_prs_signal(void);
 
 #ifdef __cplusplus

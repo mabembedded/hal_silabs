@@ -70,7 +70,7 @@ void sli_em_cmu_SYSCLKInitPreClockSelect(void)
 {
 }
 
-void sli_em_cmu_SYSCLKInitPostClockSelect(void)
+void sli_em_cmu_SYSCLKInitPostClockSelect(bool optimize_divider)
 {
 }
 

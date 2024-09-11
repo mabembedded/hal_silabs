@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LETIMER Register Declaration. */
-typedef struct {
+typedef struct letimer_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version                                         */
   __IOM uint32_t EN;                            /**< module en                                          */
   __IOM uint32_t SWRST;                         /**< Software Reset Register                            */

@@ -3,7 +3,7 @@
  * @brief EFR32MG21 LVGD register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LVGD Register Declaration. */
-typedef struct {
+typedef struct lvgd_typedef{
   uint32_t RESERVED0[1U];                       /**< Reserved for future use                            */
   uint32_t RESERVED1[1023U];                    /**< Reserved for future use                            */
   uint32_t RESERVED2[1U];                       /**< Reserved for future use                            */
@@ -64,4 +64,4 @@ typedef struct {
 /** @} End of group EFR32MG21_LVGD */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_LVGD_H */
+#endif // EFR32MG21_LVGD_H

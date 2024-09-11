@@ -259,6 +259,10 @@ typedef enum {
   systemPartFamilySideWalk28 = DEVINFO_PART_FAMILY_SG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Side Walk Gecko Series 2 Config 8 Value Device Family */
   systemPartFamilyEfm32Pearl28 = DEVINFO_PART_FAMILY_PG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),  /**< EFM32 Pearl Gecko Series 2 Config 8 Value Device Family */
 #endif
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
+  systemPartFamilyMighty29 = DEVINFO_PART_FAMILY_MG | (29 << _DEVINFO_PART_FAMILYNUM_SHIFT), /**< EFR32 Mighty Gecko Series 2 Config 9 Value Device Family */
+  systemPartFamilyBlue29 = DEVINFO_PART_FAMILY_BG | (29 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Blue Gecko Series 2 Config 9 Value Device Family */
+#endif
 /* Deprecated family #defines */
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_G)
   systemPartFamilyGecko   = _DEVINFO_PART_DEVICE_FAMILY_G,   /**< Gecko Device Family. */

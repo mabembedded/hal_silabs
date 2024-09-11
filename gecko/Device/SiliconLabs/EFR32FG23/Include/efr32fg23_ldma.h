@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LDMA CH Register Group Declaration. */
-typedef struct {
+typedef struct ldma_ch_typedef{
   uint32_t       RESERVED0[1U];                      /**< Reserved for future use                            */
   __IOM uint32_t CFG;                                /**< Channel Configuration Register                     */
   __IOM uint32_t LOOP;                               /**< Channel Loop Counter Register                      */
@@ -54,8 +54,8 @@ typedef struct {
 } LDMA_CH_TypeDef;
 
 /** LDMA Register Declaration. */
-typedef struct {
-  __IM uint32_t   IPVERSION;                    /**< DMA Channel Request Clear Register                 */
+typedef struct ldma_typedef{
+  __IM uint32_t   IPVERSION;                    /**< IP version                                         */
   __IOM uint32_t  EN;                           /**< DMA module enable disable Register                 */
   __IOM uint32_t  CTRL;                         /**< DMA Control Register                               */
   __IM uint32_t   STATUS;                       /**< DMA Status Register                                */
@@ -79,7 +79,7 @@ typedef struct {
   __IOM uint32_t  IEN;                          /**< Interrupt Enable Register                          */
   LDMA_CH_TypeDef CH[8U];                       /**< DMA Channel Registers                              */
   uint32_t        RESERVED0[906U];              /**< Reserved for future use                            */
-  __IM uint32_t   IPVERSION_SET;                /**< DMA Channel Request Clear Register                 */
+  __IM uint32_t   IPVERSION_SET;                /**< IP version                                         */
   __IOM uint32_t  EN_SET;                       /**< DMA module enable disable Register                 */
   __IOM uint32_t  CTRL_SET;                     /**< DMA Control Register                               */
   __IM uint32_t   STATUS_SET;                   /**< DMA Status Register                                */
@@ -103,7 +103,7 @@ typedef struct {
   __IOM uint32_t  IEN_SET;                      /**< Interrupt Enable Register                          */
   LDMA_CH_TypeDef CH_SET[8U];                   /**< DMA Channel Registers                              */
   uint32_t        RESERVED1[906U];              /**< Reserved for future use                            */
-  __IM uint32_t   IPVERSION_CLR;                /**< DMA Channel Request Clear Register                 */
+  __IM uint32_t   IPVERSION_CLR;                /**< IP version                                         */
   __IOM uint32_t  EN_CLR;                       /**< DMA module enable disable Register                 */
   __IOM uint32_t  CTRL_CLR;                     /**< DMA Control Register                               */
   __IM uint32_t   STATUS_CLR;                   /**< DMA Status Register                                */
@@ -127,7 +127,7 @@ typedef struct {
   __IOM uint32_t  IEN_CLR;                      /**< Interrupt Enable Register                          */
   LDMA_CH_TypeDef CH_CLR[8U];                   /**< DMA Channel Registers                              */
   uint32_t        RESERVED2[906U];              /**< Reserved for future use                            */
-  __IM uint32_t   IPVERSION_TGL;                /**< DMA Channel Request Clear Register                 */
+  __IM uint32_t   IPVERSION_TGL;                /**< IP version                                         */
   __IOM uint32_t  EN_TGL;                       /**< DMA module enable disable Register                 */
   __IOM uint32_t  CTRL_TGL;                     /**< DMA Control Register                               */
   __IM uint32_t   STATUS_TGL;                   /**< DMA Status Register                                */

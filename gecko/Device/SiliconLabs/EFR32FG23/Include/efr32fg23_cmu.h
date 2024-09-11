@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** CMU Register Declaration. */
-typedef struct {
+typedef struct cmu_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  STATUS;                        /**< Status Register                                    */

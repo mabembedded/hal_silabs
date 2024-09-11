@@ -3,7 +3,7 @@
  * @brief EFR32BG27 SYSCFG register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SYSCFG Register Declaration. */
-typedef struct {
+typedef struct syscfg_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t IF;                            /**< Interrupt Flag                                     */
   __IOM uint32_t IEN;                           /**< Interrupt Enable                                   */
@@ -659,7 +659,7 @@ typedef struct {
  *****************************************************************************/
 
 /** SYSCFG_CFGNS Register Declaration. */
-typedef struct {
+typedef struct syscfg_cfgns_typedef{
   uint32_t       RESERVED0[7U];                 /**< Reserved for future use                            */
   __IOM uint32_t CFGNSTCALIB;                   /**< Configure Non-secure Sys-Tick Cal.                 */
   uint32_t       RESERVED1[376U];               /**< Reserved for future use                            */
@@ -735,4 +735,4 @@ typedef struct {
 /** @} End of group EFR32BG27_SYSCFG_CFGNS */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_SYSCFG_H */
+#endif // EFR32BG27_SYSCFG_H

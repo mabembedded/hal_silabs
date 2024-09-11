@@ -69,7 +69,6 @@ extern "C" {
 /// the sync word and other parameters as needed based on your connection.
 ///
 /// @code{.c}
-///
 /// // RAIL Handle set at initialization time.
 /// static RAIL_Handle_t gRailHandle = NULL;
 ///
@@ -206,6 +205,22 @@ extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbi;
  */
 extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbi;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Default PHY to use for BLE 1M Viterbi CS. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_CS is 0. On EFR32XG24, this will also
+ * be NULL for non 40MHz HFXO frequencies.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiCs;
+
+/**
+ * Default PHY to use for BLE 2M Viterbi CS. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_CS is 0. On EFR32XG24, this will also
+ * be NULL for non 40MHz HFXO frequencies.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiCs;
+#endif
+
 /**
  * PHY to use for BLE 2M with AoX functionality. Will be NULL if either
  * \ref RAIL_BLE_SUPPORTS_2MBPS_VITERBI or \ref RAIL_BLE_SUPPORTS_AOX is 0.
@@ -286,25 +301,31 @@ typedef struct RAIL_BLE_State {
   uint32_t accessAddress; /**< The access address used for the connection. */
   uint16_t channel; /**< The logical channel used. */
   bool disableWhitening; /**< Indicates whether the whitening engine should be off. */
+  uint16_t whiteInit; /**< The value used to initialize the whitening algorithm */
 } RAIL_BLE_State_t;
 
 /**
  * Configure RAIL to run in BLE mode.
  *
  * @param[in] railHandle A handle for RAIL instance.
+ * @return Status code indicating success of the function call.
+ *
  * This function changes your radio, channel configuration, and other
- * parameters to match what is needed for BLE. To switch back to a
+ * parameters to match what is needed for BLE, initially establishing
+ * the BLE 1mbps PHY. To switch back to a
  * default RAIL mode, call RAIL_BLE_Deinit() first. This function
  * will configure the protocol output on PTI to \ref RAIL_PTI_PROTOCOL_BLE.
  *
  * @note BLE may not be enabled while Auto-ACKing is enabled.
  */
-void RAIL_BLE_Init(RAIL_Handle_t railHandle);
+RAIL_Status_t RAIL_BLE_Init(RAIL_Handle_t railHandle);
 
 /**
  * Take RAIL out of BLE mode.
  *
  * @param[in] railHandle A handle for RAIL instance.
+ * @return Status code indicating success of the function call.
+ *
  * This function will undo some of the configuration that happens when you call
  * RAIL_BLE_Init(). After this you can safely run your normal radio
  * initialization code to use a non-BLE configuration. This function does \b
@@ -312,13 +333,14 @@ void RAIL_BLE_Init(RAIL_Handle_t railHandle);
  * manually reinitializing. This also resets the protocol output on PTI to \ref
  * RAIL_PTI_PROTOCOL_CUSTOM.
  */
-void RAIL_BLE_Deinit(RAIL_Handle_t railHandle);
+RAIL_Status_t RAIL_BLE_Deinit(RAIL_Handle_t railHandle);
 
 /**
  * Determine whether BLE mode is enabled or not.
  *
  * @param[in] railHandle A handle for RAIL instance.
- * @return True if BLE mode is enabled and false otherwise.
+ * @return true if BLE mode is enabled and false otherwise.
+ *
  * This function returns the current status of RAIL's BLE mode. It is enabled by
  * a call to RAIL_BLE_Init() and disabled by a call to RAIL_BLE_Deinit().
  */
@@ -333,7 +355,7 @@ bool RAIL_BLE_IsEnabled(RAIL_Handle_t railHandle);
  * You can use this function to switch to the Quuppa PHY.
  *
  * @note Not all chips support the 1Mbps Quuppa PHY. This API should return RAIL_STATUS_INVALID_CALL if
- * unsupported by the hardware we're building for.
+ *   unsupported by the hardware we're building for.
  */
 RAIL_Status_t RAIL_BLE_ConfigPhyQuuppa(RAIL_Handle_t railHandle);
 
@@ -346,10 +368,6 @@ RAIL_Status_t RAIL_BLE_ConfigPhyQuuppa(RAIL_Handle_t railHandle);
  * Use this function to switch back to the default BLE 1 Mbps PHY if you
  * have switched to the 2 Mbps or another configuration. You may only call this
  * function after initializing BLE and while the radio is idle.
- *
- * @note The EFR32XG1 family does not support BLE Viterbi PHYs. However, calls
- *   to this function from that family will be silently redirected to the legacy
- *   \ref RAIL_BLE_ConfigPhy1Mbps().
  */
 RAIL_Status_t RAIL_BLE_ConfigPhy1MbpsViterbi(RAIL_Handle_t railHandle);
 
@@ -376,8 +394,6 @@ RAIL_Status_t RAIL_BLE_ConfigPhy1Mbps(RAIL_Handle_t railHandle);
  * Use this function to switch back to the BLE 2 Mbps PHY from the
  * default 1 Mbps option. You may only call this function after initializing BLE
  * and while the radio is idle.
- *
- * @note The EFR32XG1 family does not support BLE Viterbi PHYs.
  */
 RAIL_Status_t RAIL_BLE_ConfigPhy2MbpsViterbi(RAIL_Handle_t railHandle);
 
@@ -391,7 +407,7 @@ RAIL_Status_t RAIL_BLE_ConfigPhy2MbpsViterbi(RAIL_Handle_t railHandle);
  * default 1 Mbps option. You may only call this function after initializing BLE
  * and while the radio is idle.
  *
- * @note The EFR32XG1 and EFR32XG2x families do not support BLE non-Viterbi
+ * @deprecated No EFR32 Series 2 parts support BLE non-Viterbi
  *   2 Mbps PHY.
  */
 RAIL_Status_t RAIL_BLE_ConfigPhy2Mbps(RAIL_Handle_t railHandle);
@@ -409,9 +425,6 @@ RAIL_Status_t RAIL_BLE_ConfigPhy2Mbps(RAIL_Handle_t railHandle);
  * RAIL_RxPacketDetails_t::subPhyId marks the coding of the received packet.
  * A subPhyId of 0 marks a 500 kbps packet, and a subPhyId of 1 marks a 125
  * kbps packet.
- *
- * @note The EFR32XG1, EFR32XG12, and EFR32XG14 families do not support BLE
- *   Coded PHYs.
  */
 RAIL_Status_t RAIL_BLE_ConfigPhyCoded(RAIL_Handle_t railHandle,
                                       RAIL_BLE_Coding_t bleCoding);
@@ -429,24 +442,54 @@ RAIL_Status_t RAIL_BLE_ConfigPhyCoded(RAIL_Handle_t railHandle,
  * 500 kbps packet, a subPhyId of 1 marks a 125 kbps packet, and a
  * subPhyId of 2 marks a 1 Mbps packet.
  *
- * @note: The Simulscan PHY is supported only on some 2.4 GHz Series-2 parts.
- * The preprocessor symbol \ref RAIL_BLE_SUPPORTS_SIMULSCAN_PHY and the
- * runtime function \ref RAIL_BLE_SupportsSimulscanPhy() may be used to
- * test for support of the Simulscan PHY.
+ * @note: The Simulscan PHY is supported only on some parts.
+ *   The preprocessor symbol \ref RAIL_BLE_SUPPORTS_SIMULSCAN_PHY and the
+ *   runtime function \ref RAIL_BLE_SupportsSimulscanPhy() may be used to
+ *   test for support of the Simulscan PHY.
  */
 RAIL_Status_t RAIL_BLE_ConfigPhySimulscan(RAIL_Handle_t railHandle);
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Switch to the 1 Mbps BLE PHY for CS.
+ *
+ * @param[in] railHandle A handle for RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * Use this function to switch back to the BLE 1 Mbps CS PHY from
+ * another configuration. You may only call this
+ * function after initializing BLE and while the radio is idle.
+ *
+ * @note This PHY is only supported when \ref RAIL_BLE_SUPPORTS_CS is not 0.
+ */
+RAIL_Status_t RAIL_BLE_ConfigPhy1MbpsCs(RAIL_Handle_t railHandle);
+
+/**
+ * Switch to the 2 Mbps BLE PHY for CS.
+ *
+ * @param[in] railHandle A handle for RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * Use this function to switch back to the BLE 2 Mbps CS PHY from
+ * another configuration. You may only call this
+ * function after initializing BLE and while the radio is idle.
+ *
+ * @note This PHY is only supported when \ref RAIL_BLE_SUPPORTS_CS is not 0.
+ */
+RAIL_Status_t RAIL_BLE_ConfigPhy2MbpsCs(RAIL_Handle_t railHandle);
+#endif
 
 /**
  * Change BLE radio parameters.
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @param[in] crcInit The value to use for CRC initialization.
- * @param[in] accessAddress The access address to use for the connection.  The
- * bits of this parameter are transmitted or received LSB first.
+ * @param[in] accessAddress The access address to use for the connection. The
+ *   bits of this parameter are transmitted or received LSB first.
  * @param[in] channel The logical channel that you're changing to, which
- * initializes the whitener if used.
+ *   initializes the whitener if used.
  * @param[in] disableWhitening This can turn off the whitening engine and is useful
- * for sending BLE test mode packets that don't have this turned on.
+ *   for sending BLE test mode packets that don't have this turned on.
  * @return A status code indicating success of the function call.
  *
  * This function can be used to switch radio parameters on every connection
@@ -469,12 +512,12 @@ RAIL_Status_t RAIL_BLE_ConfigChannelRadioParams(RAIL_Handle_t railHandle,
  * @param[in] railChannel Which channel of the given PHY to receive on
  * @param[in] startRxTime When to enter RX
  * @param[in] crcInit The value to use for CRC initialization.
- * @param[in] accessAddress The access address to use for the connection.  The
- * bits of this parameter are transmitted or received LSB first.
+ * @param[in] accessAddress The access address to use for the connection. The
+ *   bits of this parameter are transmitted or received LSB first.
  * @param[in] logicalChannel The logical channel that you're changing to, which
- * initializes the whitener if used.
+ *   initializes the whitener if used.
  * @param[in] disableWhitening This can turn off the whitening engine and is useful
- * for sending BLE test mode packets that don't have this turned on.
+ *   for sending BLE test mode packets that don't have this turned on.
  * @return A status code indicating success of the function call.
  *
  * This function is used to implement auxiliary packet reception, as defined in
@@ -518,7 +561,7 @@ RAIL_Status_t RAIL_BLE_ConfigSignalIdentifier(RAIL_Handle_t railHandle,
                                               RAIL_BLE_SignalIdentifierMode_t signalIdentifierMode);
 
 /**
- * Enable or Disable signal identifier interrupt for BLE signal detection.
+ * Enable or disable signal identifier interrupt for BLE signal detection.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] enable Signal detection is enabled if true, disabled if false.
@@ -541,7 +584,7 @@ RAIL_Status_t RAIL_BLE_EnableSignalDetection(RAIL_Handle_t railHandle,
 
 /**
  * @brief Backward compatible name for the \ref
- * RAIL_BLE_EnableSignalDetection API.
+ *   RAIL_BLE_EnableSignalDetection API.
  */
 #define RAIL_BLE_EnableSignalIdentifier RAIL_BLE_EnableSignalDetection
 
@@ -552,7 +595,7 @@ RAIL_Status_t RAIL_BLE_EnableSignalDetection(RAIL_Handle_t railHandle,
  * @addtogroup AoX Angle of Arrival/Departure
  * @{
  * @brief These APIs are to a stack implementing BLE's angle of arrival and
- * angle of departure functionality.
+ *   angle of departure functionality.
  *
  * They are designed for use by the Silicon Labs BLE stack only at this time and
  * may cause problems if accessed directly.
@@ -649,11 +692,13 @@ typedef struct RAIL_BLE_AoxConfig {
   RAIL_BLE_AoxOptions_t aoxOptions;
   /**
    * Size of the raw AoX CTE (continuous tone extension) data capture buffer in
-   * bytes.
+   * bytes. Note this value should be a multiple of 4 as each IQ sample
+   * requires 4 bytes.
    */
   uint16_t cteBuffSize;
   /**
-   * Address to where the received CTE is written.
+   * Address to where the received CTE is written. Buffer must be 32-bit
+   * aligned.
    */
   uint32_t * cteBuffAddr;
   /**
@@ -686,7 +731,7 @@ typedef struct RAIL_BLE_AoxAntennaPortPins {
 /**
  * @struct RAIL_BLE_AoxAntennaConfig_t
  * @brief Contains arguments for \ref RAIL_BLE_ConfigAoxAntenna function for
- * EFR32XG22.
+ *   EFR32XG22.
  */
 typedef struct RAIL_BLE_AoxAntennaConfig {
   /**
@@ -710,7 +755,7 @@ typedef struct RAIL_BLE_AoxAntennaConfig {
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] lock Lock the CTE buffer if true and unlock it if false.
- * @return True if the CTE buffer is locked after the call, otherwise false.
+ * @return true if the CTE buffer is locked after the call, otherwise false.
  */
 bool RAIL_BLE_LockCteBuffer(RAIL_Handle_t railHandle, bool lock);
 
@@ -718,7 +763,7 @@ bool RAIL_BLE_LockCteBuffer(RAIL_Handle_t railHandle, bool lock);
  * Determine whether the CTE buffer is currently locked or not.
  *
  * @param[in] railHandle A handle for RAIL instance.
- * @return True if CTE buffer is locked and false otherwise.
+ * @return true if CTE buffer is locked and false otherwise.
  */
 bool RAIL_BLE_CteBufferIsLocked(RAIL_Handle_t railHandle);
 
@@ -736,7 +781,7 @@ uint8_t RAIL_BLE_GetCteSampleOffset(RAIL_Handle_t railHandle);
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @return The actual sample rate used to capture the CTE in samples per second.
- * On unsupported platforms this returns 0.
+ *   On unsupported platforms this returns 0.
  */
 uint32_t RAIL_BLE_GetCteSampleRate(RAIL_Handle_t railHandle);
 
@@ -748,8 +793,7 @@ uint32_t RAIL_BLE_GetCteSampleRate(RAIL_Handle_t railHandle);
  * Connection based AoX packets are different than normal BLE packets in that
  * they have 3 header bytes instead of 2 and they have CTE appended after the
  * payload's CRC. 3rd byte or CTE info contains CTE length. Connectionless AoX
- * packets have 2 header bytes and CTE info is part of the payload. AoX is
- * supported on EFR32XG12/13/14 only on legacy 1Mbps BLE PHY.
+ * packets have 2 header bytes and CTE info is part of the payload.
  * Note that calling \ref RAIL_GetRadioEntropy during AoX reception may break
  * receiving packets.
  *
@@ -790,7 +834,7 @@ RAIL_Status_t RAIL_BLE_InitCte(RAIL_Handle_t railHandle);
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] antennaConfig structure to hold the set of ports and pins to
- * configure Antenna pins for AoX Antenna switching.
+ *   configure Antenna pins for AoX Antenna switching.
  * @return RAIL_Status_t indicating success or failure of the call.
  */
 RAIL_Status_t RAIL_BLE_ConfigAoxAntenna(RAIL_Handle_t railHandle,
@@ -798,10 +842,612 @@ RAIL_Status_t RAIL_BLE_ConfigAoxAntenna(RAIL_Handle_t railHandle,
 
 /** @} */  // end of group AoX
 
+ #ifndef DOXYGEN_SHOULD_SKIP_THIS
+/******************************************************************************
+ * Channel Sounding (CS)
+ *****************************************************************************/
+/**
+ * @addtogroup CS Channel Sounding
+ * @{
+ * @brief These APIs are to a stack implementing BLE's channel sounding
+ *   functionality.
+ *
+ * They are designed for use by the Silicon Labs BLE stack only at this time and
+ * may cause problems if accessed directly.
+ */
+
+/** Total number of CS Channels. */
+#define RAIL_BLE_CS_NUM_CHANNELS 79
+
+/** Total number of allowed CS Channels. */
+#define RAIL_BLE_CS_NUM_ALLOWED_CHANNELS 72
+
+/**
+ * @enum RAIL_BLE_CsRole_t
+ * @brief The device role during CS events.
+ */
+RAIL_ENUM(RAIL_BLE_CsRole_t) {
+  /** Device cannot perform CS events. */
+  RAIL_BLE_CS_ROLE_UNASSIGNED = 0,
+  /** Device is an initiator during CS events */
+  RAIL_BLE_CS_ROLE_INITIATOR = 1,
+  /** Device is a reflector during CS events */
+  RAIL_BLE_CS_ROLE_REFLECTOR = 2,
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_BLE_CS_ROLE_UNASSIGNED ((RAIL_BLE_CsRole_t) RAIL_BLE_CS_ROLE_UNASSIGNED)
+#define RAIL_BLE_CS_ROLE_INITIATOR  ((RAIL_BLE_CsRole_t) RAIL_BLE_CS_ROLE_INITIATOR)
+#define RAIL_BLE_CS_ROLE_REFLECTOR  ((RAIL_BLE_CsRole_t) RAIL_BLE_CS_ROLE_REFLECTOR)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * @struct RAIL_BLE_CsResults_t
+ * @brief Contains measurement results from CS step
+ */
+typedef struct {
+  uint32_t result[7]; /**< CS measurement data for a particular step. */
+} RAIL_BLE_CsResults_t;
+
+/**
+ * @enum RAIL_BLE_CsRttType_t
+ * @brief CS RTT Types.
+ */
+RAIL_ENUM(RAIL_BLE_CsRttType_t) {
+  /** Coarse cost function engine method RTT. */
+  RAIL_BLE_CS_RTT_AA_ONLY = 0U,
+  /** 32 bit sounding sequence method RTT. */
+  RAIL_BLE_CS_RTT_32B_SS = 1U,
+  /** 96 bit sounding sequence method RTT. */
+  RAIL_BLE_CS_RTT_96B_SS = 2U,
+};
+
+/**
+ *  The minimum size in 32 bit words for the IQ buffer. This value guarantees
+ *  all IQ samples for a single 1mbps CS step can be stored.
+ */
+#define RAIL_BLE_CS_1MBPS_MINIMUM_IQ_BUFFER_SIZE  600U
+
+/**
+ * @struct RAIL_BLE_CsConfig_t
+ * @brief Contains arguments for \ref RAIL_BLE_ConfigCs function.
+ */
+typedef struct RAIL_BLE_CsConfig {
+  RAIL_BLE_CsRole_t role; /**< The device role during CS event. */
+  uint16_t csSqteSteps; /**< Number of steps in CS event. */
+  /** Pointer to CS measurements. Set to NULL if unused. */
+  RAIL_BLE_CsResults_t *pCsDataOutput;
+  uint16_t t_fcs; /**< Frequency change spacing (in us). */
+  uint16_t t_ip1; /**< Interlude period for mode 0 & 1 steps (in us). */
+  uint16_t t_ip2; /**< Interlude period for mode 2 steps (in us). */
+  uint16_t t_pm; /**< Phase measurement time (in us). */
+  /**
+   * Pointer to buffer where IQ data will be written. Buffer must be 32-bit
+   * aligned.
+   */
+  uint32_t *pIqBuffer;
+  /**
+   * Size of IQ buffer in 32 bit words. Must be at least \ref
+   * RAIL_BLE_CS_1MBPS_MINIMUM_IQ_BUFFER_SIZE or else an error will be
+   * returned by \ref RAIL_BLE_ConfigCs.
+   */
+  uint16_t iqBufferSize;
+  /**
+   * Step Index to perform the event calibration. This index must correspond
+   * to a mode 0 step or else the event calibration won't occur.
+   */
+  uint8_t eventCalStepIndex;
+  RAIL_BLE_CsRttType_t rttType; /**< RTT type returned during mode 1 step. */
+  /**
+   * A pointer to the selected CS event gain index. This field will be
+   * populated after \ref eventCalStepIndex has been reached.
+   */
+  uint8_t *pEventGainIndex;
+  /**
+   * A pointer to the selected CS event Fractional Frequency Offset
+   * (FFO) * 100. This field will be populated after \ref eventCalStepIndex
+   * has been reached.
+   */
+  int16_t *pEventFfoPp100m;
+  bool disableRttGdComp; /**< Debug flag to disable RTT GD compensation. */
+  bool disablePbrDcComp; /**< Debug flag to disable PBR DC compensation. */
+  bool disablePbrGdComp; /**< Debug flag to disable PBR GD compensation. */
+  bool forceAgcGain;     /**< Debug flag to force event gain for calibration. */
+  /**
+   * Pointer to an FAE table of size \ref RAIL_BLE_CS_NUM_ALLOWED_CHANNELS
+   * that holds the FAE value for each allowed CS channel in units of
+   * parts-per-32-million (pp32m). In units of parts-per-million (ppm),
+   * the FAE ranges from [-4, +3.96875] ppm with a resolution of 0.03125 ppm.
+   * Set to NULL if unused.
+   */
+  int8_t(*pFaeTable)[RAIL_BLE_CS_NUM_ALLOWED_CHANNELS];
+  uint32_t forcedAgcStatus0; /**< Equivalent AGC status0 register to force. */
+} RAIL_BLE_CsConfig_t;
+
+/** The maximum number of CS steps allowed during a CS event */
+#define RAIL_BLE_CS_MAX_SQTE_STEPS 512U
+
+/**
+ * @enum RAIL_BLE_CsStepState_t
+ * @brief The current CS step state.
+ */
+RAIL_ENUM(RAIL_BLE_CsStepState_t) {
+  /** CS step state idle */
+  RAIL_BLE_CS_STATE_IDLE = 0,
+  /** CS step state initiator initiator transmit mode 0 */
+  RAIL_BLE_CS_STATE_I_TX_MODE0 = 1,
+  /** CS step state initiator reflector transmit mode 0 */
+  RAIL_BLE_CS_STATE_R_TX_MODE0 = 2,
+  /** CS step state initiator initiator transmit mode 1 */
+  RAIL_BLE_CS_STATE_I_TX_MODE1 = 3,
+  /** CS step state initiator reflector transmit mode 1 */
+  RAIL_BLE_CS_STATE_R_TX_MODE1 = 4,
+  /** CS step state initiator initiator transmit mode 2 */
+  RAIL_BLE_CS_STATE_R_TX_MODE2 = 6,
+  /** CS step state initiator reflector transmit mode 2 */
+  RAIL_BLE_CS_STATE_I_TX_MODE2 = 7,
+};
+
+/**
+ * First step state for CS mode 0.
+ */
+#define RAIL_BLE_CS_STEP_MODE0             RAIL_BLE_CS_STATE_I_TX_MODE0
+
+/**
+ * First step state for CS mode 1.
+ */
+#define RAIL_BLE_CS_STEP_MODE1             RAIL_BLE_CS_STATE_I_TX_MODE1
+
+/**
+ * First step state for CS mode 2.
+ */
+#define RAIL_BLE_CS_STEP_MODE2             RAIL_BLE_CS_STATE_I_TX_MODE2
+
+/**
+ * @enum RAIL_BLE_CsStepMode_t
+ * @brief The CS step mode.
+ */
+RAIL_ENUM(RAIL_BLE_CsStepMode_t) {
+  RAIL_BLE_CS_MODE_0,   /**< CS step mode 0. */
+  RAIL_BLE_CS_MODE_1,   /**< CS step mode 1. */
+  RAIL_BLE_CS_MODE_2,   /**< CS step mode 2. */
+  RAIL_BLE_CS_MODE_3,   /**< CS step mode 3. */
+};
+
+/**
+ * @enum RAIL_BLE_CsAntennaId_t
+ * @brief The CS antenna ID.
+ */
+RAIL_ENUM(RAIL_BLE_CsAntennaId_t) {
+  RAIL_BLE_CS_ANTENNA_1 = 0, /**< CS antenna ID 1. */
+  RAIL_BLE_CS_ANTENNA_2, /**< CS antenna ID 2. */
+  RAIL_BLE_CS_ANTENNA_3, /**< CS antenna ID 3. */
+  RAIL_BLE_CS_ANTENNA_4, /**< CS antenna ID 4. */
+};
+
+/**
+ * @enum RAIL_BLE_CsRttPacketQuality_t
+ * @brief CS RTT packet quality.
+ */
+RAIL_ENUM(RAIL_BLE_CsRttPacketQuality_t) {
+  /** Access address check succeeded. */
+  RAIL_BLE_CS_RTT_AA_SUCCESS = 0U,
+  /** Access address had one or more bit errors. */
+  RAIL_BLE_CS_RTT_AA_BIT_ERRORS = 1U,
+  /** Access address not found. */
+  RAIL_BLE_CS_RTT_AA_NOT_FOUND = 2U,
+};
+
+/**
+ * @struct RAIL_BLE_CsMode0Results_t
+ * @brief Contains CS mode 0 step measurement results.
+ */
+typedef struct RAIL_BLE_CsMode0Results {
+  /** Mode of CS step. */
+  uint8_t mode;
+  /** Antenna ID. */
+  RAIL_BLE_CsAntennaId_t antenna;
+  /** RSSI during step in integer dBm. */
+  int8_t rssi;
+  /** Packet quality */
+  uint8_t packetQuality;
+  /** Reserved */
+  uint16_t reserved;
+  /** Fractional Frequency Offset (FFO) * 100 */
+  int16_t csFfoPp100m;
+  /** The gain setting. */
+  uint32_t stepGainSetting;
+  /** Reserved */
+  uint32_t reserved1;
+} RAIL_BLE_CsMode0Results_t;
+
+/**
+ *  A sentinel value to indicate an invalid rtt time value in
+ *  \ref RAIL_BLE_CsMode1Results_t::rttHalfNs
+ */
+#define RAIL_BLE_CS_INVALID_RTT_VALUE ((int16_t)0x8000)
+
+/**
+ * @struct RAIL_BLE_CsMode1Results_t
+ * @brief Contains CS mode 1 step measurement results.
+ */
+typedef struct RAIL_BLE_CsMode1Results {
+  /** Mode of CS step. */
+  uint8_t mode;
+  /** Antenna ID. */
+  RAIL_BLE_CsAntennaId_t antenna;
+  /** RSSI during step in integer dBm. */
+  int8_t rssi;
+  /** Packet quality */
+  uint8_t packetQuality;
+  /**
+   * For the initiator, this is the time (in 0.5 ns units) between time of
+   * departure and time of arrival excluding known offsets such as interlude
+   * period and packet length.
+   * For the reflector, this is the time (in 0.5 ns units) between time of
+   * arrival and time of departure excluding known offsets such as interlude
+   * period and packet length.
+   */
+  int16_t rttHalfNs;
+  /** Flag used to indicate whether we have missed FCAL during calibration */
+  uint8_t missedFcal;
+  /** Reserved */
+  uint8_t reserved1;
+  /** Reserved */
+  uint32_t reserved2[2];
+} RAIL_BLE_CsMode1Results_t;
+
+/**
+ * @enum RAIL_BLE_CsToneQuality_t
+ * @brief CS tone quality.
+ */
+RAIL_ENUM(RAIL_BLE_CsToneQuality_t) {
+  /** Good quality CS mode 2 tone. */
+  RAIL_BLE_CS_TONE_QUALITY_GOOD = 0U,
+  /** Medium quality CS mode 2 tone. */
+  RAIL_BLE_CS_TONE_QUALITY_MEDIUM = 1U,
+  /** Low quality CS mode 2 tone. */
+  RAIL_BLE_CS_TONE_QUALITY_LOW = 2U,
+  /** CS mode 2 tone quality indication unavailable. */
+  RAIL_BLE_CS_TONE_QUALITY_UNAVAILABLE = 3U,
+};
+
+/**
+ * @struct RAIL_BLE_CsMode2Results_t
+ * @brief Contains CS mode 2 step measurement results.
+ */
+typedef struct RAIL_BLE_CsMode2Results {
+  /** Mode of CS step. */
+  uint8_t mode;
+  /** Antenna ID. */
+  RAIL_BLE_CsAntennaId_t antenna;
+  /** Flag used to indicate whether we have missed FCAL during calibration */
+  uint8_t missedFcal;
+  /** Reserved */
+  uint8_t reserved1;
+  /** PCT i value */
+  int16_t pctI;
+  /** PCT q value */
+  int16_t pctQ;
+  /** Tone extension PCT i value */
+  int16_t pctToneExtI;
+  /** Tone extension PCT q value */
+  int16_t pctToneExtQ;
+  /** Tone quality indicator */
+  RAIL_BLE_CsToneQuality_t tqi;
+  /** Tone quality indicator for tone extension */
+  RAIL_BLE_CsToneQuality_t tqiToneExt;
+  /** Reserved */
+  uint16_t reserved2;
+} RAIL_BLE_CsMode2Results_t;
+
+/**
+ * @struct RAIL_BLE_CsStepResults_t
+ * @brief Generic CS step mode result structure. Based on the value of the
+ *   mode field, this structure can be type cast to the appropriate mode
+ *   specific structure \ref RAIL_BLE_CsMode0Results_t,
+ *   \ref RAIL_BLE_CsMode1Results_t, or RAIL_BLE_CsMode2Results_t.
+ */
+typedef struct RAIL_BLE_CsStepResults {
+  /** Mode of CS step. */
+  uint8_t mode;
+  /** Reserved */
+  uint8_t reserved0;
+  /** Reserved */
+  uint16_t reserved1;
+  /** Reserved */
+  uint32_t reserved2[3];
+} RAIL_BLE_CsStepResults_t;
+
+/**
+ * @struct RAIL_BLE_CsMode0DebugResults_t
+ * @brief Contains CS mode 0 step measurement debug results.
+ */
+typedef struct RAIL_BLE_CsMode0DebugResults {
+  /**
+   * AGC gain value of the Mode 0 step with the highest recorded
+   * RSSI up to and including the current Mode 0 step.
+   */
+  uint32_t agcStatus0;
+  /**
+   * For devices configured as an initiator, the measured frequency offset
+   * in Hz between the two devices during a CS mode 0 step. For devices
+   * configured as a reflector, this value will always be 0.
+   */
+  int32_t freqOffHz;
+  /**
+   * Estimated coarse frequency offset in internal units.
+   */
+  int32_t hwFreqOffEst;
+  /** Starting index IQ sample index of unmodulated carrier. */
+  uint16_t ucStartIndex;
+  /** End index IQ sample index of unmodulated carrier. */
+  uint16_t ucEndIndex;
+  /** Reserved */
+  uint32_t reserved[2];
+  /**
+   * FFO of the Mode 0 step with the highest recorded RSSI
+   * up to and including the current Mode 0 step.
+   */
+  int16_t csFfoPp100m;
+  /** Highest recorded RSSI up to and including the current mode 0 step, in dBm. */
+  int8_t highestRssiDbm;
+  /** Reserved */
+  uint8_t reserved0;
+} RAIL_BLE_CsMode0DebugResults_t;
+
+/**
+ * @struct RAIL_BLE_CsMode1DebugResults_t
+ * @brief Contains CS mode 1 step measurement debug results.
+ */
+typedef struct RAIL_BLE_CsMode1DebugResults {
+  uint16_t toxClks;
+  int16_t fracRttHalfNs;
+  uint32_t coarseRttHalfNs;
+  int32_t gdCompRttHalfNs;
+  int32_t toxWithOffsetsRttHalfNs;
+  uint32_t csstatus3;
+  uint32_t csstatus4;
+  uint32_t csstatus5;
+} RAIL_BLE_CsMode1DebugResults_t;
+
+/**
+ * @struct RAIL_BLE_CsMode2DebugResults_t
+ * @brief Contains CS mode 2 step measurement debug results.
+ */
+typedef struct RAIL_BLE_CsMode2DebugResults {
+  /** Hardware PCT I value */
+  int16_t hardwarePctI;
+  /** Hardware PCT Q value */
+  int16_t hardwarePctQ;
+  /** DCCOMP i value */
+  int16_t dcCompI;
+  /** DCCOMP q value */
+  int16_t dcCompQ;
+  /** GDCOMP i value */
+  int16_t gdCompI;
+  /** GDCOMP q value */
+  int16_t gdCompQ;
+  /** Raw tone quality value */
+  uint16_t tqiRaw;
+  /** Raw tone quality tone extension value */
+  uint16_t tqiToneExtRaw;
+  /** FCAL value from SYNTH_VCOTUNING */
+  uint16_t fcal;
+  /** Starting index for reading IQ samples */
+  uint16_t ucStartIndex;
+  /** End index for reading IQ samples */
+  uint16_t ucEndIndex;
+  /** Reserved */
+  uint16_t reserved[3];
+} RAIL_BLE_CsMode2DebugResults_t;
+
+/**
+ * @struct RAIL_BLE_CsStepDebugResults_t
+ * @brief Generic CS step mode debug result structure. Based on the value of
+ *   the mode field, this structure can be type cast to the appropriate mode
+ *   specific structure \ref RAIL_BLE_CsMode0DebugResults_t,
+ *   \ref RAIL_BLE_CsMode1DebugResults_t, or RAIL_BLE_CsMode2DebugResults_t.
+ */
+typedef struct RAIL_BLE_CsStepDebugResults {
+  uint32_t reserved;
+  uint32_t reserved1;
+  uint32_t reserved2;
+  uint32_t reserved3;
+  uint32_t reserved4;
+  uint32_t reserved5;
+  uint32_t reserved6;
+} RAIL_BLE_CsStepDebugResults_t;
+
+/**
+ * @struct RAIL_BLE_CsStepConfig_t
+ * @brief Contains arguments for \ref RAIL_BLE_SetNextCsStep.
+ */
+typedef struct RAIL_BLE_CsStepConfig {
+  /** Sets the CS step state. */
+  RAIL_BLE_CsStepState_t stepState;
+  /** Indicates whether this is final step in CS event. */
+  bool lastStep;
+  /**
+   * Transmit tone during tone extension slot in mode 2 packet.
+   * This field is ignored during RX and for all non mode 2 packets.
+   */
+  bool transmitToneExtension;
+  /**
+   * Length of packet payload in bytes. Should not include trailer, guard,
+   * or UC bits. Only used for mode 1 steps, ignored otherwise.
+   */
+  uint8_t packetLength;
+  /** Sets the CS step logical channel. */
+  uint16_t channel;
+  /** The initiator (first) access address during step. */
+  uint32_t initAccessAddress;
+  /** The reflector (second) access address during step. */
+  uint32_t reflAccessAddress;
+  /** Pointer to TX data to be transmitted. Ignored for mode 0 and 2 steps. */
+  uint8_t *pTxData;
+  /** RTT marker bit position. Ignored for mode 0 and 2 steps. */
+  uint8_t rttMarkerBitPosition[2];
+  /**
+   * A pointer to an array of CS step results. These results will be
+   * populated after the completion of the CS step. This array can be cast to
+   * \ref RAIL_BLE_CsMode0Results_t, \ref RAIL_BLE_CsMode1Results_t, or
+   * \ref RAIL_BLE_CsMode2Results_t as appropriate to read mode specific
+   * results.
+   */
+  RAIL_BLE_CsStepResults_t *pResults;
+  /**
+   * A pointer to an array of CS step debug results. These results will be
+   * populated after the completion of the CS step. This array can be cast to
+   * \ref RAIL_BLE_CsMode0DebugResults_t, \ref
+   * RAIL_BLE_CsMode1DebugResults_t, or \ref RAIL_BLE_CsMode2DebugResults_t
+   * as appropriate to read mode specific debug results.
+   *
+   * Setting this pointer to NULL means no debug data will be collected.
+   */
+  RAIL_BLE_CsStepDebugResults_t *pDebugResults;
+  /**
+   * A pointer to the start of captured IQ data for this step. This pointer
+   * will be populated after the completion of the CS step.
+   */
+  uint32_t **pIqBuffer;
+  /**
+   * A pointer to captured IQ data size in 32 bit words. This pointer will be
+   * populated after the completion of the CS step.
+   */
+  uint16_t *pIqBufferSize;
+  /**
+   * A pointer to a boolean to indicate whether to preserve IQ data for this
+   * step. If this is the final step of the event, IQ data will automatically
+   * be preserved regardless of how this boolean is set. For other steps, if
+   * this boolean is set true, and there are at least \ref
+   * RAIL_BLE_CS_1MBPS_MINIMUM_IQ_BUFFER_SIZE unused 32 bit words still
+   * available in the event IQ buffer, this step's IQ data will be preserved
+   * and not be overwritten by IQ data from a subsequent step. Otherwise, this
+   * step's IQ data will not be preserved and may be overwritten. This boolean
+   * will be updated after completion of the CS step to indicate whether the
+   * IQ data from that step was actually preserved.
+   */
+  bool *pSaveIqData;
+} RAIL_BLE_CsStepConfig_t;
+
+/**
+ * @struct RAIL_BLE_CsAntennaConfig_t
+ * @brief Contains arguments for \ref RAIL_BLE_ConfigCsAntenna function.
+ */
+typedef struct RAIL_BLE_CsAntennaConfig {
+  uint8_t antennaCount; /**< Total number of antenna elements. */
+  const int16_t *pAntennaOffsetCm; /**< Pointer to antenna offsets in cm units. */
+} RAIL_BLE_CsAntennaConfig_t;
+
+/** The maximum number of antennas supported. */
+#define RAIL_BLE_CS_MAX_ANTENNAS 4
+
+/**
+ * @struct RAIL_BLE_CsGdCompTables_t
+ * @brief Contains pointers to CS group delay compensation tables.
+ */
+typedef struct RAIL_BLE_CsGdCompTables {
+  /** Pointer to PBR phase LSB group delay compensation table. */
+  const int16_t *pPbrPhaseLsb;
+  /** Pointer to RTT slope group delay compensation table. */
+  const int16_t *pRttSlope;
+  /** Pointer to RTT offset group delay compensation table. */
+  const int16_t *pRttOffset;
+  /** Common length for each table in units of int16_t. */
+  uint8_t length;
+} RAIL_BLE_CsGdCompTables_t;
+
+/**
+ * Configure High Accuracy Distance Measurement (CS) functionality.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] csConfig Configuration options for CS.
+ * @return RAIL_Status_t indicating success or failure of the call.
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ */
+RAIL_Status_t RAIL_BLE_ConfigCs(RAIL_Handle_t railHandle,
+                                const RAIL_BLE_CsConfig_t *csConfig);
+
+/**
+ * Enable High Accuracy Distance Measurement (CS) functionality.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] enable Enable or disable CS functionality.
+ * @return RAIL_Status_t indicating success or failure of the call.
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ */
+RAIL_Status_t RAIL_BLE_EnableCs(RAIL_Handle_t railHandle,
+                                bool enable);
+
+/**
+ * Set up the next CS step.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in,out] csStepConfig Configuration options for next CS step.
+ * @param[in] pend If true, apply configuration at next appropriate radio
+ *   transition (i.e. at Rx2Tx for an initiator, or Tx2Rx for a reflector).
+ *   Otherwise, apply configuration immediately.
+ * @return RAIL_Status_t indicating success or failure of the call.
+ *
+ * @note When the next CS step is to be pended, the specified step in
+ *   csStepConfig must be the initial step state for a particular mode (e.g.
+ *   \ref RAIL_BLE_CS_STEP_MODE0, \ref RAIL_BLE_CS_STEP_MODE1, or \ref
+ *   RAIL_BLE_CS_STEP_MODE2). Otherwise this API will return \ref
+ *   RAIL_STATUS_INVALID_PARAMETER.
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ */
+RAIL_Status_t RAIL_BLE_SetNextCsStep(RAIL_Handle_t railHandle,
+                                     const RAIL_BLE_CsStepConfig_t *csStepConfig,
+                                     bool pend);
+
+/**
+ * Configure antennas for CS event.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] pAntennaConfig A pointer to the antenna config
+ * @return RAIL_Status_t indicating success or failure of the call.
+ */
+RAIL_Status_t RAIL_BLE_ConfigCsAntenna(RAIL_Handle_t railHandle,
+                                       RAIL_BLE_CsAntennaConfig_t *pAntennaConfig);
+
+/**
+ * Loads the CS RTT and PBR group delay compensation tables for a
+ * particular PA mode.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] pTables Pointer to group delay compensation lookup tables.
+ * @param[in] powerMode The PA mode for which to load compensation tables.
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_BLE_LoadCsCompTables(RAIL_Handle_t railHandle,
+                                        const RAIL_BLE_CsGdCompTables_t *pTables,
+                                        RAIL_TxPowerMode_t powerMode);
+
+/**
+ * Callback used to load CS group delay compensation tables for all PA modes
+ * supported by device during \ref RAIL_BLE_EnableCs when enable is true.
+ * This function is optional to implement.
+ *
+ * @return Status code indicating success of the function call.
+ *
+ * @note If this callback function is not implemented, unneeded tables may not
+ *   be dead stripped, resulting in larger overall code size. The API \ref
+ *   RAIL_BLE_LoadCsCompTables should be used within this callback to load the
+ *   appropriate tables for each supported PA mode.
+ */
+RAIL_Status_t RAILCb_BLE_CsGdCompTableLoad(void);
+
+/** @} */  // end of group CS
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
 /// @addtogroup BLETX2TX BLE TX Channel Hopping
 /// @{
 /// @code{.c}
-///
 /// // Configuration to send one additional packet
 /// static RAIL_BLE_TxChannelHoppingConfigEntry_t entry[1];
 /// static uint32_t buffer[BUFFER_SIZE];
@@ -996,10 +1642,9 @@ typedef struct RAIL_BLE_TxRepeatConfig {
  * kind is ongoing, including during the time between an initial transmit and
  * the end of a previously-configured repetition.
  *
- * @note This feature/API is not supported on the EFR32XG1 family of chips.
- *        Use the compile time symbol \ref RAIL_SUPPORTS_TX_TO_TX or the runtime
- *        call \ref RAIL_SupportsTxToTx() to check whether the platform supports
- *        this feature.
+ * @note Use the compile time symbol \ref RAIL_SUPPORTS_TX_TO_TX or the runtime
+ *   call \ref RAIL_SupportsTxToTx() to check whether the platform supports
+ *   this feature.
  */
 RAIL_Status_t RAIL_BLE_SetNextTxRepeat(RAIL_Handle_t railHandle,
                                        const RAIL_BLE_TxRepeatConfig_t *repeatConfig);
@@ -1007,6 +1652,26 @@ RAIL_Status_t RAIL_BLE_SetNextTxRepeat(RAIL_Handle_t railHandle,
 /** @} */  // end of group BLETX2TX
 
 /** @} */ // end of BLE
+
+/// @addtogroup Calibration
+/// @brief Bluetooth protocol-specific APIs for calibrating the radio.
+/// @{
+
+/**
+ * Calibrate image rejection for Bluetooth Low Energy.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] imageRejection The result of the image rejection calibration.
+ * @return A status code indicating success of the function call.
+ *
+ * Some chips have protocol-specific image rejection calibrations programmed
+ * into their flash. This function will either get the value from flash and
+ * apply it, or run the image rejection algorithm to find the value.
+ */
+RAIL_Status_t RAIL_BLE_CalibrateIr(RAIL_Handle_t railHandle,
+                                   uint32_t *imageRejection);
+
+/// @} // End of group Calibration
 
 #ifdef __cplusplus
 }

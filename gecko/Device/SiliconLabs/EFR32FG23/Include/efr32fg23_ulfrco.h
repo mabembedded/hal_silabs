@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** ULFRCO Register Declaration. */
-typedef struct {
+typedef struct ulfrco_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version                                         */
   uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  STATUS;                        /**< Status Register                                    */

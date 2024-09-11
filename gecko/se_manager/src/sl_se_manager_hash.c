@@ -33,7 +33,7 @@
 #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #include "sli_se_manager_internal.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_assert.h"
 #include <string.h>
 
@@ -253,7 +253,7 @@ static sl_status_t se_cmd_hash_multipart_update(void *hash_type_ctx,
                                                 const uint8_t *input,
                                                 uint32_t num_blocks)
 {
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint8_t *state;
   uint32_t command_word = SLI_SE_COMMAND_HASHUPDATE;
   size_t state_len, blocksize;
@@ -300,15 +300,15 @@ static sl_status_t se_cmd_hash_multipart_update(void *hash_type_ctx,
   sli_se_command_init(cmd_ctx, command_word);
 
   size_t ilen = blocksize * num_blocks;
-  SE_addParameter(se_cmd, ilen);
+  sli_se_mailbox_command_add_parameter(se_cmd, ilen);
 
-  SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT(input, ilen);
-  SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(state, state_len);
-  SE_DataTransfer_t iv_out = SE_DATATRANSFER_DEFAULT(state, state_len);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, ilen);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(state, state_len);
+  sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(state, state_len);
 
-  SE_addDataInput(se_cmd, &iv_in);
-  SE_addDataInput(se_cmd, &data_in);
-  SE_addDataOutput(se_cmd, &iv_out);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_in);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
+  sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
   // Execute and wait
   return sli_se_execute_and_wait(cmd_ctx);
@@ -552,20 +552,20 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
   // Remaining bytes in buffer
   size_t rem_bytes = (counter[0] & (blocksize - 1));
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
   sli_se_command_init(cmd_ctx, command_word);
 
-  SE_addParameter(se_cmd, rem_bytes);
-  SE_addParameter(se_cmd, counter[0]);
+  sli_se_mailbox_command_add_parameter(se_cmd, rem_bytes);
+  sli_se_mailbox_command_add_parameter(se_cmd, counter[0]);
 
-  SE_DataTransfer_t in_0 = SE_DATATRANSFER_DEFAULT(state, state_len);
-  SE_DataTransfer_t in_1 = SE_DATATRANSFER_DEFAULT(buffer, rem_bytes);
-  SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(digest_out, outputsize);
+  sli_se_datatransfer_t in_0 = SLI_SE_DATATRANSFER_DEFAULT(state, state_len);
+  sli_se_datatransfer_t in_1 = SLI_SE_DATATRANSFER_DEFAULT(buffer, rem_bytes);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(digest_out, outputsize);
 
-  SE_addDataInput(se_cmd, &in_0);
-  SE_addDataInput(se_cmd, &in_1);
-  SE_addDataOutput(se_cmd, &out);
+  sli_se_mailbox_command_add_input(se_cmd, &in_0);
+  sli_se_mailbox_command_add_input(se_cmd, &in_1);
+  sli_se_mailbox_command_add_output(se_cmd, &out);
 
   // Execute and wait
   status = sli_se_execute_and_wait(cmd_ctx);
@@ -619,7 +619,7 @@ sl_status_t sl_se_hash(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint32_t command_word = SLI_SE_COMMAND_HASH;
   uint32_t digest_size = 0;
 
@@ -656,13 +656,13 @@ sl_status_t sl_se_hash(sl_se_command_context_t *cmd_ctx,
 
   sli_se_command_init(cmd_ctx, command_word);
 
-  SE_addParameter(se_cmd, message_size);
+  sli_se_mailbox_command_add_parameter(se_cmd, message_size);
 
-  SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT(message, message_size);
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(digest, digest_size);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(message, message_size);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(digest, digest_size);
 
-  SE_addDataInput(se_cmd, &data_in);
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
   // Execute and wait
   return sli_se_execute_and_wait(cmd_ctx);

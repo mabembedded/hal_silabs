@@ -31,11 +31,13 @@
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
-#include "peripheral_sysrtc.h"
+#include "sl_hal_sysrtc.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
-#include "em_core.h"
-#include "em_cmu.h"
+#include "sl_code_classification.h"
+#include "sl_core.h"
+#include "sl_clock_manager.h"
+#include "sl_device_peripheral.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
@@ -45,7 +47,7 @@
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #include "em_prs.h"
 #else
-#include "sl_peripheral_prs.h"
+#include "sl_hal_prs.h"
 #endif
 #endif
 
@@ -62,6 +64,7 @@ static bool cc_disabled = true;
 
 static bool cc1_disabled = true;
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
                                        uint32_t b);
 
@@ -73,7 +76,7 @@ void sleeptimer_hal_init_timer(void)
   sl_hal_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
   sl_hal_sysrtc_group_config_t group_config = SYSRTC_GROUP_CONFIG_DEFAULT;
 
-  CMU_ClockEnable(cmuClock_SYSRTC, true);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYSRTC0);
 
 #if (SL_SLEEPTIMER_DEBUGRUN == 1)
   sysrtc_config.enable_debug_run = true;
@@ -101,7 +104,7 @@ void sleeptimer_hal_init_timer(void)
 void sli_sleeptimer_hal_power_manager_integration_init(void)
 {
   // Initialize PRS to start HFXO for early wakeup
-  CMU_ClockEnable(cmuClock_PRS, true);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_PRS);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   PRS_ConnectSignal(1UL, prsTypeAsync, prsSignalSYSRTC0_GRP0OUT1);
@@ -123,7 +126,7 @@ void sli_sleeptimer_hal_power_manager_integration_init(void)
 void sli_sleeptimer_hal_hfxo_manager_integration_init(void)
 {
   // Set PRS signal from HFXO to SYSRTC capture channel
-  CMU_ClockEnable(cmuClock_PRS, true);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_PRS);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   PRS_ConnectSignal(2UL, prsTypeAsync, prsSignalHFXO0L_STATUS1);
@@ -309,6 +312,8 @@ bool sli_sleeptimer_hal_is_int_status_set(uint8_t local_flag)
 /*******************************************************************************
  * SYSRTC interrupt handler.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER,
+                 SL_CODE_CLASS_TIME_CRITICAL)
 void SYSRTC_APP_IRQHandler(void)
 {
   CORE_DECLARE_IRQ_STATE;
@@ -337,7 +342,12 @@ void SYSRTC_APP_IRQHandler(void)
  ******************************************************************************/
 uint32_t sleeptimer_hal_get_timer_frequency(void)
 {
-  return (CMU_ClockFreqGet(cmuClock_SYSRTC));
+  uint32_t frequency;
+  sl_clock_branch_t clock_branch;
+
+  clock_branch = sl_device_peripheral_get_clock_branch(SL_PERIPHERAL_SYSRTC0);
+  sl_clock_manager_get_clock_branch_frequency(clock_branch, &frequency);
+  return frequency;
 }
 
 /*******************************************************************************
@@ -364,7 +374,9 @@ __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
  ******************************************************************************/
 uint16_t sleeptimer_hal_get_clock_accuracy(void)
 {
-  return CMU_LF_ClockPrecisionGet(cmuClock_SYSRTC);
+  uint16_t precision;
+  sl_clock_manager_get_clock_branch_precision(SL_CLOCK_BRANCH_SYSRTCCLK, &precision);
+  return precision;
 }
 
 /*******************************************************************************

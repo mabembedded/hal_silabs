@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** EUSART Register Declaration. */
-typedef struct {
+typedef struct eusart_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t EN;                            /**< Enable Register                                    */
   __IOM uint32_t CFG0;                          /**< Configuration 0 Register                           */

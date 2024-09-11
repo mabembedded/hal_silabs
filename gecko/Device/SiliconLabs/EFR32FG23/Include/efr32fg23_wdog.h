@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** WDOG Register Declaration. */
-typedef struct {
+typedef struct wdog_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version Register                                */
   __IOM uint32_t EN;                            /**< Enable Register                                    */
   __IOM uint32_t CFG;                           /**< Configuration Register                             */

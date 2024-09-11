@@ -180,7 +180,7 @@ void SystemInit(void)
   __DSB();
   __ISB();
 //#else
-// #error "The startup code requires access to the CMSE toolchain extension to set proper SAU settings."
+//  #error "The startup code requires access to the CMSE toolchain extension to set proper SAU settings."
 #endif // __ARM_FEATURE_CMSE
 
 // Clear and Enable the SMU PPUSEC and BMPUSEC interrupt.
@@ -233,7 +233,9 @@ void FlashToRamCopy(uint32_t *from,
  *****************************************************************************/
 uint32_t SystemHFRCODPLLClockGet(void)
 {
-#if !defined(SYSTEM_NO_STATIC_MEMORY)
+#if defined(BOOTLOADER_SYSTEM_NO_STATIC_MEMORY)
+  return HFRCODPLL_STARTUP_FREQ;
+#elif !defined(SYSTEM_NO_STATIC_MEMORY)
   return SystemHFRCODPLLClock;
 #else
   uint32_t ret = 0UL;

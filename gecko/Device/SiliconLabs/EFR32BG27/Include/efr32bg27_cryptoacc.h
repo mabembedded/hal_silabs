@@ -3,7 +3,7 @@
  * @brief EFR32BG27 CRYPTOACC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 /** CRYPTOACC Register Declaration. */
-typedef struct {
+typedef struct cryptoacc_typedef{
   __IOM uint32_t DMACTRL_FETCHADDR;                  /**< CRYPTOMASTER_DMACTRL_FETCH_ADDR_LSB                */
   __IOM uint32_t DMACTRL_FETCHADDRMSB;               /**< CRYPTOMASTER_DMACTRL_FETCH_ADDR_MSB                */
   __IOM uint32_t DMACTRL_FETCHLEN;                   /**< CRYPTOMASTER_DMACTRL_FETCH_LEN                     */
@@ -980,4 +980,4 @@ typedef struct {
 /** @} End of group EFR32BG27_CRYPTOACC */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_CRYPTOACC_H */
+#endif // EFR32BG27_CRYPTOACC_H

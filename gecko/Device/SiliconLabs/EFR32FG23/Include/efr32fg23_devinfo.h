@@ -41,22 +41,22 @@
  *****************************************************************************/
 
 /** DEVINFO HFRCODPLLCAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcodpllcal_typedef{
   __IM uint32_t HFRCODPLLCAL;                        /**< HFRCODPLL Calibration                              */
 } DEVINFO_HFRCODPLLCAL_TypeDef;
 
 /** DEVINFO HFRCOEM23CAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcoem23cal_typedef{
   __IM uint32_t HFRCOEM23CAL;                        /**< HFRCOEM23 Calibration                              */
 } DEVINFO_HFRCOEM23CAL_TypeDef;
 
 /** DEVINFO HFRCOSECAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcosecal_typedef{
   uint32_t RESERVED0[1U];                            /**< Reserved for future use                            */
 } DEVINFO_HFRCOSECAL_TypeDef;
 
 /** DEVINFO Register Declaration. */
-typedef struct {
+typedef struct devinfo_typedef{
   __IM uint32_t                INFO;                  /**< DI Information                                     */
   __IM uint32_t                PART;                  /**< Part Info                                          */
   __IM uint32_t                MEMINFO;               /**< Memory Info                                        */

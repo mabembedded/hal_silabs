@@ -3,7 +3,7 @@
  * @brief EFR32BG27 PRS register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,17 +42,17 @@
  *****************************************************************************/
 
 /** PRS ASYNC_CH Register Group Declaration. */
-typedef struct {
+typedef struct prs_async_ch_typedef{
   __IOM uint32_t CTRL;                               /**< Async Channel Control Register                     */
 } PRS_ASYNC_CH_TypeDef;
 
 /** PRS SYNC_CH Register Group Declaration. */
-typedef struct {
+typedef struct prs_sync_ch_typedef{
   __IOM uint32_t CTRL;                               /**< Sync Channel Control Register                      */
 } PRS_SYNC_CH_TypeDef;
 
 /** PRS Register Declaration. */
-typedef struct {
+typedef struct prs_typedef{
   __IM uint32_t        IPVERSION;                        /**< IP version ID                                      */
   uint32_t             RESERVED0[1U];                    /**< Reserved for future use                            */
   __IOM uint32_t       ASYNC_SWPULSE;                    /**< Software Pulse Register                            */
@@ -1362,4 +1362,4 @@ typedef struct {
 /** @} End of group EFR32BG27_PRS */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_PRS_H */
+#endif // EFR32BG27_PRS_H

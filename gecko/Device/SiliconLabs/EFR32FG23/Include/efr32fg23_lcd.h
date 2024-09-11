@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LCD Register Declaration. */
-typedef struct {
+typedef struct lcd_typedef{
   __IM uint32_t  IPVERSION;                     /**< IPVERSION                                          */
   __IOM uint32_t EN;                            /**< Enable                                             */
   __IOM uint32_t SWRST;                         /**< Software Reset                                     */

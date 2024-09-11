@@ -30,11 +30,10 @@
 #ifndef SL_SE_MANAGER_ATTESTATION_H
 #define SL_SE_MANAGER_ATTESTATION_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if (defined(SEMAILBOX_PRESENT)                                                \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
-  || defined(DOXYGEN)
+#if (defined(SLI_MAILBOX_COMMAND_SUPPORTED) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -53,7 +52,7 @@
 
 #include "sl_se_manager_key_handling.h"
 #include "sl_se_manager_types.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_status.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -205,6 +204,6 @@ sl_status_t sl_se_attestation_get_config_token_size(sl_se_command_context_t *cmd
 /// @} (end addtogroup sl_se_manager_attestation)
 /// @} (end addtogroup sl_se_manager)
 
-#endif // SEMAILBOX_PRESENT && VAULT
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED && VAULT
 
 #endif // SL_SE_MANAGER_ATTESTATION_H

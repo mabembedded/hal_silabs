@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** ACMP Register Declaration. */
-typedef struct {
+typedef struct acmp_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t EN;                            /**< ACMP enable                                        */
   __IOM uint32_t SWRST;                         /**< Software reset                                     */

@@ -3,7 +3,7 @@
  * @brief EFR32BG22 HFRCO register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** HFRCO Register Declaration. */
-typedef struct {
+typedef struct hfrco_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version ID                                      */
   __IOM uint32_t CTRL;                          /**< Ctrl Register                                      */
   __IOM uint32_t CAL;                           /**< Calibration Register                               */
@@ -218,4 +218,4 @@ typedef struct {
 /** @} End of group EFR32BG22_HFRCO */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_HFRCO_H */
+#endif // EFR32BG22_HFRCO_H

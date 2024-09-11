@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LESENSE CH Register Group Declaration. */
-typedef struct {
+typedef struct lesense_ch_typedef{
   __IOM uint32_t TIMING;                             /**< Scan configuration                                 */
   __IOM uint32_t INTERACT;                           /**< Scan configuration                                 */
   __IOM uint32_t EVALCFG;                            /**< Scan configuration                                 */
@@ -50,12 +50,12 @@ typedef struct {
 } LESENSE_CH_TypeDef;
 
 /** LESENSE ST Register Group Declaration. */
-typedef struct {
+typedef struct lesense_st_typedef{
   __IOM uint32_t ARC;                                /**< State transition Arc                               */
 } LESENSE_ST_TypeDef;
 
 /** LESENSE Register Declaration. */
-typedef struct {
+typedef struct lesense_typedef{
   __IM uint32_t      IPVERSION;                 /**< IPVERSION                                          */
   __IOM uint32_t     EN;                        /**< Enable                                             */
   __IOM uint32_t     SWRST;                     /**< Software Reset Register                            */

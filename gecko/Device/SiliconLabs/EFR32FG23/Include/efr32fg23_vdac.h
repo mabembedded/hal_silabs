@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** VDAC Register Declaration. */
-typedef struct {
+typedef struct vdac_typedef{
   __IM uint32_t  IPVERSION;                     /**< IPVERSION                                          */
   __IOM uint32_t EN;                            /**< Module Enable                                      */
   __IOM uint32_t SWRST;                         /**< Software Reset Register                            */

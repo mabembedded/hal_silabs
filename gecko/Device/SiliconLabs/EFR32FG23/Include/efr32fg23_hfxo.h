@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** HFXO Register Declaration. */
-typedef struct {
+typedef struct hfxo_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   uint32_t       RESERVED0[3U];                 /**< Reserved for future use                            */
   __IOM uint32_t XTALCFG;                       /**< Crystal Configuration Register                     */

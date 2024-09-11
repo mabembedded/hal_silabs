@@ -3,7 +3,7 @@
  * @brief EFR32MG21 ACMP register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** ACMP Register Declaration. */
-typedef struct {
+typedef struct acmp_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t EN;                            /**< ACMP enable                                        */
   __IOM uint32_t CFG;                           /**< Configuration register                             */
@@ -612,4 +612,4 @@ typedef struct {
 /** @} End of group EFR32MG21_ACMP */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_ACMP_H */
+#endif // EFR32MG21_ACMP_H

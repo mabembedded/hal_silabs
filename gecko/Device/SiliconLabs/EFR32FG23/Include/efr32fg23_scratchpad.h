@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SCRATCHPAD Register Declaration. */
-typedef struct {
+typedef struct scratchpad_typedef{
   __IOM uint32_t SREG0;                         /**< Scratchpad Register 0                              */
   __IOM uint32_t SREG1;                         /**< Scratchpad Register 1                              */
   uint32_t       RESERVED0[1022U];              /**< Reserved for future use                            */

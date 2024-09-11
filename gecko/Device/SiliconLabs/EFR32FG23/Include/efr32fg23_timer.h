@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** TIMER CC Register Group Declaration. */
-typedef struct {
+typedef struct timer_cc_typedef{
   __IOM uint32_t CFG;                                /**< CC Channel Configuration Register                  */
   __IOM uint32_t CTRL;                               /**< CC Channel Control Register                        */
   __IOM uint32_t OC;                                 /**< OC Channel Value Register                          */
@@ -54,7 +54,7 @@ typedef struct {
 } TIMER_CC_TypeDef;
 
 /** TIMER Register Declaration. */
-typedef struct {
+typedef struct timer_typedef{
   __IM uint32_t    IPVERSION;                   /**< IP version ID                                      */
   __IOM uint32_t   CFG;                         /**< Configuration Register                             */
   __IOM uint32_t   CTRL;                        /**< Control Register                                   */

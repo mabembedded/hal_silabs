@@ -3,7 +3,7 @@
  * @brief EFR32MG21 LDMA register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LDMA CH Register Group Declaration. */
-typedef struct {
+typedef struct ldma_ch_typedef{
   uint32_t       RESERVED0[1U];                      /**< Reserved for future use                            */
   __IOM uint32_t CFG;                                /**< Channel Configuration Register                     */
   __IOM uint32_t LOOP;                               /**< Channel Loop Counter Register                      */
@@ -54,8 +54,8 @@ typedef struct {
 } LDMA_CH_TypeDef;
 
 /** LDMA Register Declaration. */
-typedef struct {
-  __IM uint32_t   IPVERSION;                    /**< DMA Channel Request Clear Register                 */
+typedef struct ldma_typedef{
+  __IM uint32_t   IPVERSION;                    /**< IP version                                         */
   __IOM uint32_t  EN;                           /**< DMA module enable disable Register                 */
   __IOM uint32_t  CTRL;                         /**< DMA Control Register                               */
   __IM uint32_t   STATUS;                       /**< DMA Status Register                                */
@@ -79,7 +79,7 @@ typedef struct {
   __IOM uint32_t  IEN;                          /**< Interrupt Enable Register                          */
   LDMA_CH_TypeDef CH[8U];                       /**< DMA Channel Registers                              */
   uint32_t        RESERVED0[906U];              /**< Reserved for future use                            */
-  __IM uint32_t   IPVERSION_SET;                /**< DMA Channel Request Clear Register                 */
+  __IM uint32_t   IPVERSION_SET;                /**< IP version                                         */
   __IOM uint32_t  EN_SET;                       /**< DMA module enable disable Register                 */
   __IOM uint32_t  CTRL_SET;                     /**< DMA Control Register                               */
   __IM uint32_t   STATUS_SET;                   /**< DMA Status Register                                */
@@ -103,7 +103,7 @@ typedef struct {
   __IOM uint32_t  IEN_SET;                      /**< Interrupt Enable Register                          */
   LDMA_CH_TypeDef CH_SET[8U];                   /**< DMA Channel Registers                              */
   uint32_t        RESERVED1[906U];              /**< Reserved for future use                            */
-  __IM uint32_t   IPVERSION_CLR;                /**< DMA Channel Request Clear Register                 */
+  __IM uint32_t   IPVERSION_CLR;                /**< IP version                                         */
   __IOM uint32_t  EN_CLR;                       /**< DMA module enable disable Register                 */
   __IOM uint32_t  CTRL_CLR;                     /**< DMA Control Register                               */
   __IM uint32_t   STATUS_CLR;                   /**< DMA Status Register                                */
@@ -127,7 +127,7 @@ typedef struct {
   __IOM uint32_t  IEN_CLR;                      /**< Interrupt Enable Register                          */
   LDMA_CH_TypeDef CH_CLR[8U];                   /**< DMA Channel Registers                              */
   uint32_t        RESERVED2[906U];              /**< Reserved for future use                            */
-  __IM uint32_t   IPVERSION_TGL;                /**< DMA Channel Request Clear Register                 */
+  __IM uint32_t   IPVERSION_TGL;                /**< IP version                                         */
   __IOM uint32_t  EN_TGL;                       /**< DMA module enable disable Register                 */
   __IOM uint32_t  CTRL_TGL;                     /**< DMA Control Register                               */
   __IM uint32_t   STATUS_TGL;                   /**< DMA Status Register                                */
@@ -191,7 +191,7 @@ typedef struct {
 #define LDMA_CTRL_CORERST_DEFAULT               (_LDMA_CTRL_CORERST_DEFAULT << 31)      /**< Shifted mode DEFAULT for LDMA_CTRL          */
 
 /* Bit fields for LDMA STATUS */
-#define _LDMA_STATUS_RESETVALUE                 0x1F100000UL                            /**< Default value for LDMA_STATUS               */
+#define _LDMA_STATUS_RESETVALUE                 0x08100000UL                            /**< Default value for LDMA_STATUS               */
 #define _LDMA_STATUS_MASK                       0x1F1F1FFBUL                            /**< Mask for LDMA_STATUS                        */
 #define LDMA_STATUS_ANYBUSY                     (0x1UL << 0)                            /**< Any DMA Channel Busy                        */
 #define _LDMA_STATUS_ANYBUSY_SHIFT              0                                       /**< Shift value for LDMA_ANYBUSY                */
@@ -217,7 +217,7 @@ typedef struct {
 #define LDMA_STATUS_FIFOLEVEL_DEFAULT           (_LDMA_STATUS_FIFOLEVEL_DEFAULT << 16)  /**< Shifted mode DEFAULT for LDMA_STATUS        */
 #define _LDMA_STATUS_CHNUM_SHIFT                24                                      /**< Shift value for LDMA_CHNUM                  */
 #define _LDMA_STATUS_CHNUM_MASK                 0x1F000000UL                            /**< Bit mask for LDMA_CHNUM                     */
-#define _LDMA_STATUS_CHNUM_DEFAULT              0x0000001FUL                            /**< Mode DEFAULT for LDMA_STATUS                */
+#define _LDMA_STATUS_CHNUM_DEFAULT              0x00000008UL                            /**< Mode DEFAULT for LDMA_STATUS                */
 #define LDMA_STATUS_CHNUM_DEFAULT               (_LDMA_STATUS_CHNUM_DEFAULT << 24)      /**< Shifted mode DEFAULT for LDMA_STATUS        */
 
 /* Bit fields for LDMA SYNCSWSET */
@@ -682,4 +682,4 @@ typedef struct {
 /** @} End of group EFR32MG21_LDMA */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_LDMA_H */
+#endif // EFR32MG21_LDMA_H

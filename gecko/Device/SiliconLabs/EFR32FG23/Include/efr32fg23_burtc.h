@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** BURTC Register Declaration. */
-typedef struct {
+typedef struct burtc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t EN;                            /**< Module Enable Register                             */
   __IOM uint32_t CFG;                           /**< Configuration Register                             */

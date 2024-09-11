@@ -36,9 +36,6 @@
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_msc.h"
-#if defined(_SILICON_LABS_32B_SERIES_2)
-#include "em_se.h"
-#endif
 
 /***************************************************************************//**
  * @addtogroup dbg DBG - Debug
@@ -161,17 +158,6 @@ void DBG_SWOEnable(unsigned int location)
  ******************************************************************************/
 void DBG_DisableDebugAccess(DBG_LockMode_TypeDef lockMode)
 {
-#if defined(SEMAILBOX_PRESENT)
-  if (lockMode == dbgLockModeAllowErase) {
-    SE_debugLockApply();
-  } else if (lockMode == dbgLockModePermanent) {
-    SE_deviceEraseDisable();
-    SE_debugLockApply();
-  } else {
-    /* Invalid input */
-    EFM_ASSERT(0);
-  }
-#else
 #if defined(_SILICON_LABS_32B_SERIES_0)
   if (lockMode != dbgLockModeAllowErase) {
     EFM_ASSERT(0);
@@ -205,7 +191,6 @@ void DBG_DisableDebugAccess(DBG_LockMode_TypeDef lockMode)
   if (wasLocked) {
     MSC_Deinit();
   }
-#endif
 }
 
 #endif /* defined(LOCKBITS_BASE) && !defined(_EFM32_GECKO_FAMILY) */

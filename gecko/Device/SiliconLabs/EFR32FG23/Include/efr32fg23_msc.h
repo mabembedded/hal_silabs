@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** MSC Register Declaration. */
-typedef struct {
+typedef struct msc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t READCTRL;                      /**< Read Control Register                              */
   __IOM uint32_t RDATACTRL;                     /**< Read Data Control Register                         */

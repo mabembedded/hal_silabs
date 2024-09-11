@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LFXO Register Declaration. */
-typedef struct {
+typedef struct lfxo_typedef{
   __IM uint32_t  IPVERSION;                     /**< LFXO IP version                                    */
   __IOM uint32_t CTRL;                          /**< LFXO Control Register                              */
   __IOM uint32_t CFG;                           /**< LFXO Configuration Register                        */

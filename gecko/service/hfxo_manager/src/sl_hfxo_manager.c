@@ -55,9 +55,9 @@
  ******************************************************************************/
 
 // Time in ticks required for HFXO start-up after wake-up from sleep.
-static uint32_t hfxo_startup_time_tick = 0;
+static volatile uint32_t hfxo_startup_time_tick = 0;
 
-static uint32_t hfxo_last_startup_time = 0;
+static volatile uint32_t hfxo_last_startup_time = 0;
 
 static uint32_t hfxo_startup_time_table[HFXO_STARTUP_TIME_TABLE_SIZE];
 
@@ -65,9 +65,9 @@ static uint8_t hfxo_startup_time_table_index = 0;
 
 static uint32_t hfxo_startup_time_sum_average = 0;
 
-static uint32_t hfxo_startup_time_tc_initial = 0;
+static volatile uint32_t hfxo_startup_time_tc_initial = 0;
 
-static bool hfxo_measurement_on = false;
+static volatile bool hfxo_measurement_on = false;
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************

@@ -3,7 +3,7 @@
  * @brief EFR32BG27 SEPUF register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 /** SEPUF_APBCFG Register Declaration. */
-typedef struct {
+typedef struct sepuf_apbcfg_typedef{
   __IOM uint32_t QK_CR;                              /**< QK_CR                                              */
   uint32_t       RESERVED0[7U];                      /**< Reserved for future use                            */
   __IM uint32_t  QK_SR;                              /**< QK_SR                                              */
@@ -175,4 +175,4 @@ typedef struct {
 /** @} End of group EFR32BG27_SEPUF_APBCFG */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_SEPUF_H */
+#endif // EFR32BG27_SEPUF_H

@@ -30,15 +30,15 @@
 #ifndef SL_SE_MANAGER_TYPES_H
 #define SL_SE_MANAGER_TYPES_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager
 /// @{
 
 #include "sl_se_manager_defines.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -57,16 +57,16 @@ extern "C" {
 typedef enum {
   SL_SE_KEY_TYPE_IMMUTABLE_BOOT = 0,
   SL_SE_KEY_TYPE_IMMUTABLE_AUTH,
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
   SL_SE_KEY_TYPE_IMMUTABLE_AES_128,
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   SL_SE_KEY_TYPE_IMMUTABLE_ATTESTATION,
   SL_SE_KEY_TYPE_IMMUTABLE_SE_ATTESTATION,
 #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED
 } sl_se_device_key_type_t;
 
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// SE tamper signal levels
 typedef uint8_t sl_se_tamper_level_t;
 
@@ -106,7 +106,7 @@ typedef struct {
   /// secure-booted image, including the last page if end of signature is not
   /// page-aligned.
   bool secure_boot_page_lock_full;
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   /// List of tamper levels to configure for the different tamper sources.
   sl_se_tamper_level_t tamper_levels[SL_SE_TAMPER_SIGNAL_NUM_SIGNALS];
   /// Reset period for the tamper filter counter.
@@ -138,14 +138,14 @@ typedef struct {
  *   sl_se_set_yield().
  ******************************************************************************/
 typedef struct sl_se_command_context_t {
-  SE_Command_t  command;             ///< SE mailbox command struct
-#if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION) || defined(DOXYGEN)
+  sli_se_mailbox_command_t  command;             ///< SE mailbox command struct
+#if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
   bool          yield;               ///< If true, yield the CPU core while
                                      ///< waiting for the SE mailbox command
                                      ///< to complete. If false, busy-wait, by
                                      ///< polling the SE mailbox response
                                      ///< register.
-#endif // SEMAILBOX_PRESENT
+#endif // SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION
 } sl_se_command_context_t;
 
 /// @} (end addtogroup sl_se_manager_core)
@@ -156,7 +156,7 @@ typedef struct sl_se_command_context_t {
 /// SE Debug lock flags
 typedef uint32_t sl_se_debug_flags_t;
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 /// Debug lock options
 typedef struct {
   /// Non-Secure, Invasive debug access enabled if true. If false, it is not
@@ -193,7 +193,7 @@ typedef struct {
   /// True if locked with @ref sl_se_apply_debug_lock().
   /// False if new clean, erased or unlocked with @ref sl_se_open_debug().
   bool debug_port_lock_state;
-  #if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+  #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
   /// Debug option configuration as set by @ref sl_se_set_debug_options().
   sl_se_debug_options_t options_config;
   /// Current state of debug options, locked by @ref sl_se_set_debug_options() and
@@ -204,7 +204,7 @@ typedef struct {
 
 /// @} (end addtogroup sl_se_manager_util)
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager_key_handling
 /// @{
@@ -262,7 +262,7 @@ typedef struct {
   const void* domain;
 } sl_se_key_descriptor_t;
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Custom Weierstrass curve structure.
 typedef struct {
   /// Domain size in bytes.
@@ -312,10 +312,16 @@ typedef struct {
   sl_se_debug_status_t debug_status;
   /// Secure boot enabled.
   bool secure_boot_enabled;
+  /// Active mode enabled.
+  bool active_mode_enabled;
   /// Recorded tamper status. Reset on status read.
   uint32_t tamper_status;
   /// Currently active tamper sources.
   uint32_t tamper_status_raw;
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  uint8_t rom_revision;
+  uint8_t otp_patch_sequence;
+#endif
 } sl_se_status_t;
 
 /// @} (end addtogroup sl_se_manager_util)
@@ -337,13 +343,6 @@ typedef struct {
   size_t                       length;          ///< Length of all processed and unprocessed data
 } sl_se_cmac_multipart_context_t;
 
-/// CMAC streaming context. Deprecated.
-typedef struct {
-  sl_se_command_context_t      *cmd_ctx;        ///< Pointer to command context object
-  const sl_se_key_descriptor_t *key;            ///< Pointer to key object
-  sl_se_cmac_multipart_context_t cmac_ctx;    ///< CMAC streaming context
-} sl_se_cmac_streaming_context_t;
-
 /// CCM streaming context.
 typedef struct {
   uint32_t processed_message_length;///< Current length of the encrypted/decrypted data
@@ -351,7 +350,7 @@ typedef struct {
   uint8_t  iv[13];                  ///< Nonce (MAX size is 13 bytes)
   uint32_t tag_len;                 ///< Tag length
   sl_se_cipher_operation_t     mode;///< CCM mode (decrypt or encrypt)
-  #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
+  #if defined(SLI_SE_MAJOR_VERSION_ONE)
   uint8_t nonce_counter[16];        ///< Counter to keep CTR state
   uint8_t iv_len;                   ///< Nonce length
   uint8_t cbc_mac_state[16];        ///< State of authenication/MAC
@@ -366,23 +365,10 @@ typedef struct {
   uint8_t final_data_length;        ///< Length of data saved
 } sl_se_ccm_multipart_context_t;
 
-/// GCM streaming context. Deprecated.
-typedef struct {
-  sl_se_command_context_t *cmd_ctx; ///< Pointer to command context object
-  const sl_se_key_descriptor_t *key;///< Pointer to key object
-  uint64_t len;                     ///< Total length of the encrypted data
-  uint64_t add_len;                 ///< Total length of the additional data
-  uint8_t  se_ctx_enc[32];          ///< SE encryption state
-  uint8_t  se_ctx_dec[32];          ///< SE decryption state
-  uint8_t  tagbuf[16];              ///< Tag
-  int      mode;                    ///< GCM mode
-  bool     last_op;                 ///< Last operation / update
-} sl_se_gcm_streaming_context_t;
-
 typedef struct {
   uint64_t len;                     ///< Total length of the encrypted data
   uint64_t add_len;                 ///< Total length of the additional data
-  #if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  #if defined(SLI_SE_MAJOR_VERSION_ONE)
   uint8_t  tagbuf[16];              ///< Tag
   uint8_t previous_se_ctx[32];      ///< SE state from previous operation
   #endif
@@ -404,21 +390,13 @@ typedef enum {
   SL_SE_HASH_SHA1,      ///< SHA-1
   SL_SE_HASH_SHA224,    ///< SHA-224
   SL_SE_HASH_SHA256,    ///< SHA-256
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   SL_SE_HASH_SHA384,    ///< SHA-384
   SL_SE_HASH_SHA512,    ///< SHA-512
 #endif
 } sl_se_hash_type_t;
 
-/// Generic hash streaming context. Deprecated.
-typedef struct {
-  sl_se_command_context_t *cmd_ctx;   ///< Pointer to command context object
-  sl_se_hash_type_t        hash_type; ///< Hash type
-  size_t                   size;      ///< Hash output size
-  void                    *hash_type_ctx; ///< Pointer to hash specific context
-} sl_se_hash_streaming_context_t;
-
-/// SHA-1 streaming context. Safe to use.
+/// SHA-1 streaming context.
 typedef struct {
   sl_se_hash_type_t      hash_type; ///< Hash streaming context
   uint32_t total[2];                ///< number of bytes processed
@@ -426,14 +404,7 @@ typedef struct {
   uint8_t  buffer[64];              ///< data block being processed
 } sl_se_sha1_multipart_context_t;
 
-/// SHA-1 streaming context. Deprecated.
-typedef struct {
-  uint32_t total[2];                ///< number of bytes processed
-  uint8_t  state[32];               ///< intermediate digest state
-  uint8_t  buffer[64];              ///< data block being processed
-} sl_se_sha1_streaming_context_t;
-
-/// SHA-224 streaming context. Safe to use.
+/// SHA-224 streaming context.
 typedef struct {
   sl_se_hash_type_t      hash_type; ///< Hash streaming context
   uint32_t total[2];                ///< Number of bytes processed
@@ -441,14 +412,7 @@ typedef struct {
   uint8_t  buffer[64];              ///< Data block being processed
 } sl_se_sha224_multipart_context_t;
 
-/// SHA-224 streaming context. Deprecated.
-typedef struct {
-  uint32_t total[2];                ///< Number of bytes processed
-  uint8_t  state[32];               ///< Intermediate digest state
-  uint8_t  buffer[64];              ///< Data block being processed
-} sl_se_sha224_streaming_context_t;
-
-/// SHA-256 streaming context. Safe to use.
+/// SHA-256 streaming context.
 typedef struct {
   sl_se_hash_type_t      hash_type; ///< Hash streaming context
   uint32_t total[2];                ///< Number of bytes processed
@@ -456,15 +420,8 @@ typedef struct {
   uint8_t  buffer[64];              ///< Data block being processed
 } sl_se_sha256_multipart_context_t;
 
-/// SHA-256 streaming context. Deprecated.
-typedef struct {
-  uint32_t total[2];                ///< Number of bytes processed
-  uint8_t  state[32];               ///< Intermediate digest state
-  uint8_t  buffer[64];              ///< Data block being processed
-} sl_se_sha256_streaming_context_t;
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
-/// SHA-384 streaming context. Safe to use.
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+/// SHA-384 streaming context.
 typedef struct {
   sl_se_hash_type_t      hash_type; ///< Hash streaming context
   uint32_t total[4];                ///< Number of bytes processed
@@ -472,14 +429,7 @@ typedef struct {
   uint8_t  buffer[128];             ///< Data block being processed
 } sl_se_sha384_multipart_context_t;
 
-/// SHA-384 streaming context. Deprecated.
-typedef struct {
-  uint32_t total[4];                ///< Number of bytes processed
-  uint8_t  state[64];               ///< Intermediate digest state
-  uint8_t  buffer[128];             ///< Data block being processed
-} sl_se_sha384_streaming_context_t;
-
-/// SHA-512 streaming context. Safe to use.
+/// SHA-512 streaming context.
 typedef struct {
   sl_se_hash_type_t      hash_type; ///< Hash streaming context
   uint32_t total[4];                ///< Number of bytes processed
@@ -487,12 +437,6 @@ typedef struct {
   uint8_t  buffer[128];             ///< Data block being processed
 } sl_se_sha512_multipart_context_t;
 
-/// SHA-512 streaming context. Deprecated.
-typedef struct {
-  uint32_t total[4];                ///< Number of bytes processed
-  uint8_t  state[64];               ///< Intermediate digest state
-  uint8_t  buffer[128];             ///< Data block being processed
-} sl_se_sha512_streaming_context_t;
 #endif
 
 /// @} (end addtogroup sl_se_manager_hash)
@@ -533,7 +477,7 @@ typedef struct {
   uint8_t Xp[64];                     ///< Their point (round 2)
 } sl_se_ecjpake_context_t;
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Typedef sl_se_pbkdf2_prf_type_t to sl_se_hash_type_t in order to maintain
 /// backward compatibility. Defines for mapping the PRF identifiers to the
 /// underlying hash enum values exists in sl_se_manager_defines.h.
@@ -542,7 +486,73 @@ typedef sl_se_hash_type_t sl_se_pbkdf2_prf_type_t;
 
 /// @} (end addtogroup sl_se_manager_key_derivation)
 
-#endif // defined(SEMAILBOX_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+
+/// @addtogroup sl_se_manager_extmem
+/// @{
+
+/// SE Crypto algorithms (ciphers, AEADs, MACs, hashes, etc) used for
+/// the code region write function.
+typedef enum {
+  SL_SE_ALG_AES_CTR,               ///< Counter mode AES cipher
+  SL_SE_ALG_SHA_256,               ///< SHA2-256
+} sl_se_crypto_alg_t;
+
+typedef struct {
+  sl_se_cipher_operation_t mode;   ///< encryption or decryption
+  sl_se_key_descriptor_t *key;     ///< Key to be used for encryption or decryption
+  unsigned char *iv;               ///< Initial Vector/Nonce
+  size_t iv_len;                   ///< Initial Vector/Nonce length
+  unsigned char *add;              ///< Additional data
+  size_t add_len;                  ///< Additional data length
+  unsigned char *tag;              ///< Tag
+  size_t tag_len;                  ///< Tag length
+} sl_se_aead_info_t;
+
+typedef struct {
+  sl_se_cipher_operation_t mode;   ///< encryption or decryption
+  sl_se_key_descriptor_t *key;     ///< Key to be used for encryption or decryption
+} sl_se_cipher_info_t;
+
+typedef struct {
+  unsigned char *digest;           ///< Pointer to message digest buffer
+  size_t digest_size;              ///< Size of message digest
+} sl_se_hash_info_t;
+
+typedef union {
+  sl_se_aead_info_t   aead;
+  sl_se_cipher_info_t cipher;
+  sl_se_hash_info_t   hash;
+} sl_se_crypto_alg_specific_info_t;
+
+/// Information associated with cryupto related operations
+typedef struct {
+  sl_se_crypto_alg_t *alg;         ///< SE Crypto algorithm
+  sl_se_crypto_alg_specific_info_t alg_specific_info;
+} sl_se_crypto_operation_t;
+
+/// Security level of code region
+typedef enum {
+  SL_SE_CODE_REGION_SECURITY_LEVEL_PLAINTEXT = 0,
+  SL_SE_CODE_REGION_SECURITY_LEVEL_ENCRYPTED_ONLY,
+  SL_SE_CODE_REGION_SECURITY_LEVEL_ENCRYPTED_AUTHENTICATED,
+} sl_se_code_region_security_level_t;
+
+/// Code region configuration
+typedef struct {
+  unsigned int region_idx;         ///< Index of code region
+  unsigned int region_size;        ///< Size of code region
+  sl_se_code_region_security_level_t security_level;   ///< Security level of region
+  bool auto_secure_boot_enabled;   ///< SE driven secure boot enabled (if true)
+  bool bank_swapping_enabled;      ///< Bank swapping enabled (if true)
+  bool active_banked_region;       ///< Active banked region (if true)
+} sl_code_region_config_t;
+
+/// @} (end addtogroup sl_se_manager_extmem)
+
+#endif // defined(_SILICON_LABS_32B_SERIES_3)
+
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #ifdef __cplusplus
 }
@@ -550,6 +560,6 @@ typedef sl_se_hash_type_t sl_se_pbkdf2_prf_type_t;
 
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_TYPES_H

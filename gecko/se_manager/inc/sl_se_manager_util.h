@@ -54,7 +54,7 @@
 #include "sl_se_manager_key_handling.h"
 #endif
 #include "sl_se_manager_types.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_status.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -810,6 +810,41 @@ sl_status_t sl_se_enter_active_mode(sl_se_command_context_t *cmd_ctx);
  * @retval SL_STATUS_COMMAND_IS_INVALID when already not in active mode
  ******************************************************************************/
 sl_status_t sl_se_exit_active_mode(sl_se_command_context_t *cmd_ctx);
+
+#if defined(_SILICON_LABS_32B_SERIES_3)
+
+/***************************************************************************//**
+ * @brief
+ *   Read the OTP rollback counter.
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ * @param[out] rollback_counter
+ *   Pointer to location where the rollback counter value will be returned.
+ *
+ * @return
+ *   SL_STATUS_OK when the functions was successfully, or else, a status code
+ *   of type sl_status_t that indicates why the function was not successful,
+ *   ref sl_status.h.
+ ******************************************************************************/
+sl_status_t sl_se_get_rollback_counter(sl_se_command_context_t *cmd_ctx,
+                                       uint32_t *rollback_counter);
+
+/***************************************************************************//**
+ * @brief
+ *   Increment the OTP rollback counter.
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ *
+ * @return
+ *   SL_STATUS_OK when the functions was successfully, or else, a status code
+ *   of type sl_status_t that indicates why the function was not successful,
+ *   ref sl_status.h.
+ ******************************************************************************/
+sl_status_t sl_se_increment_rollback_counter(sl_se_command_context_t *cmd_ctx);
+
+#endif // defined(_SILICON_LABS_32B_SERIES_3)
 
 #endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 

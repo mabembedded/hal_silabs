@@ -3,7 +3,7 @@
  * @brief EFR32MG24 EUSART register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,6 +30,7 @@
 #ifndef EFR32MG24_EUSART_H
 #define EFR32MG24_EUSART_H
 #define EUSART_HAS_SET_CLEAR
+
 /**************************************************************************//**
 * @addtogroup Parts
 * @{
@@ -41,7 +42,7 @@
  *****************************************************************************/
 
 /** EUSART Register Declaration. */
-typedef struct {
+typedef struct eusart_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t EN;                            /**< Enable Register                                    */
   __IOM uint32_t CFG0;                          /**< Configuration 0 Register                           */
@@ -1315,4 +1316,4 @@ typedef struct {
 /** @} End of group EFR32MG24_EUSART */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_EUSART_H */
+#endif // EFR32MG24_EUSART_H

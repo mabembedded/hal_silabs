@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** GPCRC Register Declaration. */
-typedef struct {
+typedef struct gpcrc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version ID                                      */
   __IOM uint32_t EN;                            /**< CRC Enable                                         */
   __IOM uint32_t CTRL;                          /**< Control Register                                   */

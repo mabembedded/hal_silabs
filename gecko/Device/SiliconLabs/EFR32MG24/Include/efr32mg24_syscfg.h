@@ -3,7 +3,7 @@
  * @brief EFR32MG24 SYSCFG register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SYSCFG Register Declaration. */
-typedef struct {
+typedef struct syscfg_typedef{
   uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t IF;                            /**< Interrupt Flag                                     */
@@ -693,7 +693,7 @@ typedef struct {
  *****************************************************************************/
 
 /** SYSCFG_CFGNS Register Declaration. */
-typedef struct {
+typedef struct syscfg_cfgns_typedef{
   uint32_t       RESERVED0[7U];                 /**< Reserved for future use                            */
   __IOM uint32_t CFGNSTCALIB;                   /**< Configure Non-Secure Sys-Tick cal.                 */
   uint32_t       RESERVED1[376U];               /**< Reserved for future use                            */
@@ -773,4 +773,4 @@ typedef struct {
 /** @} End of group EFR32MG24_SYSCFG_CFGNS */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_SYSCFG_H */
+#endif // EFR32MG24_SYSCFG_H

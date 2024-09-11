@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** I2C Register Declaration. */
-typedef struct {
+typedef struct i2c_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP VERSION Register                                */
   __IOM uint32_t EN;                            /**< Enable Register                                    */
   __IOM uint32_t CTRL;                          /**< Control Register                                   */

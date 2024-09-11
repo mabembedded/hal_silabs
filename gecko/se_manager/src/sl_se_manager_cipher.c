@@ -32,7 +32,7 @@
 #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #include "sli_se_manager_internal.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_assert.h"
 #include <string.h>
 
@@ -69,7 +69,7 @@ sl_status_t sl_se_aes_crypt_ecb(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
 
   sli_se_command_init(cmd_ctx,
@@ -81,18 +81,18 @@ sl_status_t sl_se_aes_crypt_ecb(sl_se_command_context_t *cmd_ctx,
   // Add key parameters to command
   sli_add_key_parameters(cmd_ctx, key, status);
   // Message size (number of bytes)
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   // Add key metadata block to command
   sli_add_key_metadata(cmd_ctx, key, status);
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_DataTransfer_t in = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_addDataInput(se_cmd, &in);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_mailbox_command_add_input(se_cmd, &in);
 
-  SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(output, length);
-  SE_addDataOutput(se_cmd, &out);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_mailbox_command_add_output(se_cmd, &out);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -113,7 +113,7 @@ sl_status_t sl_se_aes_crypt_cbc(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
 
   // Input length must be a multiple of 16 bytes which is the AES block length
@@ -130,22 +130,22 @@ sl_status_t sl_se_aes_crypt_cbc(sl_se_command_context_t *cmd_ctx,
   // Add key parameters to command
   sli_add_key_parameters(cmd_ctx, key, status);
   // Message size (number of bytes)
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   // Add key metadata block to command
   sli_add_key_metadata(cmd_ctx, key, status);
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, 16);
-  SE_DataTransfer_t in = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_addDataInput(se_cmd, &iv_in);
-  SE_addDataInput(se_cmd, &in);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_in);
+  sli_se_mailbox_command_add_input(se_cmd, &in);
 
-  SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(output, length);
-  SE_DataTransfer_t iv_out = SE_DATATRANSFER_DEFAULT(iv, 16);
-  SE_addDataOutput(se_cmd, &out);
-  SE_addDataOutput(se_cmd, &iv_out);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
+  sli_se_mailbox_command_add_output(se_cmd, &out);
+  sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -167,7 +167,7 @@ sl_status_t sl_se_aes_crypt_cfb128(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint32_t n = iv_off ? *iv_off : 0;
   uint32_t processed = 0;
   sl_status_t command_status = SL_STATUS_OK;
@@ -198,22 +198,22 @@ sl_status_t sl_se_aes_crypt_cfb128(sl_se_command_context_t *cmd_ctx,
         // Add key parameters to command
         sli_add_key_parameters(cmd_ctx, key, command_status);
         // Message size (number of bytes)
-        SE_addParameter(se_cmd, iterations * 16);
+        sli_se_mailbox_command_add_parameter(se_cmd, iterations * 16);
 
         // Add key metadata block to command
         sli_add_key_metadata(cmd_ctx, key, command_status);
         // Add key input block to command
         sli_add_key_input(cmd_ctx, key, command_status);
 
-        SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, 16);
-        SE_DataTransfer_t in = SE_DATATRANSFER_DEFAULT(&input[processed], iterations * 16);
-        SE_addDataInput(se_cmd, &iv_in);
-        SE_addDataInput(se_cmd, &in);
+        sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
+        sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(&input[processed], iterations * 16);
+        sli_se_mailbox_command_add_input(se_cmd, &iv_in);
+        sli_se_mailbox_command_add_input(se_cmd, &in);
 
-        SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(&output[processed], iterations * 16);
-        SE_DataTransfer_t iv_out = SE_DATATRANSFER_DEFAULT(iv, 16);
-        SE_addDataOutput(se_cmd, &out);
-        SE_addDataOutput(se_cmd, &iv_out);
+        sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(&output[processed], iterations * 16);
+        sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
+        sli_se_mailbox_command_add_output(se_cmd, &out);
+        sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
         command_status = sli_se_execute_and_wait(cmd_ctx);
         processed += iterations * 16;
@@ -358,7 +358,7 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint32_t n = nc_off ? *nc_off : 0;
   uint32_t processed = 0;
   sl_status_t command_status = SL_STATUS_OK;
@@ -382,22 +382,22 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
         // Add key parameters to command
         sli_add_key_parameters(cmd_ctx, key, command_status);
         // Message size (number of bytes)
-        SE_addParameter(se_cmd, iterations * SL_SE_AES_BLOCK_SIZE);
+        sli_se_mailbox_command_add_parameter(se_cmd, iterations * SL_SE_AES_BLOCK_SIZE);
 
         // Add key metadata block to command
         sli_add_key_metadata(cmd_ctx, key, command_status);
         // Add key input block to command
         sli_add_key_input(cmd_ctx, key, command_status);
 
-        SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
-        SE_DataTransfer_t in = SE_DATATRANSFER_DEFAULT(&input[processed], iterations * SL_SE_AES_BLOCK_SIZE);
-        SE_addDataInput(se_cmd, &iv_in);
-        SE_addDataInput(se_cmd, &in);
+        sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
+        sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(&input[processed], iterations * SL_SE_AES_BLOCK_SIZE);
+        sli_se_mailbox_command_add_input(se_cmd, &iv_in);
+        sli_se_mailbox_command_add_input(se_cmd, &in);
 
-        SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(&output[processed], iterations * SL_SE_AES_BLOCK_SIZE);
-        SE_DataTransfer_t iv_out = SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
-        SE_addDataOutput(se_cmd, &out);
-        SE_addDataOutput(se_cmd, &iv_out);
+        sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(&output[processed], iterations * SL_SE_AES_BLOCK_SIZE);
+        sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
+        sli_se_mailbox_command_add_output(se_cmd, &out);
+        sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
         command_status = sli_se_execute_and_wait(cmd_ctx);
         processed += iterations * SL_SE_AES_BLOCK_SIZE;
@@ -469,7 +469,7 @@ sl_status_t sl_se_ccm_encrypt_and_tag(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   unsigned char q;
   sl_status_t command_status = SL_STATUS_OK;
 
@@ -491,7 +491,7 @@ sl_status_t sl_se_ccm_encrypt_and_tag(sl_se_command_context_t *cmd_ctx,
   }
 
 #if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
-  if ((uint32_t)output + length > RAM_MEM_END) {
+  if ((uint32_t)output + length > (SRAM_BASE + SRAM_SIZE)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 #endif // SLI_SE_MANAGER_HOST_SYSTEM
@@ -501,26 +501,26 @@ sl_status_t sl_se_ccm_encrypt_and_tag(sl_se_command_context_t *cmd_ctx,
   // Add key parameters to command
   sli_add_key_parameters(cmd_ctx, key, command_status);
   // Message size (number of bytes)
-  SE_addParameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
-  SE_addParameter(se_cmd, add_len);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
+  sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   // Add key metadata block to command
   sli_add_key_metadata(cmd_ctx, key, command_status);
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, command_status);
 
-  SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_DataTransfer_t in_add = SE_DATATRANSFER_DEFAULT(add, add_len);
-  SE_DataTransfer_t in_nonce = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-  SE_addDataInput(se_cmd, &in_nonce);
-  SE_addDataInput(se_cmd, &in_add);
-  SE_addDataInput(se_cmd, &in_data);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t in_add = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t in_nonce = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_mailbox_command_add_input(se_cmd, &in_nonce);
+  sli_se_mailbox_command_add_input(se_cmd, &in_add);
+  sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(output, length);
-  SE_DataTransfer_t out_tag = SE_DATATRANSFER_DEFAULT(tag, tag_len);
-  SE_addDataOutput(se_cmd, &out_data);
-  SE_addDataOutput(se_cmd, &out_tag);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
+  sli_se_mailbox_command_add_output(se_cmd, &out_tag);
 
   command_status = sli_se_execute_and_wait(cmd_ctx);
   return command_status;
@@ -548,7 +548,7 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   unsigned char q;
   sl_status_t command_status = SL_STATUS_OK;
 
@@ -570,7 +570,7 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   }
 
 #if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
-  if ((uint32_t)output + length > RAM_MEM_END) {
+  if ((uint32_t)output + length > (SRAM_BASE + SRAM_SIZE)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 #endif // SLI_SE_MANAGER_HOST_SYSTEM
@@ -580,26 +580,26 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   // Add key parameters to command
   sli_add_key_parameters(cmd_ctx, key, command_status);
   // Message size (number of bytes)
-  SE_addParameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
-  SE_addParameter(se_cmd, add_len);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
+  sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   // Add key metadata block to command
   sli_add_key_metadata(cmd_ctx, key, command_status);
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, command_status);
 
-  SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_DataTransfer_t in_add = SE_DATATRANSFER_DEFAULT(add, add_len);
-  SE_DataTransfer_t in_nonce = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-  SE_addDataInput(se_cmd, &in_nonce);
-  SE_addDataInput(se_cmd, &in_add);
-  SE_addDataInput(se_cmd, &in_data);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t in_add = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t in_nonce = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_mailbox_command_add_input(se_cmd, &in_nonce);
+  sli_se_mailbox_command_add_input(se_cmd, &in_add);
+  sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
-  SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(output, length);
-  SE_addDataOutput(se_cmd, &out_data);
-  SE_DataTransfer_t in_tag = SE_DATATRANSFER_DEFAULT(tag, tag_len);
-  SE_addDataInput(se_cmd, &in_tag);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
+  sli_se_datatransfer_t in_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+  sli_se_mailbox_command_add_input(se_cmd, &in_tag);
 
   command_status = sli_se_execute_and_wait(cmd_ctx);
   if (command_status == SL_STATUS_OK) {
@@ -799,7 +799,7 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  if ((uint32_t)output + length > RAM_MEM_END) {
+  if ((uint32_t)output + length > (SRAM_BASE + SRAM_SIZE)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1013,35 +1013,35 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
   ccm_ctx->tag_len = tag_len;
   memcpy(ccm_ctx->iv, iv, iv_len);
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
   if (total_message_length == 0) {
     // The first encryption precomputes the tag in the event there is no more data.
     // For decryption, the pre-computed is compared to the input tag in
     // sl_se_ccm_multipart_finish.
-    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-    SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-    SE_DataTransfer_t tag_out = SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.tagbuf,
-                                                        tag_len);
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+    sli_se_datatransfer_t tag_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.tagbuf,
+                                                                tag_len);
 
     sli_se_command_init(cmd_ctx,
                         SLI_SE_COMMAND_AES_CCM_ENCRYPT
                         | SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE);
 
     sli_add_key_parameters(cmd_ctx, key, status);
-    SE_addParameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
-    SE_addParameter(se_cmd, add_len);
-    SE_addParameter(se_cmd, 0);
+    sli_se_mailbox_command_add_parameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
+    sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+    sli_se_mailbox_command_add_parameter(se_cmd, 0);
 
     // Add key metadata block to command
     sli_add_key_metadata(cmd_ctx, key, status);
     // Add key input block to command
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_addDataInput(se_cmd, &iv_in);
-    SE_addDataInput(se_cmd, &add_in);
+    sli_se_mailbox_command_add_input(se_cmd, &iv_in);
+    sli_se_mailbox_command_add_input(se_cmd, &add_in);
 
-    SE_addDataOutput(se_cmd, &tag_out);
+    sli_se_mailbox_command_add_output(se_cmd, &tag_out);
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
@@ -1049,11 +1049,11 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
     }
     return status;
   }
-  SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-  SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
-  SE_DataTransfer_t message_length_in = SE_DATATRANSFER_DEFAULT(&total_message_length, sizeof(uint32_t));
+  sli_se_datatransfer_t message_length_in = SLI_SE_DATATRANSFER_DEFAULT(&total_message_length, sizeof(uint32_t));
 
   sli_se_command_init(cmd_ctx,
                       ((ccm_ctx->mode == SL_SE_DECRYPT)
@@ -1062,18 +1062,18 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
 
   sli_add_key_parameters(cmd_ctx, key, status);
 
-  SE_addParameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
-  SE_addParameter(se_cmd, add_len);
-  SE_addParameter(se_cmd, 0);
+  sli_se_mailbox_command_add_parameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
+  sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, 0);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_addDataInput(se_cmd, &message_length_in);
+  sli_se_mailbox_command_add_input(se_cmd, &message_length_in);
 
-  SE_addDataInput(se_cmd, &iv_in);
-  SE_addDataInput(se_cmd, &add_in);
-  SE_addDataOutput(se_cmd, &ctx_out);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_in);
+  sli_se_mailbox_command_add_input(se_cmd, &add_in);
+  sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
   status = sli_se_execute_and_wait(cmd_ctx);
   if (status != SL_STATUS_OK) {
@@ -1124,12 +1124,12 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
   }
 
 #if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
-  if ((uint32_t)output + length > RAM_MEM_END) {
+  if ((uint32_t)output + length > (SRAM_BASE + SRAM_SIZE)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 #endif // SLI_SE_MANAGER_HOST_SYSTEM
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   *output_length = 0;
 
   // Approach:
@@ -1163,14 +1163,14 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
       return SL_STATUS_OK;
     }
 
-    SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+    sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
-    SE_DataTransfer_t data_in =
-      SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.final_data, 16);
-    SE_DataTransfer_t data_out =
-      SE_DATATRANSFER_DEFAULT(output, 16);
+    sli_se_datatransfer_t data_in =
+      SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.final_data, 16);
+    sli_se_datatransfer_t data_out =
+      SLI_SE_DATATRANSFER_DEFAULT(output, 16);
 
-    SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+    sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
     sli_se_command_init(cmd_ctx,
                         ((ccm_ctx->mode == SL_SE_DECRYPT)
@@ -1179,16 +1179,16 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
 
     sli_add_key_parameters(cmd_ctx, key, status);
 
-    SE_addParameter(se_cmd, 16);
+    sli_se_mailbox_command_add_parameter(se_cmd, 16);
 
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_addDataInput(se_cmd, &iv_ctx_in);
-    SE_addDataInput(se_cmd, &data_in);
+    sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+    sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-    SE_addDataOutput(se_cmd, &data_out);
-    SE_addDataOutput(se_cmd, &ctx_out);
+    sli_se_mailbox_command_add_output(se_cmd, &data_out);
+    sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
@@ -1229,14 +1229,14 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
     }
   }
 
-  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
-  SE_DataTransfer_t data_in =
-    SE_DATATRANSFER_DEFAULT(input, length);
-  SE_DataTransfer_t data_out =
-    SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_in =
+    SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t data_out =
+    SLI_SE_DATATRANSFER_DEFAULT(output, length);
 
-  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
   sli_se_command_init(cmd_ctx,
                       ((ccm_ctx->mode == SL_SE_DECRYPT)
@@ -1245,16 +1245,16 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
 
   sli_add_key_parameters(cmd_ctx, key, status);
 
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_addDataInput(se_cmd, &iv_ctx_in);
-  SE_addDataInput(se_cmd, &data_in);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  SE_addDataOutput(se_cmd, &data_out);
-  SE_addDataOutput(se_cmd, &ctx_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
   status = sli_se_execute_and_wait(cmd_ctx);
   if (status != SL_STATUS_OK) {
@@ -1307,16 +1307,16 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
     return SL_STATUS_OK;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
-  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
-  SE_DataTransfer_t data_in =
-    SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.final_data, ccm_ctx->final_data_length);
+  sli_se_datatransfer_t data_in =
+    SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.final_data, ccm_ctx->final_data_length);
 
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, ccm_ctx->final_data_length);
-  SE_DataTransfer_t tag_buf = SE_DATATRANSFER_DEFAULT(tag,
-                                                      ccm_ctx->tag_len);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, ccm_ctx->final_data_length);
+  sli_se_datatransfer_t tag_buf = SLI_SE_DATATRANSFER_DEFAULT(tag,
+                                                              ccm_ctx->tag_len);
 
   sli_se_command_init(cmd_ctx,
                       ((ccm_ctx->mode == SL_SE_DECRYPT)
@@ -1325,21 +1325,21 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
 
   sli_add_key_parameters(cmd_ctx, key, status);
 
-  SE_addParameter(se_cmd, (ccm_ctx->tag_len & 0xFFFF));
+  sli_se_mailbox_command_add_parameter(se_cmd, (ccm_ctx->tag_len & 0xFFFF));
 
-  SE_addParameter(se_cmd, ccm_ctx->final_data_length);
+  sli_se_mailbox_command_add_parameter(se_cmd, ccm_ctx->final_data_length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_addDataInput(se_cmd, &iv_ctx_in);
-  SE_addDataInput(se_cmd, &data_in);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
   if (ccm_ctx->mode == SL_SE_DECRYPT) {
-    SE_addDataInput(se_cmd, &tag_buf);
+    sli_se_mailbox_command_add_input(se_cmd, &tag_buf);
   } else {
-    SE_addDataOutput(se_cmd, &tag_buf);
+    sli_se_mailbox_command_add_output(se_cmd, &tag_buf);
   }
   status = sli_se_execute_and_wait(cmd_ctx);
 
@@ -1369,7 +1369,7 @@ sl_status_t sl_se_cmac(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status = SL_STATUS_OK;
 
   switch (key->type) {
@@ -1388,19 +1388,19 @@ sl_status_t sl_se_cmac(sl_se_command_context_t *cmd_ctx,
   sli_add_key_parameters(cmd_ctx, key, status);
 
   // Message size parameter.
-  SE_addParameter(se_cmd, input_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, input_len);
 
   // Key metadata.
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
   // Data input.
-  SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT(input, input_len);
-  SE_addDataInput(se_cmd, &in_data);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, input_len);
+  sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
   // Data output.
-  SE_DataTransfer_t out_tag = SE_DATATRANSFER_DEFAULT(output, 16);
-  SE_addDataOutput(se_cmd, &out_tag);
+  sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
+  sli_se_mailbox_command_add_output(se_cmd, &out_tag);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1433,7 +1433,7 @@ sl_status_t sl_se_cmac_multipart_finish(sl_se_cmac_multipart_context_t *cmac_ctx
   if (status == SL_STATUS_OK) {
     // Feed previous block and unprocessed data (if any) to CMAC,
     // or on data < 16 just use accumulated data in context.
-    SE_Command_t *se_cmd = &cmd_ctx->command;
+    sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
     sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_AES_CMAC);
 
     // Add key parameter to command.
@@ -1441,33 +1441,33 @@ sl_status_t sl_se_cmac_multipart_finish(sl_se_cmac_multipart_context_t *cmac_ctx
 
     // Message size parameter.
     if (cmac_ctx->length >= 16U) {
-      SE_addParameter(se_cmd, 16U + (cmac_ctx->length & 0xFU));
+      sli_se_mailbox_command_add_parameter(se_cmd, 16U + (cmac_ctx->length & 0xFU));
     } else {
-      SE_addParameter(se_cmd, cmac_ctx->length);
+      sli_se_mailbox_command_add_parameter(se_cmd, cmac_ctx->length);
     }
 
     // Key metadata.
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_DataTransfer_t in_data1 = SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
-    SE_DataTransfer_t in_data2 = SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
-                                                         cmac_ctx->length & 0xFU);
-    SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
-                                                        cmac_ctx->length);
+    sli_se_datatransfer_t in_data1 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
+    sli_se_datatransfer_t in_data2 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
+                                                                 cmac_ctx->length & 0xFU);
+    sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
+                                                                cmac_ctx->length);
     // Data input.
     if (cmac_ctx->length >= 16U) {
       // Collect data from two sources.
-      in_data1.length &= ~SE_DATATRANSFER_REALIGN;
-      SE_addDataInput(se_cmd, &in_data1);
-      SE_addDataInput(se_cmd, &in_data2);
+      in_data1.length &= ~SLI_SE_DATATRANSFER_REALIGN;
+      sli_se_mailbox_command_add_input(se_cmd, &in_data1);
+      sli_se_mailbox_command_add_input(se_cmd, &in_data2);
     } else {
-      SE_addDataInput(se_cmd, &in_data);
+      sli_se_mailbox_command_add_input(se_cmd, &in_data);
     }
 
     // Data output.
-    SE_DataTransfer_t out_tag = SE_DATATRANSFER_DEFAULT(output, 16U);
-    SE_addDataOutput(se_cmd, &out_tag);
+    sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(output, 16U);
+    sli_se_mailbox_command_add_output(se_cmd, &out_tag);
 
     status = sli_se_execute_and_wait(cmd_ctx);
   }
@@ -1523,7 +1523,7 @@ sl_status_t sl_se_cmac_multipart_update(sl_se_cmac_multipart_context_t *cmac_ctx
     // Process one or more 16 byte blocks.
     size_t bytes_to_process = (pending + input_len) & 0xFFFFFFF0U;
 
-    SE_Command_t *se_cmd = &cmd_ctx->command;
+    sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
     sli_se_command_init(cmd_ctx,
                         SLI_SE_COMMAND_AES_ENCRYPT
                         | SLI_SE_COMMAND_OPTION_MODE_CBC
@@ -1532,33 +1532,33 @@ sl_status_t sl_se_cmac_multipart_update(sl_se_cmac_multipart_context_t *cmac_ctx
     // Add key parameters to command.
     sli_add_key_parameters(cmd_ctx, key, status);
     // Message size (number of bytes)
-    SE_addParameter(se_cmd, bytes_to_process);
+    sli_se_mailbox_command_add_parameter(se_cmd, bytes_to_process);
 
     // Add key metadata block to command.
     sli_add_key_metadata(cmd_ctx, key, status);
     // Add key input block to command.
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
-    SE_addDataInput(se_cmd, &iv_in);
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
+    sli_se_mailbox_command_add_input(se_cmd, &iv_in);
 
     // Data input, collect data from two sources.
-    SE_DataTransfer_t in1 = SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in, pending);
-    SE_DataTransfer_t in2 = SE_DATATRANSFER_DEFAULT(input, bytes_to_process - pending);
-    in1.length &= ~SE_DATATRANSFER_REALIGN;
-    SE_addDataInput(se_cmd, &in1);
-    SE_addDataInput(se_cmd, &in2);
+    sli_se_datatransfer_t in1 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in, pending);
+    sli_se_datatransfer_t in2 = SLI_SE_DATATRANSFER_DEFAULT(input, bytes_to_process - pending);
+    in1.length &= ~SLI_SE_DATATRANSFER_REALIGN;
+    sli_se_mailbox_command_add_input(se_cmd, &in1);
+    sli_se_mailbox_command_add_input(se_cmd, &in2);
 
     // Data output, discard everything except the last 16 bytes.
-    SE_DataTransfer_t out1 = SE_DATATRANSFER_DEFAULT(NULL, bytes_to_process - 16U);
-    SE_DataTransfer_t out2 = SE_DATATRANSFER_DEFAULT(cmac_ctx->data_out, 16U);
-    out1.length |= SE_DATATRANSFER_DISCARD;
-    out1.length &= ~SE_DATATRANSFER_REALIGN;
-    SE_addDataOutput(se_cmd, &out1);
-    SE_addDataOutput(se_cmd, &out2);
+    sli_se_datatransfer_t out1 = SLI_SE_DATATRANSFER_DEFAULT(NULL, bytes_to_process - 16U);
+    sli_se_datatransfer_t out2 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_out, 16U);
+    out1.length |= SLI_SE_DATATRANSFER_DISCARD;
+    out1.length &= ~SLI_SE_DATATRANSFER_REALIGN;
+    sli_se_mailbox_command_add_output(se_cmd, &out1);
+    sli_se_mailbox_command_add_output(se_cmd, &out2);
 
-    SE_DataTransfer_t iv_out = SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
-    SE_addDataOutput(se_cmd, &iv_out);
+    sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
+    sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
     status = sli_se_execute_and_wait(cmd_ctx);
 
@@ -1588,7 +1588,7 @@ sl_status_t sl_se_hmac(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status = SL_STATUS_OK;
   uint32_t command_word;
   size_t hmac_len;
@@ -1640,7 +1640,7 @@ sl_status_t sl_se_hmac(sl_se_command_context_t *cmd_ctx,
   sli_add_key_parameters(cmd_ctx, key, status);
 
   // Message size parameter.
-  SE_addParameter(se_cmd, message_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, message_len);
 
   // Key metadata.
   sli_add_key_metadata(cmd_ctx, key, status);
@@ -1648,12 +1648,12 @@ sl_status_t sl_se_hmac(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Data input.
-  SE_DataTransfer_t in_data = SE_DATATRANSFER_DEFAULT(message, message_len);
-  SE_addDataInput(se_cmd, &in_data);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
   // Data output.
-  SE_DataTransfer_t out_hmac = SE_DATATRANSFER_DEFAULT(output, hmac_len);
-  SE_addDataOutput(se_cmd, &out_hmac);
+  sli_se_datatransfer_t out_hmac = SLI_SE_DATATRANSFER_DEFAULT(output, hmac_len);
+  sli_se_mailbox_command_add_output(se_cmd, &out_hmac);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1682,7 +1682,7 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   uint8_t tagbuf[16];
   sl_status_t status = SL_STATUS_OK;
 
@@ -1711,29 +1711,29 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
                         SLI_SE_COMMAND_AES_GCM_DECRYPT | ((tag_len & 0xFF) << 8));
 
     sli_add_key_parameters(cmd_ctx, key, status);
-    SE_addParameter(se_cmd, add_len);
-    SE_addParameter(se_cmd, length);
+    sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+    sli_se_mailbox_command_add_parameter(se_cmd, length);
 
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-    SE_addDataInput(se_cmd, &iv_in);
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    sli_se_mailbox_command_add_input(se_cmd, &iv_in);
 
-    SE_DataTransfer_t aad_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-    SE_addDataInput(se_cmd, &aad_in);
+    sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+    sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-    SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT(input, length);
-    SE_addDataInput(se_cmd, &data_in);
+    sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+    sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-    SE_DataTransfer_t tag_in = SE_DATATRANSFER_DEFAULT(tag, tag_len);
-    SE_addDataInput(se_cmd, &tag_in);
+    sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+    sli_se_mailbox_command_add_input(se_cmd, &tag_in);
 
-    SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
+    sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
     if (output == NULL) {
-      data_out.length |= SE_DATATRANSFER_DISCARD;
+      data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
     }
-    SE_addDataOutput(se_cmd, &data_out);
+    sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
     // Execute GCM operation.
     status = sli_se_execute_and_wait(cmd_ctx);
@@ -1750,29 +1750,29 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_AES_GCM_ENCRYPT);
 
   sli_add_key_parameters(cmd_ctx, key, status);
-  SE_addParameter(se_cmd, add_len);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-  SE_addDataInput(se_cmd, &iv_in);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_in);
 
-  SE_DataTransfer_t aad_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-  SE_addDataInput(se_cmd, &aad_in);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-  SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_addDataInput(se_cmd, &data_in);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
-    data_out.length |= SE_DATATRANSFER_DISCARD;
+    data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-  SE_DataTransfer_t mac_out = SE_DATATRANSFER_DEFAULT(tagbuf, sizeof(tagbuf));
-  SE_addDataOutput(se_cmd, &mac_out);
+  sli_se_datatransfer_t mac_out = SLI_SE_DATATRANSFER_DEFAULT(tagbuf, sizeof(tagbuf));
+  sli_se_mailbox_command_add_output(se_cmd, &mac_out);
 
   // Execute GCM operation.
   status = sli_se_execute_and_wait(cmd_ctx);
@@ -1809,7 +1809,7 @@ sl_status_t sl_se_gcm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status = SL_STATUS_OK;
 
   if (// IV length is required to be 96 bits for SE.
@@ -1835,29 +1835,29 @@ sl_status_t sl_se_gcm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
                       SLI_SE_COMMAND_AES_GCM_DECRYPT | ((tag_len & 0xFF) << 8));
 
   sli_add_key_parameters(cmd_ctx, key, status);
-  SE_addParameter(se_cmd, add_len);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-  SE_addDataInput(se_cmd, &iv_in);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_in);
 
-  SE_DataTransfer_t aad_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-  SE_addDataInput(se_cmd, &aad_in);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-  SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_addDataInput(se_cmd, &data_in);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  SE_DataTransfer_t tag_in = SE_DATATRANSFER_DEFAULT(tag, tag_len);
-  SE_addDataInput(se_cmd, &tag_in);
+  sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+  sli_se_mailbox_command_add_input(se_cmd, &tag_in);
 
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
-    data_out.length |= SE_DATATRANSFER_DISCARD;
+    data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
   // Execute GCM operation.
   status = sli_se_execute_and_wait(cmd_ctx);
@@ -1904,7 +1904,7 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
   gcm_ctx->len = 0;
   gcm_ctx->add_len = add_len;
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
   // The start context requires some data, either additional data or input data.
   // Case add_len > 0: Run start command with additonal data to create ctx_out.
@@ -1913,10 +1913,10 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
   // input data < 16 run sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in
   // sl_se_gcm_multipart_finish.
   if ( add_len > 0 ) {
-    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-    SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-    SE_DataTransfer_t ctx_out =
-      SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+    sli_se_datatransfer_t ctx_out =
+      SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
 
     sli_se_command_init(cmd_ctx,
                         (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
@@ -1924,15 +1924,15 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
                         | SLI_SE_COMMAND_OPTION_CONTEXT_START);
 
     sli_add_key_parameters(cmd_ctx, key, status);
-    SE_addParameter(se_cmd, add_len);
-    SE_addParameter(se_cmd, 0);
+    sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+    sli_se_mailbox_command_add_parameter(se_cmd, 0);
 
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_addDataInput(se_cmd, &iv_in);
-    SE_addDataInput(se_cmd, &add_in);
-    SE_addDataOutput(se_cmd, &ctx_out);
+    sli_se_mailbox_command_add_input(se_cmd, &iv_in);
+    sli_se_mailbox_command_add_input(se_cmd, &add_in);
+    sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
@@ -1997,25 +1997,25 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
     // for this config. For add_len = 0 and input_length = 0 we can run
     // sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in finish, so this is only
     // an issue for 0 input data and add_len != 0.
-    SE_Command_t *se_cmd = &cmd_ctx->command;
-    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-    SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-    SE_DataTransfer_t tag_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->tagbuf,
-                                                        sizeof(gcm_ctx->tagbuf));
+    sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+    sli_se_datatransfer_t tag_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->tagbuf,
+                                                                sizeof(gcm_ctx->tagbuf));
     sli_se_command_init(cmd_ctx,
                         SLI_SE_COMMAND_AES_GCM_ENCRYPT
                         | SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE);
 
     sli_add_key_parameters(cmd_ctx, key, status);
-    SE_addParameter(se_cmd, add_len);
-    SE_addParameter(se_cmd, 0);
+    sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+    sli_se_mailbox_command_add_parameter(se_cmd, 0);
 
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_addDataInput(se_cmd, &iv_in);
-    SE_addDataInput(se_cmd, &add_in);
-    SE_addDataOutput(se_cmd, &tag_out);
+    sli_se_mailbox_command_add_input(se_cmd, &iv_in);
+    sli_se_mailbox_command_add_input(se_cmd, &add_in);
+    sli_se_mailbox_command_add_output(se_cmd, &tag_out);
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
@@ -2023,8 +2023,8 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
       return status;
     }
 
-    SE_DataTransfer_t ctx_out =
-      SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+    sli_se_datatransfer_t ctx_out =
+      SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
 
     // Reuse the values of the command context object from the previous
     // operation, and only update the command word and the output data pointer.
@@ -2083,7 +2083,7 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
       || (uint64_t)gcm_ctx->len + length > 0xFFFFFFFE0ULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
   // The update context only support an input length as a multiple of 16. Hence, there
   // there is a few cases that can happen.
@@ -2114,15 +2114,15 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
     memcpy(gcm_ctx->final_data + gcm_ctx->final_data_length, input, stored_res_length);
 
     //The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
-    SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                          gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+    sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                                  gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-    SE_DataTransfer_t data_in =
-      SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, 16);
+    sli_se_datatransfer_t data_in =
+      SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, 16);
 
-    SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, 16);
-    SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                        sizeof(gcm_ctx->se_ctx));
+    sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
+    sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                                sizeof(gcm_ctx->se_ctx));
 
     sli_se_command_init(cmd_ctx,
                         (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
@@ -2130,18 +2130,18 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
                         | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
 
     sli_add_key_parameters(cmd_ctx, key, status);
-    SE_addParameter(se_cmd, 0);
-    SE_addParameter(se_cmd, 16);
+    sli_se_mailbox_command_add_parameter(se_cmd, 0);
+    sli_se_mailbox_command_add_parameter(se_cmd, 16);
 
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_addDataInput(se_cmd, &iv_ctx_in);
-    SE_addDataInput(se_cmd, &data_in);
+    sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+    sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-    SE_addDataOutput(se_cmd, &data_out);
+    sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-    SE_addDataOutput(se_cmd, &ctx_out);
+    sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
     status = sli_se_execute_and_wait(cmd_ctx);
 
@@ -2180,15 +2180,15 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
   }
   gcm_ctx->len += length;
 
-  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                        gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                                gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-  SE_DataTransfer_t data_in =
-    SE_DATATRANSFER_DEFAULT(input + stored_res_length, length);
+  sli_se_datatransfer_t data_in =
+    SLI_SE_DATATRANSFER_DEFAULT(input + stored_res_length, length);
 
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
-  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                      sizeof(gcm_ctx->se_ctx));
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                              sizeof(gcm_ctx->se_ctx));
 
   sli_se_command_init(cmd_ctx,
                       (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
@@ -2196,18 +2196,18 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
                       | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
 
   sli_add_key_parameters(cmd_ctx, key, status);
-  SE_addParameter(se_cmd, 0);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, 0);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_addDataInput(se_cmd, &iv_ctx_in);
-  SE_addDataInput(se_cmd, &data_in);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-  SE_addDataOutput(se_cmd, &ctx_out);
+  sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
   status = sli_se_execute_and_wait(cmd_ctx);
 
@@ -2254,7 +2254,7 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
       || (uint64_t)gcm_ctx->len + length > 0xFFFFFFFE0ULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
   // The finish command will return the wrong tag or INVALID SIGNATURE if there is no
   // input data. There is no way to know when sl_se_gcm_multipart_update is called for the last time, so there must
@@ -2305,15 +2305,15 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
     stored_res_length = 16 - gcm_ctx->final_data_length;
     memcpy(gcm_ctx->final_data + gcm_ctx->final_data_length, input, stored_res_length);
 
-    SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                          gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+    sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                                  gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-    SE_DataTransfer_t data_in =
-      SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, 16);
+    sli_se_datatransfer_t data_in =
+      SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, 16);
 
-    SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, 16);
-    SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                        sizeof(gcm_ctx->se_ctx));
+    sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
+    sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                                sizeof(gcm_ctx->se_ctx));
 
     sli_se_command_init(cmd_ctx,
                         (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
@@ -2321,18 +2321,18 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
                         | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
 
     sli_add_key_parameters(cmd_ctx, key, status);
-    SE_addParameter(se_cmd, 0);
-    SE_addParameter(se_cmd, 16);
+    sli_se_mailbox_command_add_parameter(se_cmd, 0);
+    sli_se_mailbox_command_add_parameter(se_cmd, 16);
 
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    SE_addDataInput(se_cmd, &iv_ctx_in);
-    SE_addDataInput(se_cmd, &data_in);
+    sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+    sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-    SE_addDataOutput(se_cmd, &data_out);
+    sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-    SE_addDataOutput(se_cmd, &ctx_out);
+    sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
     status = sli_se_execute_and_wait(cmd_ctx);
 
@@ -2382,15 +2382,15 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
       gcm_ctx->final_data_length = 16;
 
       //The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
-      SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                            gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+      sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                                    gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-      SE_DataTransfer_t data_in =
-        SE_DATATRANSFER_DEFAULT(input + stored_res_length, length - 16);
+      sli_se_datatransfer_t data_in =
+        SLI_SE_DATATRANSFER_DEFAULT(input + stored_res_length, length - 16);
 
-      SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length - 16);
-      SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                          sizeof(gcm_ctx->se_ctx));
+      sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length - 16);
+      sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                                  sizeof(gcm_ctx->se_ctx));
 
       sli_se_command_init(cmd_ctx,
                           (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
@@ -2398,18 +2398,18 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
                           | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
 
       sli_add_key_parameters(cmd_ctx, key, status);
-      SE_addParameter(se_cmd, 0);
-      SE_addParameter(se_cmd, length - 16);
+      sli_se_mailbox_command_add_parameter(se_cmd, 0);
+      sli_se_mailbox_command_add_parameter(se_cmd, length - 16);
 
       sli_add_key_metadata(cmd_ctx, key, status);
       sli_add_key_input(cmd_ctx, key, status);
 
-      SE_addDataInput(se_cmd, &iv_ctx_in);
-      SE_addDataInput(se_cmd, &data_in);
+      sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+      sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-      SE_addDataOutput(se_cmd, &data_out);
+      sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-      SE_addDataOutput(se_cmd, &ctx_out);
+      sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
       status = sli_se_execute_and_wait(cmd_ctx);
 
@@ -2437,15 +2437,15 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
   gcm_ctx->len += length;
 
   // The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
-  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                        gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                                gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-  SE_DataTransfer_t data_in =
-    SE_DATATRANSFER_DEFAULT(input + stored_res_length, length);
+  sli_se_datatransfer_t data_in =
+    SLI_SE_DATATRANSFER_DEFAULT(input + stored_res_length, length);
 
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
-  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
-                                                      sizeof(gcm_ctx->se_ctx));
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                              sizeof(gcm_ctx->se_ctx));
 
   sli_se_command_init(cmd_ctx,
                       (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
@@ -2453,18 +2453,18 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
                       | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
 
   sli_add_key_parameters(cmd_ctx, key, status);
-  SE_addParameter(se_cmd, 0);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, 0);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_addDataInput(se_cmd, &iv_ctx_in);
-  SE_addDataInput(se_cmd, &data_in);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-  SE_addDataOutput(se_cmd, &ctx_out);
+  sli_se_mailbox_command_add_output(se_cmd, &ctx_out);
 
   status = sli_se_execute_and_wait(cmd_ctx);
 
@@ -2502,7 +2502,7 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   length = gcm_ctx->final_data_length;
   gcm_ctx->len += ((length % 16 != 0) ? length : 0);
 
@@ -2582,25 +2582,25 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
   tmpbuf[2] = __REV(gcm_ctx->len >> 29);
   tmpbuf[3] = __REV((gcm_ctx->len << 3) & 0xFFFFFFFFUL);
 
-  SE_DataTransfer_t data_in =
-    SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, length);
+  sli_se_datatransfer_t data_in =
+    SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, length);
 
   #if defined(SLI_SE_MAJOR_VERSION_ONE)
-  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT((length % 16 != 0 || length == 0) ? gcm_ctx->se_ctx : gcm_ctx->previous_se_ctx, sizeof(gcm_ctx->previous_se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT((length % 16 != 0 || length == 0) ? gcm_ctx->se_ctx : gcm_ctx->previous_se_ctx, sizeof(gcm_ctx->previous_se_ctx));
   #else
-  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
   #endif
 
-  SE_DataTransfer_t lenalenc_in = SE_DATATRANSFER_DEFAULT(&tmpbuf[0],
-                                                          sizeof(tmpbuf));
+  sli_se_datatransfer_t lenalenc_in = SLI_SE_DATATRANSFER_DEFAULT(&tmpbuf[0],
+                                                                  sizeof(tmpbuf));
 
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (length == 16) {
     data_out.data = NULL;
-    data_out.length |= SE_DATATRANSFER_DISCARD;
+    data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
 
-  SE_DataTransfer_t gcm_tag = SE_DATATRANSFER_DEFAULT(tag, tag_length);
+  sli_se_datatransfer_t gcm_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_length);
 
   sli_se_command_init(cmd_ctx,
                       (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
@@ -2608,24 +2608,24 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
                       | tag_length << 8 | SLI_SE_COMMAND_OPTION_CONTEXT_END);
 
   sli_add_key_parameters(cmd_ctx, key, status);
-  SE_addParameter(se_cmd, 0);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, 0);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_addDataInput(se_cmd, &iv_ctx_in);
-  SE_addDataInput(se_cmd, &data_in);
-  SE_addDataInput(se_cmd, &lenalenc_in);
+  sli_se_mailbox_command_add_input(se_cmd, &iv_ctx_in);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
+  sli_se_mailbox_command_add_input(se_cmd, &lenalenc_in);
 
   if (gcm_ctx->mode == SL_SE_DECRYPT) {
-    SE_addDataInput(se_cmd, &gcm_tag);
+    sli_se_mailbox_command_add_input(se_cmd, &gcm_tag);
   }
 
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
   if (gcm_ctx->mode == SL_SE_ENCRYPT) {
-    SE_addDataOutput(se_cmd, &gcm_tag);
+    sli_se_mailbox_command_add_output(se_cmd, &gcm_tag);
   }
 
   status = sli_se_execute_and_wait(cmd_ctx);
@@ -2670,7 +2670,7 @@ sl_status_t sl_se_chacha20_crypt(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
 
   sli_se_command_init(cmd_ctx,
@@ -2682,7 +2682,7 @@ sl_status_t sl_se_chacha20_crypt(sl_se_command_context_t *cmd_ctx,
   // Add key parameters to command
   sli_add_key_parameters(cmd_ctx, key, status);
   // Message size (number of bytes)
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   // Add key metadata block to command
   sli_add_key_metadata(cmd_ctx, key, status);
@@ -2690,20 +2690,20 @@ sl_status_t sl_se_chacha20_crypt(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Add initial counter to command
-  SE_DataTransfer_t counter = SE_DATATRANSFER_DEFAULT(initial_counter, 4);
-  SE_addDataInput(se_cmd, &counter);
+  sli_se_datatransfer_t counter = SLI_SE_DATATRANSFER_DEFAULT(initial_counter, 4);
+  sli_se_mailbox_command_add_input(se_cmd, &counter);
 
   // Add nonce/IV to command
-  SE_DataTransfer_t iv = SE_DATATRANSFER_DEFAULT(nonce, 12);
-  SE_addDataInput(se_cmd, &iv);
+  sli_se_datatransfer_t iv = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
+  sli_se_mailbox_command_add_input(se_cmd, &iv);
 
   // Add input data to command
-  SE_DataTransfer_t in = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_addDataInput(se_cmd, &in);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_mailbox_command_add_input(se_cmd, &in);
 
   // Request output data from command
-  SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(output, length);
-  SE_addDataOutput(se_cmd, &out);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_mailbox_command_add_output(se_cmd, &out);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -2728,7 +2728,7 @@ sl_status_t sl_se_chacha20_poly1305_encrypt_and_tag(sl_se_command_context_t *cmd
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
 
   if (key->type != SL_SE_KEY_TYPE_CHACHA20) {
@@ -2738,32 +2738,32 @@ sl_status_t sl_se_chacha20_poly1305_encrypt_and_tag(sl_se_command_context_t *cmd
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_CHACHAPOLY_ENCRYPT);
 
   sli_add_key_parameters(cmd_ctx, key, status);
-  SE_addParameter(se_cmd, add_len);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_DataTransfer_t nonce_in = SE_DATATRANSFER_DEFAULT(nonce, 12);
-  SE_addDataInput(se_cmd, &nonce_in);
+  sli_se_datatransfer_t nonce_in = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
+  sli_se_mailbox_command_add_input(se_cmd, &nonce_in);
 
-  SE_DataTransfer_t aad_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-  SE_addDataInput(se_cmd, &aad_in);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-  SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_addDataInput(se_cmd, &data_in);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
-    data_out.length |= SE_DATATRANSFER_DISCARD;
+    data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-  SE_DataTransfer_t mac_out = SE_DATATRANSFER_DEFAULT(tag, 16);
+  sli_se_datatransfer_t mac_out = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
   if (tag == NULL) {
-    mac_out.length |= SE_DATATRANSFER_DISCARD;
+    mac_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
-  SE_addDataOutput(se_cmd, &mac_out);
+  sli_se_mailbox_command_add_output(se_cmd, &mac_out);
 
   // Execute AEAD operation.
   return sli_se_execute_and_wait(cmd_ctx);
@@ -2789,7 +2789,7 @@ sl_status_t sl_se_chacha20_poly1305_auth_decrypt(sl_se_command_context_t *cmd_ct
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
 
   if (key->type != SL_SE_KEY_TYPE_CHACHA20) {
@@ -2799,29 +2799,29 @@ sl_status_t sl_se_chacha20_poly1305_auth_decrypt(sl_se_command_context_t *cmd_ct
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_CHACHAPOLY_DECRYPT);
 
   sli_add_key_parameters(cmd_ctx, key, status);
-  SE_addParameter(se_cmd, add_len);
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, add_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_DataTransfer_t nonce_in = SE_DATATRANSFER_DEFAULT(nonce, 12);
-  SE_addDataInput(se_cmd, &nonce_in);
+  sli_se_datatransfer_t nonce_in = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
+  sli_se_mailbox_command_add_input(se_cmd, &nonce_in);
 
-  SE_DataTransfer_t aad_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-  SE_addDataInput(se_cmd, &aad_in);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-  SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_addDataInput(se_cmd, &data_in);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  SE_DataTransfer_t mac_in = SE_DATATRANSFER_DEFAULT(tag, 16);
-  SE_addDataInput(se_cmd, &mac_in);
+  sli_se_datatransfer_t mac_in = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
+  sli_se_mailbox_command_add_input(se_cmd, &mac_in);
 
-  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
-    data_out.length |= SE_DATATRANSFER_DISCARD;
+    data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
-  SE_addDataOutput(se_cmd, &data_out);
+  sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
   // Execute AEAD operation.
   return sli_se_execute_and_wait(cmd_ctx);
@@ -2847,7 +2847,7 @@ sl_status_t sl_se_poly1305_genkey_tag(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_POLY1305_KEY_MAC);
@@ -2855,7 +2855,7 @@ sl_status_t sl_se_poly1305_genkey_tag(sl_se_command_context_t *cmd_ctx,
   // Add key parameters to command
   sli_add_key_parameters(cmd_ctx, key, status);
   // Message size (number of bytes)
-  SE_addParameter(se_cmd, length);
+  sli_se_mailbox_command_add_parameter(se_cmd, length);
 
   // Add key metadata block to command
   sli_add_key_metadata(cmd_ctx, key, status);
@@ -2863,16 +2863,16 @@ sl_status_t sl_se_poly1305_genkey_tag(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Add nonce/IV to command
-  SE_DataTransfer_t iv = SE_DATATRANSFER_DEFAULT(nonce, 12);
-  SE_addDataInput(se_cmd, &iv);
+  sli_se_datatransfer_t iv = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
+  sli_se_mailbox_command_add_input(se_cmd, &iv);
 
   // Add input data to command
-  SE_DataTransfer_t in = SE_DATATRANSFER_DEFAULT(input, length);
-  SE_addDataInput(se_cmd, &in);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_mailbox_command_add_input(se_cmd, &in);
 
   // Request tag from command
-  SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(tag, 16);
-  SE_addDataOutput(se_cmd, &out);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
+  sli_se_mailbox_command_add_output(se_cmd, &out);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
