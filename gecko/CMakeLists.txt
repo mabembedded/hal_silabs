@@ -133,6 +133,8 @@ zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/power_manager/src/sl_
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/power_manager/src/sl_power_manager_hal_s2.c)
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/hfxo_manager/src/sl_hfxo_manager.c)
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/hfxo_manager/src/sl_hfxo_manager_hal_s2.c)
+zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/device_init/src/sl_device_init_lfxo_s2.c)
+
 
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     common/src/sl_slist.c)
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_CORE         emlib/src/em_core.c)
