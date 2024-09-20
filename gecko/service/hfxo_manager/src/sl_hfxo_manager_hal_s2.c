@@ -30,6 +30,7 @@
 #include "em_device.h"
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #include "sl_assert.h"
+#include "sl_core.h"
 #include "sli_hfxo_manager.h"
 #include "sl_hfxo_manager.h"
 #include "sl_hfxo_manager_config.h"
@@ -92,14 +93,14 @@
  ******************************************************************************/
 
 // Error flag to indicate if we failed the startup process
-static bool error_flag = false;
+static volatile bool error_flag = false;
 
 #if (SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT == 1)
 // Error retry counter
-static uint8_t error_try_cnt = 0;
+static volatile uint8_t error_try_cnt = 0;
 
 // Error State status
-static bool in_error_state = false;
+static volatile bool in_error_state = false;
 
 // Variables to save normal settings
 static uint32_t pkdettusstartupi_saved;
@@ -132,7 +133,7 @@ void sli_hfxo_manager_init_hardware(void)
 {
   // Increase HFXO Interrupt priority so that it won't be masked by BASEPRI
   // and will preempt other interrupts.
-  NVIC_SetPriority(HFXO_IRQ_NUMBER, 2);
+  NVIC_SetPriority(HFXO_IRQ_NUMBER, CORE_ATOMIC_BASE_PRIORITY_LEVEL - 1);
 
   // Enable HFXO Interrupt if HFXO is used
 #if _SILICON_LABS_32B_SERIES_2_CONFIG >= 2

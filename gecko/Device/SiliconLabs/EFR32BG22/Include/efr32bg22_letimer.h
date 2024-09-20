@@ -3,7 +3,7 @@
  * @brief EFR32BG22 LETIMER register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** LETIMER Register Declaration. */
-typedef struct {
+typedef struct letimer_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version                                         */
   __IOM uint32_t EN;                            /**< module en                                          */
   __IOM uint32_t CTRL;                          /**< Control Register                                   */
@@ -493,4 +493,4 @@ typedef struct {
 /** @} End of group EFR32BG22_LETIMER */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_LETIMER_H */
+#endif // EFR32BG22_LETIMER_H

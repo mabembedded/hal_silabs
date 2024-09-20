@@ -3,7 +3,7 @@
  * @brief EFR32BG22 DEVINFO register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,22 +41,22 @@
  *****************************************************************************/
 
 /** DEVINFO HFRCODPLLCAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcodpllcal_typedef{
   __IM uint32_t HFRCODPLLCAL;                        /**< HFRCODPLL Calibration                              */
 } DEVINFO_HFRCODPLLCAL_TypeDef;
 
 /** DEVINFO HFRCOEM23CAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcoem23cal_typedef{
   uint32_t RESERVED0[1U];                            /**< Reserved for future use                            */
 } DEVINFO_HFRCOEM23CAL_TypeDef;
 
 /** DEVINFO HFRCOSECAL Register Group Declaration. */
-typedef struct {
+typedef struct devinfo_hfrcosecal_typedef{
   uint32_t RESERVED0[1U];                            /**< Reserved for future use                            */
 } DEVINFO_HFRCOSECAL_TypeDef;
 
 /** DEVINFO Register Declaration. */
-typedef struct {
+typedef struct devinfo_typedef{
   __IM uint32_t                INFO;                  /**< DI Information                                     */
   __IM uint32_t                PART;                  /**< Part Info                                          */
   __IM uint32_t                MEMINFO;               /**< Memory Info                                        */
@@ -900,4 +900,4 @@ typedef struct {
 /** @} End of group EFR32BG22_DEVINFO */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_DEVINFO_H */
+#endif // EFR32BG22_DEVINFO_H

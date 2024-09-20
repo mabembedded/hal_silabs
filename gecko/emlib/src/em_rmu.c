@@ -221,6 +221,8 @@ static const RMU_ResetCauseMasks_Typedef  resetCauseMasks[NUM_RSTCAUSES] =
 /* A test variable that replaces the RSTCAUSE cause register when testing
    the RMU_ResetCauseGet function. */
 extern uint32_t rstCause;
+#else
+static uint32_t rstCause = UINT32_MAX;
 #endif
 
 /** @endcond */
@@ -310,17 +312,23 @@ void RMU_ResetCauseClear(void)
  ******************************************************************************/
 uint32_t RMU_ResetCauseGet(void)
 {
-#if defined(_EMU_RSTCAUSE_MASK)
-#if defined(EMLIB_REGRESSION_TEST)
-  return rstCause;
-#else
-  return EMU->RSTCAUSE;
+#if !defined(EMLIB_REGRESSION_TEST)
+  if (rstCause != UINT32_MAX) {
+    // RMU_ResetCauseGet() has already been called since boot. Return what was already obtained.
+    return rstCause;
+  }
 #endif
+
+#if defined(_EMU_RSTCAUSE_MASK)
+#if !defined(EMLIB_REGRESSION_TEST)
+  rstCause = EMU->RSTCAUSE;
+#endif
+  return rstCause;
 #endif
 
 #if defined(_RMU_RSTCAUSE_MASK)
 #if !defined(EMLIB_REGRESSION_TEST)
-  uint32_t rstCause = RMU->RSTCAUSE;
+  rstCause = RMU->RSTCAUSE;
 #endif
   uint32_t validRstCause = 0;
   uint32_t zeroXMask;
@@ -373,6 +381,10 @@ uint32_t RMU_ResetCauseGet(void)
                        | RMU_RSTCAUSE_DVDDBOD
                        | RMU_RSTCAUSE_AVDDBOD);
   }
+#endif
+#if !defined(EMLIB_REGRESSION_TEST)
+  // keep validRstCause in the static local variable for future calls
+  rstCause = validRstCause
 #endif
   return validRstCause;
 #endif

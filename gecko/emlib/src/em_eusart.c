@@ -161,7 +161,10 @@ void EUSART_UartInitLf(EUSART_TypeDef *eusart, const EUSART_UartInit_TypeDef *in
       || (clock_source == cmuSelect_LFRCO)
       || (clock_source == cmuSelect_EM23GRPACLK)
 #if defined(_CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPCCLK)
-      || (clock_source == cmuSelect_EM01GRPCCLK) /* ULFRCO, LFXO, LFRCO, EM23GRPACLK or EM01GRPCCLK */
+      || (clock_source == cmuSelect_EM01GRPCCLK)
+#endif
+#if defined(_CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPACLK)
+      || (clock_source == cmuSelect_EM01GRPACLK) /* ULFRCO, LFXO, LFRCO, EM23GRPACLK, EM01GRPACLK or EM01GRPCCLK */
 #endif
       );
   }

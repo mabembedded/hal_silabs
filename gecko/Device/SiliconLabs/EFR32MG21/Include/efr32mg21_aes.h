@@ -3,7 +3,7 @@
  * @brief EFR32MG21 AES register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 /** AES Register Declaration. */
-typedef struct {
+typedef struct aes_typedef{
   __IOM uint32_t FETCHADDR;                     /**< Fetcher Address                                    */
   __IOM uint32_t FETCHDESCR;                    /**< Fetcher Descriptor                                 */
   __IOM uint32_t FETCHLEN;                      /**< Fetcher Length                                     */
@@ -332,4 +332,4 @@ typedef struct {
 /** @} End of group EFR32MG21_AES */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_AES_H */
+#endif // EFR32MG21_AES_H

@@ -51,7 +51,7 @@
 
 #include "sl_se_manager_key_handling.h"
 #include "sl_se_manager_types.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_status.h"
 #include <stdint.h>
 #include <stdbool.h>

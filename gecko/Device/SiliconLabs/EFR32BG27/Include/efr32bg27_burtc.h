@@ -3,7 +3,7 @@
  * @brief EFR32BG27 BURTC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** BURTC Register Declaration. */
-typedef struct {
+typedef struct burtc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t EN;                            /**< Module Enable Register                             */
   __IOM uint32_t CFG;                           /**< Configuration Register                             */
@@ -329,4 +329,4 @@ typedef struct {
 /** @} End of group EFR32BG27_BURTC */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_BURTC_H */
+#endif // EFR32BG27_BURTC_H

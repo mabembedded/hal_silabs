@@ -35,6 +35,7 @@
 
 #include "sl_assert.h"
 #include "em_cmu.h"
+#include "em_gpio.h"
 #include "sl_common.h"
 #include "em_core.h"
 #include "em_system.h"
@@ -220,6 +221,9 @@ static errataFixDcdcHs_TypeDef errataFixDcdcHsState = errataFixDcdcHsInit;
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x8000U // 32 kB blocks
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
+#define RAM0_BLOCKS           32U
+#define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
@@ -692,7 +696,9 @@ static void vScaleAfterWakeup(void)
 }
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
 typedef enum {
   dpllState_Save,         /* Save DPLL state. */
   dpllState_Restore,      /* Restore DPLL.    */
@@ -968,7 +974,9 @@ void EMU_EnterEM2(bool restore)
   bool errataFixEmuE110En;
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
   if (restore) {
     dpllState(dpllState_Save);
   }
@@ -1011,6 +1019,18 @@ void EMU_EnterEM2(bool restore)
 
   EMU_EM23PresleepHook();
   EMU_EFPEM23PresleepHook();
+
+#if defined(_GPIO_IF_EM4WU_MASK)
+#if defined(_CMU_CLKEN0_GPIO_SHIFT)
+  if (CMU->CLKEN0 & CMU_CLKEN0_GPIO) {
+    // Clear all EM4WU interrupts before entering sleep
+    GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
+  }
+#else
+  GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
+#endif // defined(_CMU_CLKEN0_GPIO_SHIFT)
+#endif // defined(_GPIO_IF_EM4WU_MASK)
+
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205) \
   || defined(ERRATA_FIX_EMU_E110_ENABLE)
 #if defined(ERRATA_FIX_EMU_E110_ENABLE)
@@ -1067,7 +1087,9 @@ void EMU_EnterEM2(bool restore)
 #endif
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
   if (restore) {
     dpllState(dpllState_Restore);
   }
@@ -1155,7 +1177,9 @@ void EMU_EnterEM3(bool restore)
   bool errataFixEmuE110En;
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
   if (restore) {
     dpllState(dpllState_Save);
   }
@@ -1209,6 +1233,17 @@ void EMU_EnterEM3(bool restore)
 #if defined(ERRATA_FIX_DCDC_LNHS_BLOCK_ENABLE)
   dcdcHsFixLnBlock();
 #endif
+
+#if defined(_GPIO_IF_EM4WU_MASK)
+#if defined(_CMU_CLKEN0_GPIO_SHIFT)
+  if (CMU->CLKEN0 & CMU_CLKEN0_GPIO) {
+    // Clear all EM4WU interrupts before entering sleep
+    GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
+  }
+#else
+  GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
+#endif // defined(_CMU_CLKEN0_GPIO_SHIFT)
+#endif // defined(_GPIO_IF_EM4WU_MASK)
 
   EMU_EM23PresleepHook();
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205) \
@@ -1266,7 +1301,9 @@ void EMU_EnterEM3(bool restore)
 #endif
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
   if (restore) {
     dpllState(dpllState_Restore);
   }
@@ -1295,7 +1332,9 @@ void EMU_Save(void)
 #if (_SILICON_LABS_32B_SERIES < 2)
   emState(emState_Save);
 #endif
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
   dpllState(dpllState_Save);
 #endif
 }
@@ -1314,7 +1353,9 @@ void EMU_Restore(void)
 #if (_SILICON_LABS_32B_SERIES < 2)
   emState(emState_Restore);
 #endif
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
   dpllState(dpllState_Restore);
 #endif
 }
@@ -1520,6 +1561,17 @@ void EMU_EnterEM4(void)
   EMU_EM4PresleepHook();
   EMU_EFPEM4PresleepHook();
 
+#if defined(_GPIO_IF_EM4WU_MASK)
+#if defined(_CMU_CLKEN0_GPIO_SHIFT)
+  if (CMU->CLKEN0 & CMU_CLKEN0_GPIO) {
+    // Clear all EM4WU interrupts before entering sleep
+    GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
+  }
+#else
+  GPIO_IntClear(_GPIO_IF_EM4WU_MASK);
+#endif // defined(_CMU_CLKEN0_GPIO_SHIFT)
+#endif // defined(_GPIO_IF_EM4WU_MASK)
+
   for (i = 0; i < 4; i++) {
 #if defined(_EMU_EM4CTRL_EM4ENTRY_SHIFT)
     EMU->EM4CTRL = em4seq2;
@@ -1685,11 +1737,13 @@ void EMU_RamPowerDown(uint32_t start, uint32_t end)
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
     // Lynx has 2 blocks. We do no shut off block 0 because we dont want to disable all RAM0
     mask |= ADDRESS_NOT_IN_BLOCK(start, 0x20006000UL) << 1; // Block 1, 8 kB
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
     // Leopard has 3 blocks. We do no shut off block 0 because we dont want to disable all RAM0
     mask |= ADDRESS_NOT_IN_BLOCK(start, 0x20006000UL) << 1; // Block 1, 8 kB
     mask |= ADDRESS_NOT_IN_BLOCK(start, 0x20008000UL) << 2; // Block 2, 32 kB
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
     // These platforms have equally-sized RAM blocks and block 0 can be powered down but should not.
     // This condition happens when the block 0 disable bit flag is available in the retention control register.
     for (unsigned i = 1; i < RAM0_BLOCKS; i++) {

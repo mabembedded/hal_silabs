@@ -38,8 +38,8 @@
 #include "sl_status.h"
 #include "sl_sleeptimer.h"
 #include "sl_enum.h"
-
-#include "em_core_generic.h"
+#include "sl_core.h"
+#include "sl_code_classification.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -231,8 +231,8 @@ extern "C" {
 #define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM1      (1 << 3)                                  ///< sl power manager event transition leaving em1
 #define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2     (1 << 4)                                  ///< sl power manager event transition entering em2
 #define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2      (1 << 5)                                  ///< sl power manager event transition leaving em2
-#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3     (1 << 6)                                  ///< sl power manager event transition entering em3
-#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3      (1 << 7)                                  ///< sl power manager event transition leaving em3
+#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3     (1 << 6)                                  ///< sl power manager event transition entering em3 (DEPRECATED)
+#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3      (1 << 7)                                  ///< sl power manager event transition leaving em3  (DEPRECATED)
 
 // -----------------------------------------------------------------------------
 // Data Types
@@ -280,6 +280,7 @@ SL_ENUM(sl_power_manager_on_isr_exit_t) {
 
 // -----------------------------------------------------------------------------
 // Internal Prototypes only to be used by Power Manager module
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
                                              bool  add);
 
@@ -288,6 +289,7 @@ void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
 // We also make sure to always have a definition for the function regardless if
 // the debug feature is enable or not for binary compatibility.
 #if (SL_POWER_MANAGER_DEBUG == 1)
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_debug_log_em_requirement(sl_power_manager_em_t em,
                                                 bool                  add,
                                                 const char            *name);
@@ -317,7 +319,9 @@ sl_status_t sl_power_manager_init(void);
  *       triggered right after the decision to call sl_power_manager_sleep()
  *       has been made.
  *
- * @note This function must not be called with interrupts disabled.
+ * @note This function must NOT be called with interrupts disabled. This means
+ *       both BASEPRI and PRIMASK MUST have a value of 0 when invoking this
+ *       function.
  *
  * Usage example:
  *
@@ -332,6 +336,7 @@ sl_status_t sl_power_manager_init(void);
  * }
  * ```
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sl_power_manager_sleep(void);
 
 /***************************************************************************//**
@@ -339,8 +344,13 @@ void sl_power_manager_sleep(void);
  *
  * @param em  Energy mode to add the requirement to:
  *            - ::SL_POWER_MANAGER_EM1
- *            - ::SL_POWER_MANAGER_EM2
+ *            - ::SL_POWER_MANAGER_EM2 (DEPRECATED)
+ *
+ * @note Adding EM requirements on SL_POWER_MANAGER_EM2 is now DEPRECATED.
+ *       The calls can simply be removed since the system will go to deepsleep
+ *       (EM2/EM3) in the absence of EM1 requirements.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE void sl_power_manager_add_em_requirement(sl_power_manager_em_t em)
 {
   CORE_DECLARE_IRQ_STATE;
@@ -357,8 +367,13 @@ __STATIC_INLINE void sl_power_manager_add_em_requirement(sl_power_manager_em_t e
  *
  * @param em  Energy mode to remove the requirement to:
  *            - ::SL_POWER_MANAGER_EM1
- *            - ::SL_POWER_MANAGER_EM2
+ *            - ::SL_POWER_MANAGER_EM2 (DEPRECATED)
+ *
+ * @note Removing EM requirements on SL_POWER_MANAGER_EM2 is now DEPRECATED.
+ *       The calls can simply be removed since the system will go to deepsleep
+ *       (EM2/EM3) in the absence of EM1 requirements.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE void sl_power_manager_remove_em_requirement(sl_power_manager_em_t em)
 {
   CORE_DECLARE_IRQ_STATE;
@@ -384,6 +399,10 @@ __STATIC_INLINE void sl_power_manager_remove_em_requirement(sl_power_manager_em_
  * @note The parameters passed must be persistent, meaning that they need to survive
  *       until the callback fires.
  *
+ * @note SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3 and
+ *       SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3 are now DEPRECATED and should
+ *       not be used in the event_info argument.
+ *
  * Usage example:
  *
  * ```c
@@ -392,9 +411,7 @@ __STATIC_INLINE void sl_power_manager_remove_em_requirement(sl_power_manager_em_
  *                                 | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM1 \
  *                                 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM1  \
  *                                 | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2 \
- *                                 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2  \
- *                                 | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3 \
- *                                 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3)
+ *                                 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2)
  *
  * sl_power_manager_em_transition_event_handle_t event_handle;
  * sl_power_manager_em_transition_event_info_t event_info = {
@@ -525,6 +542,42 @@ void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
  *       never sleep at a lower level than EM1.
  *****************************************************************************/
 bool sl_power_manager_is_latest_wakeup_internal(void);
+
+/***************************************************************************//**
+ * Enter energy mode 4 (EM4).
+ *
+ * @note  You should not expect to return from this function. Once the device
+ *        enters EM4, only a power on reset or external reset pin can wake the
+ *        device.
+ *
+ * @note  On xG22 devices, this function re-configures the IADC if EM4 entry
+ *        is possible.
+ ******************************************************************************/
+void sl_power_manager_enter_em4(void);
+
+/***************************************************************************//**
+ *   When EM4 pin retention is set to power_manager_pin_retention_latch,
+ *   then pins are retained through EM4 entry and wakeup. The pin state is
+ *   released by calling this function. The feature allows peripherals or
+ *   GPIO to be re-initialized after EM4 exit (reset), and when
+ *   initialization is done, this function can release pins and return
+ *   control to the peripherals or GPIO.
+ *
+ * @note When the EM4 Pin Retention feature is not available on a device,
+ *       calling this function will do nothing.
+ ******************************************************************************/
+void sl_power_manager_em4_unlatch_pin_retention(void);
+
+/***************************************************************************//**
+ * Energy mode 4 pre-sleep hook function.
+ *
+ * @note  This function is called by @ref sl_power_manager_enter_em4 just
+ *        prior to the sequence of writes to put the device in EM4. The
+ *        function  implementation does not perform anything, but it is
+ *        SL_WEAK so that it can be re-implemented in application code if
+ *        actions are needed.
+ ******************************************************************************/
+void sl_power_manager_em4_presleep_hook(void);
 
 /** @} (end addtogroup power_manager) */
 

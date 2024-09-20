@@ -3,7 +3,7 @@
  * @brief EFR32MG24 SYSRTC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SYSRTC Register Declaration. */
-typedef struct {
+typedef struct sysrtc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP VERSION                                         */
   __IOM uint32_t EN;                            /**< Module Enable Register                             */
   __IOM uint32_t SWRST;                         /**< Software Reset Register                            */
@@ -418,4 +418,4 @@ typedef struct {
 /** @} End of group EFR32MG24_SYSRTC */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_SYSRTC_H */
+#endif // EFR32MG24_SYSRTC_H

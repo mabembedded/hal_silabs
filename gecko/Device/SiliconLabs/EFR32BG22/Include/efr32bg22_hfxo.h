@@ -3,7 +3,7 @@
  * @brief EFR32BG22 HFXO register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** HFXO Register Declaration. */
-typedef struct {
+typedef struct hfxo_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   uint32_t       RESERVED0[3U];                 /**< Reserved for future use                            */
   __IOM uint32_t XTALCFG;                       /**< Crystal Configuration Register                     */
@@ -460,4 +460,4 @@ typedef struct {
 /** @} End of group EFR32BG22_HFXO */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_HFXO_H */
+#endif // EFR32BG22_HFXO_H

@@ -132,7 +132,8 @@
 #define ECC_RAM0_CORRECTION_EN  (SYSCFG_DMEM0ECCCTRL_RAMECCCHKEN)
 
 #elif (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7))
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9))
 
 /* On Series 2 Config 2, aka EFR32XG22, ECC is supported for the
    main DMEM RAM banks which is controlled with one ECC encoder/decoder. */
@@ -199,7 +200,8 @@
 
 #if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7))
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9))
 #define ECC_CTRL_REG       (SYSCFG->DMEM0ECCCTRL)
 #define ECC_IFC_REG        (SYSCFG->IF_CLR)
 #define ECC_IFC_MASK       (SYSCFG_IF_RAMERR1B | SYSCFG_IF_RAMERR2B)
@@ -1551,6 +1553,7 @@ SL_RAMFUNC_DEFINITION_END
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_MPAHBRAM_CTRL_MASK)
 
 /***************************************************************************//**
@@ -1586,7 +1589,9 @@ static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
 
   EFM_ASSERT(ramptr < endptr);
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
   enableEcc = eccBank->initSyndromeEnable;
 #elif defined(_MPAHBRAM_CTRL_MASK)
   /* MPAHBRAM ECC requires both ECCEN and ECCWEN to be set for the syndromes
@@ -1823,6 +1828,7 @@ static void mscEccBankInit(const MSC_EccBank_Typedef *eccBank,
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_MPAHBRAM_CTRL_MASK)
   (void) dmaChannels;
 #if !defined(_MPAHBRAM_CTRL_MASK)

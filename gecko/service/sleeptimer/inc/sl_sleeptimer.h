@@ -41,6 +41,7 @@
 #include <stdbool.h>
 #include "sl_status.h"
 #include "sl_common.h"
+#include "sl_code_classification.h"
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #define SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG (0x01)
@@ -133,7 +134,7 @@ extern "C" {
 /***************************************************************************//**
  * Initializes the Sleeptimer.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_init(void);
 
@@ -152,8 +153,9 @@ sl_status_t sl_sleeptimer_init(void);
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *        or 0 for not flags.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_start_timer(sl_sleeptimer_timer_handle_t *handle,
                                       uint32_t timeout,
                                       sl_sleeptimer_timer_callback_t callback,
@@ -176,8 +178,9 @@ sl_status_t sl_sleeptimer_start_timer(sl_sleeptimer_timer_handle_t *handle,
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *        or 0 for not flags.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_restart_timer(sl_sleeptimer_timer_handle_t *handle,
                                         uint32_t timeout,
                                         sl_sleeptimer_timer_callback_t callback,
@@ -200,8 +203,9 @@ sl_status_t sl_sleeptimer_restart_timer(sl_sleeptimer_timer_handle_t *handle,
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *        or 0 for not flags.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_start_periodic_timer(sl_sleeptimer_timer_handle_t *handle,
                                                uint32_t timeout,
                                                sl_sleeptimer_timer_callback_t callback,
@@ -224,8 +228,9 @@ sl_status_t sl_sleeptimer_start_periodic_timer(sl_sleeptimer_timer_handle_t *han
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *        or 0 for not flags.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_restart_periodic_timer(sl_sleeptimer_timer_handle_t *handle,
                                                  uint32_t timeout,
                                                  sl_sleeptimer_timer_callback_t callback,
@@ -238,8 +243,9 @@ sl_status_t sl_sleeptimer_restart_periodic_timer(sl_sleeptimer_timer_handle_t *h
  *
  * @param handle Pointer to handle to timer.
  *
- * @return
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle);
 
 /***************************************************************************//**
@@ -250,8 +256,9 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle);
  *
  * @note A non periodic timer is considered not running during its callback.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_is_timer_running(sl_sleeptimer_timer_handle_t *handle,
                                            bool *running);
 
@@ -261,8 +268,9 @@ sl_status_t sl_sleeptimer_is_timer_running(sl_sleeptimer_timer_handle_t *handle,
  * @param handle Pointer to handle to timer.
  * @param time Time left in timer ticks.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_get_timer_time_remaining(sl_sleeptimer_timer_handle_t *handle,
                                                    uint32_t *time);
 
@@ -276,8 +284,9 @@ sl_status_t sl_sleeptimer_get_timer_time_remaining(sl_sleeptimer_timer_handle_t 
  *
  * @param time_remaining Time left in timer ticks.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *****************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_get_remaining_time_of_first_timer(uint16_t option_flags,
                                                             uint32_t *time_remaining);
 
@@ -286,6 +295,7 @@ sl_status_t sl_sleeptimer_get_remaining_time_of_first_timer(uint16_t option_flag
  *
  * @return Current tick count.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sl_sleeptimer_get_tick_count(void);
 
 /***************************************************************************//**
@@ -293,13 +303,15 @@ uint32_t sl_sleeptimer_get_tick_count(void);
  *
  * @return Current tick count.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint64_t sl_sleeptimer_get_tick_count64(void);
 
 /***************************************************************************//**
  * Get timer frequency.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return Timer frequency in hertz.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sl_sleeptimer_get_timer_frequency(void);
 
 /***************************************************************************//**
@@ -314,7 +326,7 @@ uint32_t sl_sleeptimer_get_timer_frequency(void);
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_time_to_date(sl_sleeptimer_timestamp_t time,
                                                sl_sleeptimer_time_zone_offset_t time_zone,
@@ -332,7 +344,7 @@ sl_status_t sl_sleeptimer_convert_time_to_date(sl_sleeptimer_timestamp_t time,
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_time_to_date_64(sl_sleeptimer_timestamp_64_t time,
                                                   sl_sleeptimer_time_zone_offset_t time_zone,
@@ -344,7 +356,7 @@ sl_status_t sl_sleeptimer_convert_time_to_date_64(sl_sleeptimer_timestamp_64_t t
  * @param date Pointer to date to convert.
  * @param time Pointer to converted 32 bit Unix timestamp.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @note Dates are based on the Unix time representation.
  *       Range of dates supported :
@@ -362,7 +374,7 @@ sl_status_t sl_sleeptimer_convert_date_to_time(sl_sleeptimer_date_t *date,
  * @param date Pointer to date to convert.
  * @param time Pointer to converted 64 bit Unix timestamp.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @note Dates are based on the 64 bit Unix time representation.
  *       Range of dates supported :
@@ -441,7 +453,7 @@ sl_sleeptimer_timestamp_64_t sl_sleeptimer_get_time_64(void);
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time);
 
@@ -453,7 +465,7 @@ sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time);
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_set_time_64(sl_sleeptimer_timestamp_64_t time);
 
@@ -467,7 +479,7 @@ sl_status_t sl_sleeptimer_set_time_64(sl_sleeptimer_timestamp_64_t time);
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_get_datetime(sl_sleeptimer_date_t *date);
 
@@ -479,7 +491,7 @@ sl_status_t sl_sleeptimer_get_datetime(sl_sleeptimer_date_t *date);
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_set_datetime(sl_sleeptimer_date_t *date);
 
@@ -499,7 +511,7 @@ sl_status_t sl_sleeptimer_set_datetime(sl_sleeptimer_date_t *date);
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_build_datetime(sl_sleeptimer_date_t *date,
                                          uint16_t year,
@@ -528,7 +540,7 @@ sl_status_t sl_sleeptimer_build_datetime(sl_sleeptimer_date_t *date,
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_build_datetime_64(sl_sleeptimer_date_t *date,
                                             uint16_t year,
@@ -551,7 +563,7 @@ sl_status_t sl_sleeptimer_build_datetime_64(sl_sleeptimer_date_t *date,
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_unix_time_to_ntp(sl_sleeptimer_timestamp_t time,
                                                    uint32_t *ntp_time);
@@ -568,7 +580,7 @@ sl_status_t sl_sleeptimer_convert_unix_time_to_ntp(sl_sleeptimer_timestamp_t tim
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_ntp_time_to_unix(uint32_t ntp_time,
                                                    sl_sleeptimer_timestamp_t *time);
@@ -586,7 +598,7 @@ sl_status_t sl_sleeptimer_convert_ntp_time_to_unix(uint32_t ntp_time,
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_unix_time_to_zigbee(sl_sleeptimer_timestamp_t time,
                                                       uint32_t *zigbee_time);
@@ -603,7 +615,7 @@ sl_status_t sl_sleeptimer_convert_unix_time_to_zigbee(sl_sleeptimer_timestamp_t 
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_zigbee_time_to_unix(uint32_t zigbee_time,
                                                       sl_sleeptimer_timestamp_t *time);
@@ -654,6 +666,7 @@ void sl_sleeptimer_delay_millisecond(uint16_t time_ms);
  *       This function is light and cannot fail so it should be privilegied to
  *       perform a millisecond to tick conversion.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sl_sleeptimer_ms_to_tick(uint16_t time_ms);
 
 /***************************************************************************//**
@@ -662,7 +675,7 @@ uint32_t sl_sleeptimer_ms_to_tick(uint16_t time_ms);
  * @param time_ms Number of milliseconds.
  * @param tick Pointer to the converted tick number.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @note  The result is "rounded" to the superior tick number.
  *        If possible the sl_sleeptimer_ms_to_tick() function should be used.
@@ -675,6 +688,7 @@ uint32_t sl_sleeptimer_ms_to_tick(uint16_t time_ms);
  *        If the value passed to 'time_ms' is too large,
  *        SL_STATUS_INVALID_PARAMETER will be returned.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_ms32_to_tick(uint32_t time_ms,
                                        uint32_t *tick);
 
@@ -695,6 +709,7 @@ uint32_t sl_sleeptimer_get_max_ms32_conversion(void);
  *
  * @note The result is rounded to the inferior millisecond.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sl_sleeptimer_tick_to_ms(uint32_t tick);
 
 /***************************************************************************//**
@@ -703,10 +718,11 @@ uint32_t sl_sleeptimer_tick_to_ms(uint32_t tick);
  * @param tick Number of tick.
  * @param ms Pointer to the converted milliseconds number.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @note The result is rounded to the inferior millisecond.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_tick64_to_ms(uint64_t tick,
                                        uint64_t *ms);
 
@@ -715,6 +731,7 @@ sl_status_t sl_sleeptimer_tick64_to_ms(uint64_t tick,
  *
  * @return true if sleep is allowed after ISR exit. False otherwise.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sl_sleeptimer_is_power_manager_early_restore_timer_latest_to_expire(void);
 
 /**************************************************************************//**
@@ -732,7 +749,7 @@ bool sl_sleeptimer_is_power_manager_early_restore_timer_latest_to_expire(void);
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *        or 0 for not flags.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @note  This function converts the delay expressed in milliseconds to timer
  *        ticks (represented on 32 bits). This means that the value that can
@@ -742,6 +759,7 @@ bool sl_sleeptimer_is_power_manager_early_restore_timer_latest_to_expire(void);
  *        If the value passed to 'timeout_ms' is too large,
  *        SL_STATUS_INVALID_PARAMETER will be returned.
  *****************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE sl_status_t sl_sleeptimer_start_timer_ms(sl_sleeptimer_timer_handle_t *handle,
                                                          uint32_t timeout_ms,
                                                          sl_sleeptimer_timer_callback_t callback,
@@ -775,7 +793,7 @@ __STATIC_INLINE sl_status_t sl_sleeptimer_start_timer_ms(sl_sleeptimer_timer_han
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *        or 0 for not flags.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @note  This function converts the delay expressed in milliseconds to timer
  *        ticks (represented on 32 bits). This means that the value that can
@@ -785,6 +803,7 @@ __STATIC_INLINE sl_status_t sl_sleeptimer_start_timer_ms(sl_sleeptimer_timer_han
  *        If the value passed to 'timeout_ms' is too large,
  *        SL_STATUS_INVALID_PARAMETER will be returned.
  *****************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE sl_status_t sl_sleeptimer_restart_timer_ms(sl_sleeptimer_timer_handle_t *handle,
                                                            uint32_t timeout_ms,
                                                            sl_sleeptimer_timer_callback_t callback,
@@ -818,7 +837,7 @@ __STATIC_INLINE sl_status_t sl_sleeptimer_restart_timer_ms(sl_sleeptimer_timer_h
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *        or 0 for not flags.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @note  This function converts the delay expressed in milliseconds to timer
  *        ticks (represented on 32 bits). This means that the value that can
@@ -828,6 +847,7 @@ __STATIC_INLINE sl_status_t sl_sleeptimer_restart_timer_ms(sl_sleeptimer_timer_h
  *        If the value passed to 'timeout_ms' is too large,
  *        SL_STATUS_INVALID_PARAMETER will be returned.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_start_periodic_timer_ms(sl_sleeptimer_timer_handle_t *handle,
                                                   uint32_t timeout_ms,
                                                   sl_sleeptimer_timer_callback_t callback,
@@ -850,7 +870,7 @@ sl_status_t sl_sleeptimer_start_periodic_timer_ms(sl_sleeptimer_timer_handle_t *
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *        or 0 for not flags.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @note  This function converts the delay expressed in milliseconds to timer
  *        ticks (represented on 32 bits). This means that the value that can
@@ -860,6 +880,7 @@ sl_status_t sl_sleeptimer_start_periodic_timer_ms(sl_sleeptimer_timer_handle_t *
  *        If the value passed to 'timeout_ms' is too large,
  *        SL_STATUS_INVALID_PARAMETER will be returned.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_sleeptimer_restart_periodic_timer_ms(sl_sleeptimer_timer_handle_t *handle,
                                                     uint32_t timeout_ms,
                                                     sl_sleeptimer_timer_callback_t callback,
@@ -969,6 +990,8 @@ uint16_t sl_sleeptimer_get_clock_accuracy(void);
 ///   For WTIMER/TIMER peripherals, the user must select the appropriate oscillator if it is not the default wanted clock source.
 ///
 ///   When WTIMER/TIMER is selected, sleeptimer uses channel 0 and it is not possible to use other channels of the same instance for other purposes.
+///
+///   When SYSRTC is chosen, the Peripheral Reflex System (PRS) channel 1 and 2 will be used by sleeptimer and become unavailable. PRS_GetFreeChannel() can be used to retrieve an unallocated channel.
 ///
 ///   @n @subsection  Clock Selection in a Project without Micrium OS
 ///

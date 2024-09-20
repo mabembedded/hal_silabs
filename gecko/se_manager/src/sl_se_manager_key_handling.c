@@ -674,43 +674,43 @@ static const uint32_t default_auth_data[2] = { 0 };
 #endif
 
 sl_status_t sli_se_get_auth_buffer(const sl_se_key_descriptor_t *key,
-                                   SE_DataTransfer_t *auth_buffer)
+                                   sli_se_datatransfer_t *auth_buffer)
 {
   if (key == NULL || auth_buffer == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  auth_buffer->next = (void*)SE_DATATRANSFER_STOP;
+  auth_buffer->next = (void*)SLI_SE_DATATRANSFER_STOP;
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   if ((key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_VOLATILE)
       || (key->storage.method == SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED)) {
     if (key->password) {
       auth_buffer->data = key->password;
-      auth_buffer->length = sizeof(default_auth_data) | SE_DATATRANSFER_REALIGN;
+      auth_buffer->length = sizeof(default_auth_data) | SLI_SE_DATATRANSFER_REALIGN;
     } else {
       auth_buffer->data = (void*)default_auth_data;
-      auth_buffer->length = sizeof(default_auth_data) | SE_DATATRANSFER_REALIGN;
+      auth_buffer->length = sizeof(default_auth_data) | SLI_SE_DATATRANSFER_REALIGN;
     }
   } else {
-    auth_buffer->length = 0 | SE_DATATRANSFER_REALIGN;
+    auth_buffer->length = 0 | SLI_SE_DATATRANSFER_REALIGN;
   }
 #else
   (void)key;
-  auth_buffer->length = 0 | SE_DATATRANSFER_REALIGN;
+  auth_buffer->length = 0 | SLI_SE_DATATRANSFER_REALIGN;
 #endif
 
   return SL_STATUS_OK;
 }
 
 sl_status_t sli_se_get_key_input_output(const sl_se_key_descriptor_t *key,
-                                        SE_DataTransfer_t *buffer)
+                                        sli_se_datatransfer_t *buffer)
 {
   if (key == NULL || buffer == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  buffer->next = (void*)SE_DATATRANSFER_STOP;
+  buffer->next = (void*)SLI_SE_DATATRANSFER_STOP;
 
   if ((key->storage.method == SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT)
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -739,7 +739,7 @@ sl_status_t sli_se_get_key_input_output(const sl_se_key_descriptor_t *key,
     }
 
     buffer->data = key->storage.location.buffer.pointer;
-    buffer->length = total_storage_size | SE_DATATRANSFER_REALIGN;
+    buffer->length = total_storage_size | SLI_SE_DATATRANSFER_REALIGN;
   } else if ((key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE)
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
              || (key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_VOLATILE)
@@ -770,13 +770,13 @@ sl_status_t sl_se_validate_key(const sl_se_key_descriptor_t *key)
     return status;
   }
 
-  SE_DataTransfer_t auth_buffer;
+  sli_se_datatransfer_t auth_buffer;
   status = sli_se_get_auth_buffer(key, &auth_buffer);
   if (status != SL_STATUS_OK) {
     return status;
   }
 
-  SE_DataTransfer_t key_buffer;
+  sli_se_datatransfer_t key_buffer;
   status = sli_se_get_key_input_output(key, &key_buffer);
   if (status != SL_STATUS_OK) {
     return status;
@@ -804,49 +804,49 @@ sl_status_t sl_se_generate_key(sl_se_command_context_t *cmd_ctx,
   sli_add_key_parameters(cmd_ctx, key_out, status);
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // Custom curve domain
-  SE_DataTransfer_t domain_p_buffer;
-  SE_DataTransfer_t domain_N_buffer;
-  SE_DataTransfer_t domain_Gx_buffer;
-  SE_DataTransfer_t domain_Gy_buffer;
-  SE_DataTransfer_t domain_a_buffer;
-  SE_DataTransfer_t domain_b_buffer;
+  sli_se_datatransfer_t domain_p_buffer;
+  sli_se_datatransfer_t domain_N_buffer;
+  sli_se_datatransfer_t domain_Gx_buffer;
+  sli_se_datatransfer_t domain_Gy_buffer;
+  sli_se_datatransfer_t domain_a_buffer;
+  sli_se_datatransfer_t domain_b_buffer;
 
   if (key_out->flags & SL_SE_KEY_FLAG_ASYMMETRIC_USES_CUSTOM_DOMAIN) {
     if (key_out->type & SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM) {
       sl_se_custom_weierstrass_prime_domain_t *domain = (sl_se_custom_weierstrass_prime_domain_t*)key_out->domain;
       uint32_t domain_size = domain->size;
 
-      domain_p_buffer.next = (void*)SE_DATATRANSFER_STOP;
+      domain_p_buffer.next = (void*)SLI_SE_DATATRANSFER_STOP;
       domain_p_buffer.data = (void*)domain->p;
       domain_p_buffer.length = domain_size;
-      SE_addDataInput(se_cmd, (SE_DataTransfer_t*)&domain_p_buffer);
+      sli_se_mailbox_command_add_input(se_cmd, (sli_se_datatransfer_t*)&domain_p_buffer);
 
-      domain_N_buffer.next = (void*)SE_DATATRANSFER_STOP;
+      domain_N_buffer.next = (void*)SLI_SE_DATATRANSFER_STOP;
       domain_N_buffer.data = (void*)domain->N;
       domain_N_buffer.length = domain_size;
-      SE_addDataInput(se_cmd, (SE_DataTransfer_t*)&domain_N_buffer);
+      sli_se_mailbox_command_add_input(se_cmd, (sli_se_datatransfer_t*)&domain_N_buffer);
 
-      domain_Gx_buffer.next = (void*)SE_DATATRANSFER_STOP;
+      domain_Gx_buffer.next = (void*)SLI_SE_DATATRANSFER_STOP;
       domain_Gx_buffer.data = (void*)domain->Gx;
       domain_Gx_buffer.length = domain_size;
-      SE_addDataInput(se_cmd, (SE_DataTransfer_t*)&domain_Gx_buffer);
+      sli_se_mailbox_command_add_input(se_cmd, (sli_se_datatransfer_t*)&domain_Gx_buffer);
 
-      domain_Gy_buffer.next = (void*)SE_DATATRANSFER_STOP;
+      domain_Gy_buffer.next = (void*)SLI_SE_DATATRANSFER_STOP;
       domain_Gy_buffer.data = (void*)domain->Gy;
       domain_Gy_buffer.length = domain_size;
-      SE_addDataInput(se_cmd, (SE_DataTransfer_t*)&domain_Gy_buffer);
+      sli_se_mailbox_command_add_input(se_cmd, (sli_se_datatransfer_t*)&domain_Gy_buffer);
 
-      domain_a_buffer.next = (void*)SE_DATATRANSFER_STOP;
+      domain_a_buffer.next = (void*)SLI_SE_DATATRANSFER_STOP;
       domain_a_buffer.data = (void*)domain->a;
       domain_a_buffer.length = domain_size;
-      SE_addDataInput(se_cmd, (SE_DataTransfer_t*)&domain_a_buffer);
+      sli_se_mailbox_command_add_input(se_cmd, (sli_se_datatransfer_t*)&domain_a_buffer);
 
-      domain_b_buffer.next = (void*)SE_DATATRANSFER_STOP;
+      domain_b_buffer.next = (void*)SLI_SE_DATATRANSFER_STOP;
       domain_b_buffer.data = (void*)domain->b;
       domain_b_buffer.length = domain_size;
-      SE_addDataInput(se_cmd, (SE_DataTransfer_t*)&domain_b_buffer);
+      sli_se_mailbox_command_add_input(se_cmd, (sli_se_datatransfer_t*)&domain_b_buffer);
     } else {
       return SL_STATUS_NOT_SUPPORTED;
     }
@@ -882,7 +882,7 @@ sl_status_t sl_se_export_public_key(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
 
   // Check input/output key type and size relationship
@@ -929,9 +929,9 @@ sl_status_t sl_se_export_public_key(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_WOULD_OVERFLOW;
   }
 
-  SE_DataTransfer_t pubkey_buffer = SE_DATATRANSFER_DEFAULT(
+  sli_se_datatransfer_t pubkey_buffer = SLI_SE_DATATRANSFER_DEFAULT(
     key_out->storage.location.buffer.pointer, required_storage_size);
-  SE_addDataOutput(se_cmd, &pubkey_buffer);
+  sli_se_mailbox_command_add_output(se_cmd, &pubkey_buffer);
 
   // Execute command.
   // The retries are necessary in order to reduce the risk of random failures
@@ -1092,9 +1092,9 @@ sl_status_t sl_se_transfer_key(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
-  SE_DataTransfer_t auth_buffer_out;
+  sli_se_datatransfer_t auth_buffer_out;
   uint32_t key_update_index;
   uint32_t key_update_mode;
 
@@ -1132,7 +1132,7 @@ sl_status_t sl_se_transfer_key(sl_se_command_context_t *cmd_ctx,
                 | ((key_update_mode << KEYSPEC_TRANSFER_MODE_OFFSET)
                    & KEYSPEC_TRANSFER_MODE_MASK);
   keyspec_out = (keyspec_out & ~KEYSPEC_TRANSFER_PROT_BIT_MASK);
-  SE_addParameter(se_cmd, keyspec_out);
+  sli_se_mailbox_command_add_parameter(se_cmd, keyspec_out);
 
   // Add key input metadata block to command
   sli_add_key_metadata(cmd_ctx, key_in, status);
@@ -1144,7 +1144,7 @@ sl_status_t sl_se_transfer_key(sl_se_command_context_t *cmd_ctx,
   if (status != SL_STATUS_OK) {
     return status;
   }
-  SE_addDataInput(se_cmd, &auth_buffer_out);
+  sli_se_mailbox_command_add_input(se_cmd, &auth_buffer_out);
 
   // Add key output block to command
   sli_add_key_output(cmd_ctx, key_out, status);

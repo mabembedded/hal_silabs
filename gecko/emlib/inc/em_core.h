@@ -34,22 +34,6 @@
 #include "em_core_generic.h"
 #include "sl_common.h"
 
-#if defined(EMLIB_USER_CONFIG)
-#include "emlib_config.h"
-#endif
-
-#if defined(SL_COMPONENT_CATALOG_PRESENT)
-#include "sl_component_catalog.h"
-#endif
-
-#if defined(SL_CATALOG_EMLIB_CORE_DEBUG_CONFIG_PRESENT)
-#include "emlib_core_debug_config.h"
-#endif
-
-#if !defined(SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING)
-#define SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING   0
-#endif
-
 /***************************************************************************//**
  * @addtogroup core
  * @{
@@ -65,10 +49,6 @@
 /** Number of entries in a default interrupt vector table. */
 #define CORE_DEFAULT_VECTOR_TABLE_ENTRIES   (EXT_IRQ_COUNT + 16)
 
-// Interrupt priorities based on processor architecture
-#if defined(__CM3_REV) || defined(__CM4_REV) || defined(__CM7_REV) \
-  || defined(__CM23_REV) || defined(__CM33_REV)
-
 /** Highest priority for core interrupt. */
 #define CORE_INTERRUPT_HIGHEST_PRIORITY 0
 
@@ -77,34 +57,6 @@
 
 /** Lowest priority for core interrupt. */
 #define CORE_INTERRUPT_LOWEST_PRIORITY 7
-
-/** Default method to disable interrupts in ATOMIC sections. */
-#define CORE_ATOMIC_METHOD_DEFAULT  CORE_ATOMIC_METHOD_BASEPRI
-#elif defined(__CM0_REV) || defined(__CM0PLUS_REV)
-
-/** Highest priority for core interrupt. */
-#define CORE_INTERRUPT_HIGHEST_PRIORITY 0
-
-/** Default priority for core interrupt. */
-#define CORE_INTERRUPT_DEFAULT_PRIORITY 1
-
-/** Lowest priority for core interrupt. */
-#define CORE_INTERRUPT_LOWEST_PRIORITY 3
-
-/** Default method to disable interrupts in ATOMIC sections. */
-#define CORE_ATOMIC_METHOD_DEFAULT  CORE_ATOMIC_METHOD_PRIMASK
-#endif
-
-#if !defined(CORE_ATOMIC_METHOD)
-/** Specify which method to use when implementing ATOMIC sections. You can
- *  select between BASEPRI or PRIMASK method.
- *  @note On Cortex-M0+ devices only PRIMASK can be used. */
-#if !defined(SL_CATALOG_DEVICE_INIT_NVIC_PRESENT)
-#define CORE_ATOMIC_METHOD    CORE_ATOMIC_METHOD_PRIMASK
-#else
-#define CORE_ATOMIC_METHOD   CORE_ATOMIC_METHOD_DEFAULT
-#endif
-#endif
 
 // Compile time sanity check.
 #if (CORE_NVIC_REG_WORDS > 3)
@@ -190,35 +142,28 @@ typedef struct {
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
-bool  CORE_IrqIsBlocked(IRQn_Type irqN);
+bool  CORE_IrqIsBlocked(IRQn_Type irqN) SL_DEPRECATED_API_SDK_2024_6;
 
-void  CORE_GetNvicEnabledMask(CORE_nvicMask_t *mask);
-bool  CORE_GetNvicMaskDisableState(const CORE_nvicMask_t *mask);
+void  CORE_GetNvicEnabledMask(CORE_nvicMask_t *mask) SL_DEPRECATED_API_SDK_2024_6;
+bool  CORE_GetNvicMaskDisableState(const CORE_nvicMask_t *mask) SL_DEPRECATED_API_SDK_2024_6;
 
 void  CORE_EnterNvicMask(CORE_nvicMask_t *nvicState,
-                         const CORE_nvicMask_t *disable);
-void  CORE_NvicDisableMask(const CORE_nvicMask_t *disable);
-void  CORE_NvicEnableMask(const CORE_nvicMask_t *enable);
-void  CORE_YieldNvicMask(const CORE_nvicMask_t *enable);
-void  CORE_NvicMaskSetIRQ(IRQn_Type irqN, CORE_nvicMask_t *mask);
-void  CORE_NvicMaskClearIRQ(IRQn_Type irqN, CORE_nvicMask_t *mask);
-bool  CORE_NvicIRQDisabled(IRQn_Type irqN);
+                         const CORE_nvicMask_t *disable) SL_DEPRECATED_API_SDK_2024_6;
+void  CORE_NvicDisableMask(const CORE_nvicMask_t *disable) SL_DEPRECATED_API_SDK_2024_6;
+void  CORE_NvicEnableMask(const CORE_nvicMask_t *enable) SL_DEPRECATED_API_SDK_2024_6;
+void  CORE_YieldNvicMask(const CORE_nvicMask_t *enable) SL_DEPRECATED_API_SDK_2024_6;
+void  CORE_NvicMaskSetIRQ(IRQn_Type irqN, CORE_nvicMask_t *mask) SL_DEPRECATED_API_SDK_2024_6;
+void  CORE_NvicMaskClearIRQ(IRQn_Type irqN, CORE_nvicMask_t *mask) SL_DEPRECATED_API_SDK_2024_6;
+bool  CORE_NvicIRQDisabled(IRQn_Type irqN) SL_DEPRECATED_API_SDK_2024_6;
 
-void *CORE_GetNvicRamTableHandler(IRQn_Type irqN);
-void  CORE_SetNvicRamTableHandler(IRQn_Type irqN, void *handler);
+void *CORE_GetNvicRamTableHandler(IRQn_Type irqN) SL_DEPRECATED_API_SDK_2024_6;
+void  CORE_SetNvicRamTableHandler(IRQn_Type irqN, void *handler) SL_DEPRECATED_API_SDK_2024_6;
 void  CORE_InitNvicVectorTable(uint32_t *sourceTable,
                                uint32_t sourceSize,
                                uint32_t *targetTable,
                                uint32_t targetSize,
                                void *defaultHandler,
                                bool overwriteActive);
-
-#if (SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
-uint32_t CORE_get_max_time_critical_section(void);
-uint32_t CORE_get_max_time_atomic_section(void);
-void CORE_clear_max_time_critical_section(void);
-void CORE_clear_max_time_atomic_section(void);
-#endif
 
 #ifdef __cplusplus
 }

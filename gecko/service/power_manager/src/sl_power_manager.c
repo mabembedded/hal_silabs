@@ -33,12 +33,15 @@
 #include "sli_power_manager_private.h"
 #include "sli_power_manager.h"
 #include "sli_sleeptimer.h"
+#include "sli_clock_manager.h"
 #include "sl_assert.h"
 #include "sl_atomic.h"
 
 #include "em_device.h"
 #if !defined(_SILICON_LABS_32B_SERIES_3)
 #include "em_emu.h"
+#else
+#include "sli_power_manager_execution_modes_private.h"
 #endif
 
 #include <stdlib.h>
@@ -71,10 +74,6 @@ static sl_power_manager_em_t current_em = SL_POWER_MANAGER_EM0;
 // Events subscribers lists
 static sl_slist_node_t *power_manager_em_transition_event_list = NULL;
 
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
-// Store the sleeptimer module clock frequency for conversion calculation
-static uint32_t sleeptimer_frequency;
-
 // Table of energy modes counters. Each counter indicates the presence (not zero)
 // or absence (zero) of requirements on a given energy mode. The table doesn't
 // contain requirement on EM0.
@@ -82,6 +81,10 @@ static uint8_t requirement_em_table[SLI_POWER_MANAGER_EM_TABLE_SIZE] = {
   0,  // EM1 requirement counter
   0,  // EM2 requirement counter
 };
+
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
+// Store the sleeptimer module clock frequency for conversion calculation
+static uint32_t sleeptimer_frequency;
 
 // Counter variable to save the number of High Accuracy HF clock requirements requested.
 uint8_t requirement_high_accuracy_hf_clock_counter = 0;
@@ -95,10 +98,10 @@ bool requirement_high_accuracy_hf_clock_back_to_zero = false;
 static sl_power_manager_em_t waiting_clock_restore_from_em = SL_POWER_MANAGER_EM0;
 
 // Flag indicating if we are sleeping, waiting for the HF clock restore
-static bool is_sleeping_waiting_for_clock_restore = false;
+static volatile bool is_sleeping_waiting_for_clock_restore = false;
 
 // Flag indicating if the system states (clocks) are saved and should be restored
-static bool is_states_saved = false;
+static volatile bool is_states_saved = false;
 
 // Timer that it is used for enabling the clock for the scheduled wakeup
 static sl_sleeptimer_timer_handle_t clock_wakeup_timer_handle = { 0 };
@@ -122,8 +125,8 @@ static bool is_hf_x_oscillator_not_preserved;
 static bool is_actively_waiting_for_clock_restore = false;
 
 // Indicates if the clock restore was completed from the HFXO ISR
-static bool is_restored_from_hfxo_isr = false;
-static bool is_restored_from_hfxo_isr_internal = false;
+static volatile bool is_restored_from_hfxo_isr = false;
+static volatile bool is_restored_from_hfxo_isr_internal = false;
 #endif
 
 /*
@@ -132,56 +135,71 @@ static bool is_restored_from_hfxo_isr_internal = false;
  *********************************************************************************************************
  */
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sl_power_manager_sleep_on_isr_exit(void);
 
 // Callback to application after wakeup but before restoring interrupts.
 // For internal Silicon Labs use only
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __WEAK void sli_power_manager_on_wakeup(void);
 
 // Hook that can be used by the log outputer to suspend transmission of logs
 // in case it would require energy mode changes while in the sleep loop.
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __WEAK void sli_power_manager_suspend_log_transmission(void);
 
 // Hook that can be used by the log outputer to resume transmission of logs.
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __WEAK void sli_power_manager_resume_log_transmission(void);
 
 // Callback to notify possible transition from EM1P to EM2.
 // For internal Silicon Labs use only
 #ifdef SLI_DEVICE_SUPPORTS_EM1P
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __WEAK void sli_power_manager_em1p_to_em2_notification(void);
 #endif
 
 /***************************************************************************//**
  * Mandatory callback that allows to cancel sleeping action.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sl_power_manager_is_ok_to_sleep(void);
 
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static sl_power_manager_em_t get_lowest_em(void);
 
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static void evaluate_wakeup(sl_power_manager_em_t to);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static void update_em1_requirement(bool add);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
                                     void *data);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static void clock_restore_and_wait(void);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static void clock_restore(void);
 #endif
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static void power_manager_notify_em_transition(sl_power_manager_em_t from,
                                                sl_power_manager_em_t to);
 
 // Use PriMask to enter critical section by disabling interrupts.
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static CORE_irqState_t enter_critical_with_primask();
 
 // Exit critical section by re-enabling interrupts in PriMask.
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static void exit_critical_with_primask(CORE_irqState_t primask_state);
 
 /*******************************************************************************
@@ -218,14 +236,26 @@ sl_status_t sl_power_manager_init(void)
 
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
     // If lowest energy mode is not restricted to EM1, determine and set lowest energy mode
-    #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-      sli_sleeptimer_set_pm_em_requirement();    
-    #endif
+    sli_sleeptimer_set_pm_em_requirement();
     // Set the default wake-up overhead value
     wakeup_time_config_overhead_tick = SCHEDULE_WAKEUP_DEFAULT_RESTORE_TIME_OVERHEAD_TICK;
 
     // Get the sleeptimer frequency
     sleeptimer_frequency = sl_sleeptimer_get_timer_frequency();
+#endif
+
+#if defined(_EMU_CTRL_EM2DBGEN_MASK) && defined(SL_POWER_MANAGER_INIT_EMU_EM2_DEBUG_ENABLE)
+    // EM2 set debug enable
+    EMU->CTRL = (EMU->CTRL & ~_EMU_CTRL_EM2DBGEN_MASK)
+                | (SL_POWER_MANAGER_INIT_EMU_EM2_DEBUG_ENABLE << _EMU_CTRL_EM2DBGEN_SHIFT);
+#endif
+
+    // Initialize EM4
+    sli_power_manager_init_em4();
+
+#if defined(SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN) && (SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN == 1)
+    // Initialize execution mode feature
+    sli_power_manager_executions_modes_init();
 #endif
   }
 
@@ -249,6 +279,7 @@ sl_status_t sl_power_manager_init(void)
 void sl_power_manager_sleep(void)
 {
   CORE_irqState_t primask_state;
+  sl_power_manager_em_t lowest_em;
 
   primask_state = enter_critical_with_primask();
 
@@ -261,8 +292,6 @@ void sl_power_manager_sleep(void)
   }
 
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
-  sl_power_manager_em_t lowest_em;
-
   // Go to another energy mode (same, higher to lower or lower to higher)
   do {
     // Remove any previous EM1 requirement added internally by the power manager itself
@@ -372,12 +401,21 @@ void sl_power_manager_sleep(void)
   // Notify listeners of transition to EM1
   power_manager_notify_em_transition(SL_POWER_MANAGER_EM0, SL_POWER_MANAGER_EM1);
   do {
+    // Get lowest EM
+    lowest_em = get_lowest_em();
+
     // Apply EM1 energy mode
-    sli_power_manager_apply_em(SL_POWER_MANAGER_EM1);
+    // Lowest EM is passed so that further actions can be taking by the HAL based on the EM requirements
+    // but only EM1 sleep will be entered.
+    sli_power_manager_apply_em(lowest_em);
 
     exit_critical_with_primask(primask_state);
     primask_state = enter_critical_with_primask();
   } while (sl_power_manager_sleep_on_isr_exit() == true);
+#endif
+
+#if defined(SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN) && (SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN == 1)
+  sli_power_manager_implement_execution_mode_on_wakeup();
 #endif
 
   // Indicate back to EM0
@@ -408,7 +446,6 @@ void sl_power_manager_sleep(void)
 void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
                                              bool add)
 {
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
   // EM0 is not allowed
   EFM_ASSERT((em > SL_POWER_MANAGER_EM0) && (em < SL_POWER_MANAGER_EM3));
 
@@ -420,6 +457,7 @@ void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
   // Increment (add) or decrement (remove) energy mode counter.
   requirement_em_table[em - 1] += (add) ? 1 : -1;
 
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
   if (add == true
       && current_em >= SL_POWER_MANAGER_EM2) {  // if currently sleeping at a level that can require a clock restore; i.e. called from ISR
     sl_power_manager_em_t lowest_em;
@@ -778,7 +816,6 @@ bool sl_power_manager_is_latest_wakeup_internal(void)
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /***************************************************************************//**
  * Get lowest energy mode to apply given the requirements on the different
  * energy modes.
@@ -802,7 +839,6 @@ static sl_power_manager_em_t get_lowest_em(void)
 
   return em;
 }
-#endif
 
 /***************************************************************************//**
  * Notify subscribers about energy mode transition.
@@ -1179,4 +1215,50 @@ void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
 #else
   (void)enable;
 #endif
+}
+
+/******************************************************************************
+ * Event called before entering EM4 sleep.
+ *****************************************************************************/
+SL_WEAK void sl_power_manager_em4_presleep_hook(void)
+{
+}
+
+/***************************************************************************//**
+ * Enter energy mode 4 (EM4).
+ *
+ * @note  You should not expect to return from this function. Once the device
+ *        enters EM4, only a power on reset or external reset pin can wake the
+ *        device.
+ *
+ * @note  On xG22 devices, this function re-configures the IADC if EM4 entry
+ *        is possible.
+ ******************************************************************************/
+__NO_RETURN void sl_power_manager_enter_em4(void)
+{
+  sli_power_manager_enter_em4();
+  for (;; ) {
+    // __NO_RETURN
+  }
+}
+
+/***************************************************************************//**
+ *   When EM4 pin retention is set to power_manager_pin_retention_latch,
+ *   then pins are retained through EM4 entry and wakeup. The pin state is
+ *   released by calling this function. The feature allows peripherals or
+ *   GPIO to be re-initialized after EM4 exit (reset), and when
+ *   initialization is done, this function can release pins and return
+ *   control to the peripherals or GPIO.
+ ******************************************************************************/
+void sl_power_manager_em4_unlatch_pin_retention(void)
+{
+  sli_power_manager_em4_unlatch_pin_retention();
+}
+
+/***************************************************************************//**
+ * Returns current energy mode.
+ ******************************************************************************/
+sl_power_manager_em_t sli_power_manager_get_current_em(void)
+{
+  return current_em;
 }

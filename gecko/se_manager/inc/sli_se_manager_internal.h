@@ -35,7 +35,7 @@
 #if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 #include "sl_status.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_se_manager.h"
 #include "sl_se_manager_key_handling.h"
 
@@ -45,226 +45,6 @@ extern "C" {
 
 // -----------------------------------------------------------------------------
 // Defines
-
-// -------------------------------
-// SE status codes
-
-/// Response status codes for the Secure Engine
-#define SLI_SE_RESPONSE_MASK                    0x000F0000UL
-/// Command executed successfully or signature was successfully validated.
-#define SLI_SE_RESPONSE_OK                      0x00000000UL
-
-/// Command was not recognized as a valid command, or is not allowed in the
-/// current context.
-#define SLI_SE_RESPONSE_INVALID_COMMAND         0x00010000UL
-/// User did not provide the required credentials to be allowed to execute the
-/// command.
-#define SLI_SE_RESPONSE_AUTHORIZATION_ERROR     0x00020000UL
-/// Signature validation command (e.g. SE_COMMAND_SIGNATURE_VERIFY) failed to
-/// verify the given signature as being correct.
-#define SLI_SE_RESPONSE_INVALID_SIGNATURE       0x00030000UL
-/// A command started in non-secure mode is trying to access secure memory.
-#define SLI_SE_RESPONSE_BUS_ERROR               0x00040000UL
-/// Internal error
-#define SLI_SE_RESPONSE_INTERNAL_ERROR          0x00050000UL
-/// An internal error was raised and the command did not execute.
-#define SLI_SE_RESPONSE_CRYPTO_ERROR            0x00060000UL
-/// One of the passed parameters is deemed invalid (e.g. out of bounds).
-#define SLI_SE_RESPONSE_INVALID_PARAMETER       0x00070000UL
-/// Failure while checking the host for secure boot
-#define SLI_SE_RESPONSE_SECUREBOOT_ERROR        0x00090000UL
-/// Failure during selftest
-#define SLI_SE_RESPONSE_SELFTEST_ERROR          0x000A0000UL
-/// Feature/item not initialized or not present
-#define SLI_SE_RESPONSE_NOT_INITIALIZED         0x000B0000UL
-/// Abort status code is given when no operation is attempted.
-#define SLI_SE_RESPONSE_ABORT                   0x00FF0000UL
-#if defined(CRYPTOACC_PRESENT)
-/// Root Code Mailbox is invalid.
-#define SLI_SE_RESPONSE_MAILBOX_INVALID         0x00FE0000UL
-#endif // CRYPTOACC_PRESENT
-
-// -------------------------------
-// SE command words
-// Commands are grouped based on availability
-
-#define SLI_SE_COMMAND_CHECK_SE_IMAGE           0x43020000UL
-#define SLI_SE_COMMAND_APPLY_SE_IMAGE           0x43030000UL
-#define SLI_SE_COMMAND_STATUS_SE_IMAGE          0x43040000UL
-#define SLI_SE_COMMAND_CHECK_HOST_IMAGE         0x43050001UL
-#define SLI_SE_COMMAND_APPLY_HOST_IMAGE         0x43060001UL
-#define SLI_SE_COMMAND_STATUS_HOST_IMAGE        0x43070000UL
-
-#define SLI_SE_COMMAND_READ_OTP                 0xFE040000UL
-
-#define SLI_SE_COMMAND_INIT_OTP                 0xFF000001UL
-#define SLI_SE_COMMAND_INIT_PUBKEY              0xFF070001UL
-#define SLI_SE_COMMAND_READ_PUBKEY              0xFF080001UL
-
-#define SLI_SE_COMMAND_READ_PUBKEY              0xFF080001UL
-#define SLI_SE_COMMAND_READ_OTP                 0xFE040000UL
-
-#define SLI_SE_COMMAND_DBG_LOCK_APPLY           0x430C0000UL
-
-// Commands limited to SE devices
-#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
-  #define SLI_SE_COMMAND_CREATE_KEY               0x02000000UL
-  #define SLI_SE_COMMAND_READPUB_KEY              0x02010000UL
-
-  #define SLI_SE_COMMAND_HASH                     0x03000000UL
-  #define SLI_SE_COMMAND_HASHUPDATE               0x03010000UL
-  #define SLI_SE_COMMAND_HMAC                     0x03020000UL
-  #define SLI_SE_COMMAND_HASHFINISH               0x03030000UL
-
-  #define SLI_SE_COMMAND_AES_ENCRYPT              0x04000000UL
-  #define SLI_SE_COMMAND_AES_DECRYPT              0x04010000UL
-  #define SLI_SE_COMMAND_AES_GCM_ENCRYPT          0x04020000UL
-  #define SLI_SE_COMMAND_AES_GCM_DECRYPT          0x04030000UL
-  #define SLI_SE_COMMAND_AES_CMAC                 0x04040000UL
-  #define SLI_SE_COMMAND_AES_CCM_ENCRYPT          0x04050000UL
-  #define SLI_SE_COMMAND_AES_CCM_DECRYPT          0x04060000UL
-
-  #define SLI_SE_COMMAND_SIGNATURE_SIGN           0x06000000UL
-  #define SLI_SE_COMMAND_SIGNATURE_VERIFY         0x06010000UL
-  #define SLI_SE_COMMAND_EDDSA_SIGN               0x06020000UL
-  #define SLI_SE_COMMAND_EDDSA_VERIFY             0x06030000UL
-
-  #define SLI_SE_COMMAND_TRNG_GET_RANDOM          0x07000000UL
-
-  #define SLI_SE_COMMAND_JPAKE_R1_GENERATE        0x0B000000UL
-  #define SLI_SE_COMMAND_JPAKE_R1_VERIFY          0x0B000100UL
-  #define SLI_SE_COMMAND_JPAKE_R2_GENERATE        0x0B010000UL
-  #define SLI_SE_COMMAND_JPAKE_R2_VERIFY          0x0B010100UL
-  #define SLI_SE_COMMAND_JPAKE_GEN_SESSIONKEY     0x0B020000UL
-
-  #define SLI_SE_COMMAND_DH                       0x0E000000UL
-
-  #define SLI_SE_COMMAND_STATUS_SE_VERSION        0x43080000UL
-  #define SLI_SE_COMMAND_STATUS_OTP_VERSION       0x43080100UL
-  #define SLI_SE_COMMAND_WRITE_USER_DATA          0x43090000UL
-  #define SLI_SE_COMMAND_ERASE_USER_DATA          0x430A0000UL
-  #define SLI_SE_COMMAND_DBG_LOCK_ENABLE_SECURE   0x430D0000UL
-  #define SLI_SE_COMMAND_DBG_LOCK_DISABLE_SECURE  0x430E0000UL
-  #define SLI_SE_COMMAND_DEVICE_ERASE             0x430F0000UL
-  #define SLI_SE_COMMAND_DEVICE_ERASE_DISABLE     0x43100000UL
-  #define SLI_SE_COMMAND_DBG_LOCK_STATUS          0x43110000UL
-  #define SLI_SE_COMMAND_DBG_SET_RESTRICTIONS     0x43120000UL
-  #define SLI_SE_COMMAND_PROTECTED_REGISTER       0x43210000UL
-#if defined(SLI_SE_COMMAND_STATUS_READ_RSTCAUSE_AVAILABLE)
-// SLI_SE_COMMAND_STATUS_READ_RSTCAUSE is only available on xG21 devices (series-2-config-1)
-  #define SLI_SE_COMMAND_STATUS_READ_RSTCAUSE     0x43220000UL
-#endif // SLI_SE_COMMAND_STATUS_READ_RSTCAUSE_AVAILABLE
-  #define SLI_SE_COMMAND_READ_USER_CERT_SIZE      0x43FA0000UL
-  #define SLI_SE_COMMAND_READ_USER_CERT           0x43FB0000UL
-
-  #define SLI_SE_COMMAND_ENTER_ACTIVE_MODE        0x45000000UL
-  #define SLI_SE_COMMAND_EXIT_ACTIVE_MODE         0x45010000UL
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  #define SLI_SE_COMMAND_ATTEST_PSA_IAT           0x0A030000UL
-  #define SLI_SE_COMMAND_ATTEST_CONFIG            0x0A040000UL
-#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT)
-
-  #define SLI_SE_COMMAND_GET_CHALLENGE            0xFD000001UL
-  #define SLI_SE_COMMAND_ROLL_CHALLENGE           0xFD000101UL
-  #define SLI_SE_COMMAND_OPEN_DEBUG               0xFD010001UL
-
-  #define SLI_SE_COMMAND_READ_SERIAL              0xFE000000UL
-  #define SLI_SE_COMMAND_GET_STATUS               0xFE010000UL
-  #define SLI_SE_COMMAND_READ_PUBKEYBOOT          0xFE020001UL
-  #define SLI_SE_COMMAND_SET_UPGRADEFLAG_SE       0xFE030000UL
-  #define SLI_SE_COMMAND_SET_UPGRADEFLAG_HOST     0xFE030001UL
-  #define SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE  0xFE050000UL
-
-  #define SLI_SE_COMMAND_INIT_PUBKEY_SIGNATURE    0xFF090001UL
-  #define SLI_SE_COMMAND_READ_PUBKEY_SIGNATURE    0xFF0A0001UL
-  #define SLI_SE_COMMAND_INIT_AES_128_KEY         0xFF0B0001UL
-#endif // SLI_MAILBOX_COMMAND_SUPPORTED
-
-// Commands limited to SE Vault High devices
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  #define SLI_SE_COMMAND_WRAP_KEY                 0x01000000UL
-  #define SLI_SE_COMMAND_UNWRAP_KEY               0x01020000UL
-  #define SLI_SE_COMMAND_DELETE_KEY               0x01050000UL
-  #define SLI_SE_COMMAND_TRANSFER_KEY             0x01060000UL
-
-  #define SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_HMAC   0x02020002UL
-  #define SLI_SE_COMMAND_DERIVE_KEY_HKDF          0x02020003UL
-  #define SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_CMAC   0x02020010UL
-
-  #define SLI_SE_COMMAND_CHACHAPOLY_ENCRYPT       0x0C000000UL
-  #define SLI_SE_COMMAND_CHACHAPOLY_DECRYPT       0x0C010000UL
-  #define SLI_SE_COMMAND_CHACHA20_ENCRYPT         0x0C020000UL
-  #define SLI_SE_COMMAND_CHACHA20_DECRYPT         0x0C030000UL
-  #define SLI_SE_COMMAND_POLY1305_KEY_MAC         0x0C040000UL
-
-  #define SLI_SE_COMMAND_DISABLE_TAMPER           0xFD020001UL
-#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
-
-// -------------------------------
-// SE command options
-// Commands are grouped based on availability
-
-/// Secure boot pubkey
-#define SLI_SE_KEY_TYPE_BOOT                    0x00000100UL
-/// Secure authorization (debug) pubkey
-#define SLI_SE_KEY_TYPE_AUTH                    0x00000200UL
-
-// Options limited to SE devices
-#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
-/// Root pubkey
-  #define SLI_SE_KEY_TYPE_ROOT                    0x00000300UL
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-/// Attestation pubkey
-  #define SLI_SE_KEY_TYPE_ATTEST                0x00000400UL
-#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
-/// BGL encryption key
-  #define SLI_SE_IMMUTABLE_KEY_TYPE_AES_128       0x00000500UL
-
-/// Use MD5 as hash algorithm
-  #define SLI_SE_COMMAND_OPTION_HASH_MD5          0x00000100UL
-/// Use SHA1 as hash algorithm
-  #define SLI_SE_COMMAND_OPTION_HASH_SHA1         0x00000200UL
-/// Use SHA224 as hash algorithm
-  #define SLI_SE_COMMAND_OPTION_HASH_SHA224       0x00000300UL
-/// Use SHA256 as hash algorithm
-  #define SLI_SE_COMMAND_OPTION_HASH_SHA256       0x00000400UL
-
-/// Execute algorithm in ECB mode
-  #define SLI_SE_COMMAND_OPTION_MODE_ECB          0x00000100UL
-/// Execute algorithm in CBC mode
-  #define SLI_SE_COMMAND_OPTION_MODE_CBC          0x00000200UL
-/// Execute algorithm in CTR mode
-  #define SLI_SE_COMMAND_OPTION_MODE_CTR          0x00000300UL
-/// Execute algorithm in CFB mode
-  #define SLI_SE_COMMAND_OPTION_MODE_CFB          0x00000400UL
-
-/// Run the whole algorithm, all data present
-  #define SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE     0x00000000UL
-/// Start the algorithm, but get a context to later add more data
-  #define SLI_SE_COMMAND_OPTION_CONTEXT_START     0x00000001UL
-/// End the algorithm, get the result
-  #define SLI_SE_COMMAND_OPTION_CONTEXT_END       0x00000002UL
-/// Add more data input to the algorithm. Need to supply previous context,
-/// and get a context back
-  #define SLI_SE_COMMAND_OPTION_CONTEXT_ADD       0x00000003UL
-
-/// Magic paramater for deleting user data
-  #define SLI_SE_COMMAND_OPTION_ERASE_UD          0xDE1E7EADUL
-  #define SLI_SE_COMMAND_CERT_BATCH               0x00000100UL
-  #define SLI_SE_COMMAND_CERT_SE                  0x00000200UL
-  #define SLI_SE_COMMAND_CERT_HOST                0x00000300UL
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-/// Use SHA384 as hash algorithm
-  #define SLI_SE_COMMAND_OPTION_HASH_SHA384       0x00000500UL
-/// Use SHA512 as hash algorithm
-  #define SLI_SE_COMMAND_OPTION_HASH_SHA512       0x00000600UL
-#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
-#endif // SLI_MAILBOX_COMMAND_SUPPORTED
-
-// -------------------------------
-// Other defines
 
 #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 // Due to a problem with the countermeasures applied to
@@ -314,59 +94,59 @@ extern "C" {
  ******************************************************************************/
 
 // Add keyspec to command for given key
-#define sli_add_key_parameters(cmd_ctx, key, status) { \
-    uint32_t keyspec;                                  \
-    (status) = sli_se_key_to_keyspec((key), &keyspec); \
-    if ((status) != SL_STATUS_OK) {                    \
-      return (status);                                 \
-    }                                                  \
-    SE_addParameter(&cmd_ctx->command, keyspec);       \
+#define sli_add_key_parameters(cmd_ctx, key, status) {                \
+    uint32_t keyspec;                                                 \
+    (status) = sli_se_key_to_keyspec((key), &keyspec);                \
+    if ((status) != SL_STATUS_OK) {                                   \
+      return (status);                                                \
+    }                                                                 \
+    sli_se_mailbox_command_add_parameter(&cmd_ctx->command, keyspec); \
 }
 
 // Add key metadata buffers to command for given key
 #define sli_add_key_metadata(cmd_ctx, key, status)        \
   /* Auth data */                                         \
-  SE_DataTransfer_t auth_buffer;                          \
+  sli_se_datatransfer_t auth_buffer;                      \
   (status) = sli_se_get_auth_buffer((key), &auth_buffer); \
   if ((status) != SL_STATUS_OK) {                         \
     return (status);                                      \
   }                                                       \
-  SE_addDataInput(&cmd_ctx->command, &auth_buffer);
+  sli_se_mailbox_command_add_input(&cmd_ctx->command, &auth_buffer);
 
 // Add key metadata buffers with custom auth buffer to command for given key
 #define sli_add_key_metadata_custom(cmd_ctx, auth_data_buf, key, status) \
   /* Auth data */                                                        \
-  SE_DataTransfer_t auth_data_buf;                                       \
+  sli_se_datatransfer_t auth_data_buf;                                   \
   (status) = sli_se_get_auth_buffer((key), &auth_data_buf);              \
   if ((status) != SL_STATUS_OK) {                                        \
     return (status);                                                     \
   }                                                                      \
-  SE_addDataInput(&cmd_ctx->command, &auth_data_buf);
+  sli_se_mailbox_command_add_input(&cmd_ctx->command, &auth_data_buf);
 
 // Add key input buffer to given command
 #define sli_add_key_input(cmd_ctx, key, status)                     \
-  SE_DataTransfer_t key_input_buffer;                               \
+  sli_se_datatransfer_t key_input_buffer;                           \
   (status) = sli_se_get_key_input_output((key), &key_input_buffer); \
   if ((status) != SL_STATUS_OK) {                                   \
     return (status);                                                \
   }                                                                 \
-  SE_addDataInput(&cmd_ctx->command, &key_input_buffer);
+  sli_se_mailbox_command_add_input(&cmd_ctx->command, &key_input_buffer);
 
 // Add Key output buffer to given command
 #define sli_add_key_output(cmd_ctx, key, status)                     \
-  SE_DataTransfer_t key_output_buffer;                               \
+  sli_se_datatransfer_t key_output_buffer;                           \
   (status) = sli_se_get_key_input_output((key), &key_output_buffer); \
   if ((status) != SL_STATUS_OK) {                                    \
     return (status);                                                 \
   }                                                                  \
-  SE_addDataOutput(&cmd_ctx->command, &key_output_buffer);
+  sli_se_mailbox_command_add_output(&cmd_ctx->command, &key_output_buffer);
 #endif // SLI_MAILBOX_COMMAND_SUPPORTED
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
-sl_status_t sli_se_to_sl_status(SE_Response_t res);
+sl_status_t sli_se_to_sl_status(sli_se_mailbox_response_t res);
 
 /***************************************************************************//**
  * @brief
@@ -415,9 +195,9 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t* key,
 sl_status_t sli_se_keyspec_to_key(const uint32_t keyspec,
                                   sl_se_key_descriptor_t* key);
 sl_status_t sli_se_get_auth_buffer(const sl_se_key_descriptor_t* key,
-                                   SE_DataTransfer_t* auth_buffer);
+                                   sli_se_datatransfer_t* auth_buffer);
 sl_status_t sli_se_get_key_input_output(const sl_se_key_descriptor_t* key,
-                                        SE_DataTransfer_t* buffer);
+                                        sli_se_datatransfer_t* buffer);
 #endif // SLI_MAILBOX_COMMAND_SUPPORTED
 
 #ifdef __cplusplus

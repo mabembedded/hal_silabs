@@ -70,9 +70,6 @@ void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev)
 {
 #if defined(_SYSCFG_CHIPREV_FAMILY_MASK) || defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
   /* On series-2 (and higher) the revision info is in the SYSCFG->CHIPREV register. */
-#if defined(CMU_CLKEN0_SYSCFG)
-  CMU->CLKEN0_SET = CMU_CLKEN0_SYSCFG;
-#endif
   uint32_t chiprev = SYSCFG_readChipRev();
 #if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
   rev->partNumber = ((chiprev & SYSCFG_CHIPREV_PARTNUMBER1) >> 5) | (chiprev & SYSCFG_CHIPREV_PARTNUMBER0);

@@ -3,7 +3,7 @@
  * @brief EFR32MG24 EMU register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** EMU Register Declaration. */
-typedef struct {
+typedef struct emu_typedef{
   uint32_t       RESERVED0[4U];                 /**< Reserved for future use                            */
   __IOM uint32_t DECBOD;                        /**< DECOUPLE LVBOD  Control register                   */
   uint32_t       RESERVED1[3U];                 /**< Reserved for future use                            */
@@ -776,4 +776,4 @@ typedef struct {
 /** @} End of group EFR32MG24_EMU */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_EMU_H */
+#endif // EFR32MG24_EMU_H

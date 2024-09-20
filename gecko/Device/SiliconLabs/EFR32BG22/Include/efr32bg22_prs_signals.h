@@ -3,7 +3,7 @@
  * @brief EFR32BG22 PRS register signal bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -847,4 +847,4 @@
 #define PRS_LFRCO_SDM                                   (PRS_ASYNC_LFRCO_SDM)
 #define PRS_LFRCO_TCMEAS                                (PRS_ASYNC_LFRCO_TCMEAS)
 
-#endif /* EFR32BG22_PRS_SIGNALS_H */
+#endif // EFR32BG22_PRS_SIGNALS_H

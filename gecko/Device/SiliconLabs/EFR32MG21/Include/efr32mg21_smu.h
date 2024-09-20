@@ -3,7 +3,7 @@
  * @brief EFR32MG21 SMU register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SMU Register Declaration. */
-typedef struct {
+typedef struct smu_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP Version                                         */
   __IM uint32_t  STATUS;                        /**< Status Register                                    */
   __IOM uint32_t LOCK;                          /**< Lock Register                                      */
@@ -905,4 +905,4 @@ typedef struct {
 /** @} End of group EFR32MG21_SMU */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_SMU_H */
+#endif // EFR32MG21_SMU_H

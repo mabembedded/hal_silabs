@@ -55,6 +55,9 @@ __STATIC_INLINE uint32_t SYSCFG_readChipRev(void)
 #if defined(SL_TRUSTZONE_NONSECURE)
   return sli_tz_syscfg_read_chiprev_register();
 #else
+#if defined(CMU_CLKEN0_SYSCFG)
+  CMU->CLKEN0_SET = CMU_CLKEN0_SYSCFG;
+#endif
   return SYSCFG->CHIPREV;
 #endif
 }

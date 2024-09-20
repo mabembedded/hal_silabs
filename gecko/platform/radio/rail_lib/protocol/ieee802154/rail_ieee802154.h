@@ -58,7 +58,6 @@ extern "C" {
 /// For 2.4 GHz OQPSK, macAckWaitDuration is specified as 54 symbols;
 /// subtracting 2-symbol PHY header and 10-symbol payload yields a RAIL
 /// ackTimeout of 42 symbols or 672 microseconds at 16 microseconds/symbol.
-///
 /// @code{.c}
 /// static RAIL_Handle_t railHandle = NULL; // Initialized somewhere else.
 ///
@@ -111,7 +110,6 @@ extern "C" {
 /// to set unused ones to the proper disabled value for each type. These can
 /// be found in the \ref RAIL_IEEE802154_AddrConfig_t documentation. Below is
 /// an example of setting filtering for one set of addresses.
-///
 /// @code{.c}
 /// // PanID OTA value of 0x34 0x12.
 /// // Short Address OTA byte order of 0x78 0x56.
@@ -205,6 +203,7 @@ RAIL_ENUM(RAIL_IEEE802154_AddressLength_t) {
 /**
  * @struct RAIL_IEEE802154_Address_t
  * @brief Representation of 802.15.4 address
+ *
  * This structure is only used for received source address information
  * needed to perform Frame Pending lookup.
  */
@@ -230,15 +229,16 @@ typedef struct RAIL_IEEE802154_Address{
 
 /**
  * @struct RAIL_IEEE802154_AddrConfig_t
- * @brief A configuration structure for IEEE 802.15.4 Address Filtering. The
- * broadcast addresses are handled separately and do not need to be specified
- * here. Any address to be ignored should be set with all bits high.
+ * @brief A configuration structure for IEEE 802.15.4 Address Filtering.
  *
  * This structure allows configuration of multi-PAN functionality by specifying
  * multiple PAN IDs and short addresses. A packet will be received if it matches
  * an address and its corresponding PAN ID. Long address 0 and short address 0
  * match against PAN ID 0, etc. The broadcast PAN ID and address will work with
  * any address or PAN ID, respectively.
+ *
+ * @note The broadcast addresses are handled separately and do not need to be
+ *   specified here. Any address to be ignored should be set with all bits high.
  */
 typedef struct RAIL_IEEE802154_AddrConfig{
   /**
@@ -262,14 +262,6 @@ typedef struct RAIL_IEEE802154_AddrConfig{
 /**
  * @struct RAIL_IEEE802154_Config_t
  * @brief A configuration structure for IEEE 802.15.4 in RAIL.
- *
- * @note 802.15.4 radio configurations with Forward Error Correction (FEC)
- *   enabled are incompatible with 802.15.4 filtering and AutoACK on
- *   EFR32xG1 platforms.
- *   AutoACK should be disabled and promiscuous mode enabled when using such
- *   a configuration. This is enforced implicitly on EFR32xG1 platforms with
- *   \ref RAIL_IEEE802154_SUPPORTS_G_DYNFEC true when
- *   \ref RAIL_IEEE802154_ConfigGOptions() is called to enable any G options.
  */
 typedef struct RAIL_IEEE802154_Config {
   /**
@@ -315,7 +307,17 @@ typedef struct RAIL_IEEE802154_Config {
 } RAIL_IEEE802154_Config_t;
 
 /** RX channel switching buffer size, in bytes. */
-#define RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_BYTES              (640U)
+#ifdef  SLI_LIBRARY_BUILD
+#define RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_BYTES (704U) // largest of below
+#else//!SLI_LIBRARY_BUILD
+#if     (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
+#define RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_BYTES (704U)
+#elif   ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6))
+#define RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_BYTES (640U)
+#else// RX channel switching not supported
+#define RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_BYTES (0U)
+#endif
+#endif//SLI_LIBRARY_BUILD
 
 /** Fixed-width type indicating the needed alignment for RX channel switching buffer. */
 #define RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_ALIGNMENT_TYPE     uint32_t
@@ -375,6 +377,20 @@ typedef struct RAIL_IEEE802154_RxChannelSwitchingCfg {
  * is 0.
  */
 extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz;
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Default PHY to use for 1Mbps 2.4 GHz 802.15.4 with forward error correction.
+ * Will be NULL if \ref RAIL_IEEE802154_SUPPORTS_2MBPS_PHY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz1MbpsFec;
+
+/**
+ * Default PHY to use for 2Mbps 2.4 GHz 802.15.4. Will be NULL if
+ * \ref RAIL_IEEE802154_SUPPORTS_2MBPS_PHY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz2Mbps;
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * Default PHY to use for 2.4 GHz 802.15.4 with antenna diversity. Will be NULL
@@ -447,6 +463,12 @@ extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_PhyGB863MHz;
  */
 extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_PhyGB915MHz;
 
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 with RX channel switching. Will be
+ * NULL if \ref RAIL_IEEE802154_SUPPORTS_RX_CHANNEL_SWITCHING is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzRxChSwitching;
+
 /// @} // End of group IEEE802154_PHY
 
 /**
@@ -472,6 +494,8 @@ extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_PhyGB915MHz;
  * - RAIL_SetStateTiming()
  * - RAIL_ConfigAddressFilter()
  * - RAIL_EnableAddressFilter()
+ *
+ * It must be called before most of RAIL_IEEE802154_* function.
  */
 RAIL_Status_t RAIL_IEEE802154_Init(RAIL_Handle_t railHandle,
                                    const RAIL_IEEE802154_Config_t *config);
@@ -607,6 +631,69 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCoexFem(RAIL_Handle_t railHandle)
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem(RAIL_Handle_t railHandle);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * Time in microseconds to listen for a packet on the 2Mbps channel.
+ * This timeout can be configured at runtime using \ref RAIL_IEEE802154_Config2MbpsRxTimeout.
+ */
+#define RAIL_IEEE802154_2MBPS_RECEIVE_TIMEOUT_US 1500UL
+
+/**
+ * Configure the radio for 2.4 GHz 802.15.4 for 250kbps/2Mbps operation.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for 2.4 GHz high speed operation.
+ * It takes the place of calling \ref RAIL_ConfigChannels.
+ * After this call, channels 11-26 will be available, giving the frequencies of
+ * those channels on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2
+ * at 250kbps.
+ * Channels 11-26 will support transmitting and receiving using dual sync words.
+ * Channels 27-42 will transmit and receive on the frequency of [channel - 16] at 2Mbps.
+ * Auto-ack and address filtering are disabled when channels 27-42 are selected.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
+ *   This API can be safely used with 802.15.4/BLE DMP but not 802.15.4/802.15.4 DMP.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadio2Mbps(RAIL_Handle_t railHandle);
+
+/**
+ * Configure the radio for 2.4 GHz 802.15.4 for 250kbps/1Mbps forward error correction
+ * operation.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for 2.4 GHz high speed operation.
+ * It takes the place of calling \ref RAIL_ConfigChannels.
+ * After this call, channels 11-26 will be available, giving the frequencies of
+ * those channels on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2
+ * at 250kbps.
+ * Channels 11-26 will support transmitting and receiving using dual sync words.
+ * Channels 27-42 will transmit and receive on the frequency of [channel - 16] at 1Mbps.
+ * Auto-ack and address filtering are disabled when channels 27-42 are selected.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
+ *   This API can be safely used with 802.15.4/BLE DMP but not 802.15.4/802.15.4 DMP.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadio1MbpsFec(RAIL_Handle_t railHandle);
+
+/**
+ * Configure the 802.15.4 2Mbps receive timeout.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[in] timeout Time to listen for a packet on the 2Mbps channel
+ *   before switching back to the 250kbps channel.
+ * @return Status code indicating success of the function call.
+ *
+ * @note By default the 2Mbps receive timeout is  \ref RAIL_IEEE802154_2MBPS_RECEIVE_TIMEOUT_US.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2MbpsRxTimeout(RAIL_Handle_t railHandle, RAIL_Time_t timeout);
+
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
 /**
  * Configure the radio for 2.4 GHz 802.15.4 operation with custom
  * settings. It enables better interoperability with some proprietary
@@ -620,8 +707,8 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem(RAIL_Handle_t railH
  * \ref RAIL_ConfigChannels.
  * Do not call this function unless instructed by Silicon Labs.
  *
- * @note  This feature is only available on platforms where
- * \ref RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY is true.
+ * @note This feature is only available on platforms where
+ *   \ref RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY is true.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCustom1(RAIL_Handle_t railHandle);
 
@@ -677,8 +764,8 @@ RAIL_Status_t RAIL_IEEE802154_Deinit(RAIL_Handle_t railHandle);
  * Return whether IEEE802.15.4 hardware acceleration is currently enabled.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @return True if IEEE802.15.4 hardware acceleration was enabled to start with
- * and false otherwise.
+ * @return true if IEEE802.15.4 hardware acceleration was enabled to start with
+ *   and false otherwise.
  */
 bool RAIL_IEEE802154_IsEnabled(RAIL_Handle_t railHandle);
 
@@ -686,7 +773,7 @@ bool RAIL_IEEE802154_IsEnabled(RAIL_Handle_t railHandle);
  * @enum RAIL_IEEE802154_PtiRadioConfig_t
  * @brief 802.15.4 PTI radio configuration mode
  */
-RAIL_ENUM(RAIL_IEEE802154_PtiRadioConfig_t) {
+RAIL_ENUM_GENERIC(RAIL_IEEE802154_PtiRadioConfig_t, uint16_t) {
   /**
    * Built-in 2.4 GHz 802.15.4 radio configuration.
    */
@@ -740,70 +827,6 @@ RAIL_ENUM(RAIL_IEEE802154_PtiRadioConfig_t) {
    * External 915 MHz Zigbee R23 802.15.4 NA radio configuration.
    */
   RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_R23_NA_EXT = 0x97U,
-  /**
-   * 863 MHz SUN OFDM Option 1 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT1_863MHZ = 0x42,
-  /**
-   * 902 MHz SUN OFDM Option 1 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT1_902MHZ = 0x43,
-  /**
-   * 86 3MHz SUN OFDM Option 2 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT2_863MHZ = 0x52,
-  /**
-   * 902 MHz SUN OFDM Option 2 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT2_902MHZ = 0x53,
-  /**
-   * 863 MHz SUN OFDM Option 3 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT3_863MHZ = 0x62,
-  /**
-   * 902 MHz SUN OFDM Option 3 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT3_902MHZ = 0x63,
-  /**
-   * 863 MHz SUN OFDM Option 4 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT4_863MHZ = 0x72,
-  /**
-   * 902 MHz SUN OFDM Option 4 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT4_902MHZ = 0x73,
-  /**
-   * 868 MHz SUN OQPSK 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OQPSK_868MHZ = 0x44,
-  /**
-   * 915 MHz SUN OQPSK 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OQPSK_915MHZ = 0x45,
-  /**
-   * 863 MHz SUN FSK FEC 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_FSK_FEC_863MHZ = 0x46,
-  /**
-   * 902 MHz SUN FSK FEC 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_FSK_FEC_902MHZ = 0x47,
-  /**
-   * 863 MHz SUN FSK NO FEC 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_FSK_NOFEC_863MHZ = 0x56,
-  /**
-   * 902 MHz SUN FSK NO FEC 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_FSK_NOFEC_902MHZ = 0x57,
-  /**
-   * 868 MHz Legacy OQPSK 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_LEG_OQPSK_868MHZ = 0x48,
-  /**
-   * 915 MHz Legacy OQPSK 802.15.4 radio configuration.
-   */
-  RAIL_IEEE802154_PTI_RADIO_CONFIG_LEG_OQPSK_915MHZ = 0x49
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -843,7 +866,7 @@ RAIL_Status_t RAIL_IEEE802154_SetPtiRadioConfig(RAIL_Handle_t railHandle,
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] addresses The address information that should be used.
  * @return A status code indicating success of the function call. If this returns
- * an error, the 802.15.4 address filter is in an undefined state.
+ *   an error, the 802.15.4 address filter is in an undefined state.
  *
  * Set up the 802.15.4 address filter to accept messages to the given
  * addresses. This will return false if any of the addresses failed to be set.
@@ -858,11 +881,11 @@ RAIL_Status_t RAIL_IEEE802154_SetAddresses(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] panId The 16-bit PAN ID information.
- * This will be matched against the destination PAN ID of incoming messages.
- * The PAN ID is sent little endian over the air, meaning panId[7:0] is first in
- * the payload followed by panId[15:8]. Set to 0xFFFF to disable for this index.
+ *   This will be matched against the destination PAN ID of incoming messages.
+ *   The PAN ID is sent little endian over the air, meaning panId[7:0] is first in
+ *   the payload followed by panId[15:8]. Set to 0xFFFF to disable for this index.
  * @param[in] index Indicates which PAN ID to set. Must be below
- * RAIL_IEEE802154_MAX_ADDRESSES.
+ *   RAIL_IEEE802154_MAX_ADDRESSES.
  * @return A status code indicating success of the function call.
  *
  * Set up the 802.15.4 address filter to accept messages to the given PAN ID.
@@ -876,11 +899,11 @@ RAIL_Status_t RAIL_IEEE802154_SetPanId(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A handle of RAIL instance
  * @param[in] shortAddr 16 bit short address value. This will be matched against the
- * destination short address of incoming messages. The short address is sent
- * little endian over the air meaning shortAddr[7:0] is first in the payload
- * followed by shortAddr[15:8]. Set to 0xFFFF to disable for this index.
+ *   destination short address of incoming messages. The short address is sent
+ *   little endian over the air meaning shortAddr[7:0] is first in the payload
+ *   followed by shortAddr[15:8]. Set to 0xFFFF to disable for this index.
  * @param[in] index Which short address to set. Must be below
- * RAIL_IEEE802154_MAX_ADDRESSES.
+ *   RAIL_IEEE802154_MAX_ADDRESSES.
  * @return A status code indicating success of the function call.
  *
  * Set up the 802.15.4 address filter to accept messages to the given short
@@ -895,11 +918,11 @@ RAIL_Status_t RAIL_IEEE802154_SetShortAddress(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] longAddr A pointer to an 8-byte array containing the long address
- * information. The long address must be in over-the-air byte order. This will
- * be matched against the destination long address of incoming messages. Set to
- * 0x00 00 00 00 00 00 00 00 to disable for this index.
+ *   information. The long address must be in over-the-air byte order. This will
+ *   be matched against the destination long address of incoming messages. Set to
+ *   0x00 00 00 00 00 00 00 00 to disable for this index.
  * @param[in] index Indicates which long address to set. Must be below
- * RAIL_IEEE802154_MAX_ADDRESSES.
+ *   RAIL_IEEE802154_MAX_ADDRESSES.
  * @return A status code indicating success of the function call.
  *
  * Set up the 802.15.4 address filter to accept messages to the given long
@@ -913,12 +936,13 @@ RAIL_Status_t RAIL_IEEE802154_SetLongAddress(RAIL_Handle_t railHandle,
  * Set whether the current node is a PAN coordinator.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in] isPanCoordinator True if this device is a PAN coordinator.
+ * @param[in] isPanCoordinator true if this device is a PAN coordinator.
  * @return A status code indicating success of the function call.
  *
  * If the device is a PAN Coordinator, it will accept data and command
  * frames with no destination address. This function will fail if 802.15.4
- * hardware acceleration is not currently enabled. This setting may be changed
+ * hardware acceleration is not currently enabled by calling
+ * \ref RAIL_IEEE802154_Init(). This setting may be changed
  * at any time when 802.15.4 hardware acceleration is enabled.
  */
 RAIL_Status_t RAIL_IEEE802154_SetPanCoordinator(RAIL_Handle_t railHandle,
@@ -928,13 +952,14 @@ RAIL_Status_t RAIL_IEEE802154_SetPanCoordinator(RAIL_Handle_t railHandle,
  * Set whether to enable 802.15.4 promiscuous mode.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in] enable True if all frames and addresses should be accepted.
+ * @param[in] enable true if all frames and addresses should be accepted.
  * @return A status code indicating success of the function call.
  *
  * If promiscuous mode is enabled, no frame or address filtering steps
  * will be performed other than checking the CRC. This function will fail if
- * 802.15.4 hardware acceleration is not currently enabled. This setting may be
- * changed at any time when 802.15.4 hardware acceleration is enabled.
+ * 802.15.4 hardware acceleration is not currently enabled by calling
+ * \ref RAIL_IEEE802154_Init(). This setting may be changed at any time when
+ * 802.15.4 hardware acceleration is enabled.
  */
 RAIL_Status_t RAIL_IEEE802154_SetPromiscuousMode(RAIL_Handle_t railHandle,
                                                  bool enable);
@@ -1045,7 +1070,8 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_EOptions_t, uint32_t) {
  * @return A status code indicating success of the function call.
  *
  * This function will fail if 802.15.4 hardware acceleration is not
- * currently enabled or the platform does not support the feature(s).
+ * currently enabled by calling \ref RAIL_IEEE802154_Init() or the platform
+ * does not support the feature(s).
  * These settings may be changed at any time when 802.15.4 hardware
  * acceleration is enabled.
  */
@@ -1124,12 +1150,6 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_GOptions_t, uint32_t) {
  *
  * Also, dual syncWord detection is set in all SUN FEC enabled PHYs, then there is no need
  * to change \ref RAIL_RX_OPTION_ENABLE_DUALSYNC .
- *
- * @note EFR32xG12 support for 802.15.4 FEC-capable PHYs and dynamic FEC
- *   are incompatible with 802.15.4 filtering and AutoACK.
- *   \ref RAIL_IEEE802154_Config_t::promiscuousMode must be true and \ref
- *   RAIL_IEEE802154_Config_t::ackConfig's \ref RAIL_AutoAckConfig_t.enable
- *   must be false on these platforms when using a FEC-capable PHY.
  */
 #define RAIL_IEEE802154_G_OPTION_DYNFEC (1UL << RAIL_IEEE802154_G_OPTION_DYNFEC_SHIFT)
 /**
@@ -1157,8 +1177,9 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_GOptions_t, uint32_t) {
  * @return A status code indicating success of the function call.
  *
  * This function will fail if 802.15.4 hardware acceleration is not
- * currently enabled, the platform does not support the feature(s),
- * the radio configuration is not appropriate, or the radio is not idle.
+ * currently enabled by calling \ref RAIL_IEEE802154_Init(), the platform does
+ * not support the feature(s), the radio configuration is not appropriate,
+ * or the radio is not idle.
  */
 RAIL_Status_t RAIL_IEEE802154_ConfigGOptions(RAIL_Handle_t railHandle,
                                              RAIL_IEEE802154_GOptions_t mask,
@@ -1191,9 +1212,11 @@ typedef struct RAIL_IEEE802154_ModeSwitchPhr {
  * @param[out] pChannel A pointer to the channel to switch to.
  * @return A status code indicating success of the function call.
  *
- * This function will fail if the targeted PhyModeID is the same as the
- * current PhyMode ID, or if called on a platform that lacks
- * \ref RAIL_IEEE802154_SUPPORTS_G_MODESWITCH.
+ * This function will fail if:
+ * - the targeted PhyModeID is the same as the current PhyMode ID
+ * - called on a platform that lacks \ref RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+ * - called on a platform that doesn't have 802154G options enabled
+ *     by \ref RAIL_IEEE802154_ConfigGOptions().
  * For newPhyModeId associated with a FSK FEC_off PHY, if dynamic FEC is
  * activated (see \ref RAIL_IEEE802154_G_OPTION_DYNFEC), the returned
  * channel can correspond to the associated FSK FEC_on PHY corresponding
@@ -1203,32 +1226,34 @@ RAIL_Status_t RAIL_IEEE802154_ComputeChannelFromPhyModeId(RAIL_Handle_t railHand
                                                           uint8_t newPhyModeId,
                                                           uint16_t *pChannel);
 
-#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
 /**
- * This function can be implemented to manage forbidden channels during mode
- * switch.
+ * Manage forbidden channels during mode switch.
  *
  * @param[in] currentBaseFreq  The current frequency of the base channel.
  * @param[in] newPhyModeId A targeted PhyMode ID.
  * @param[in] configEntryNewPhyModeId A pointer to \ref RAIL_ChannelConfigEntry_t
  *   structure corresponding to the new PHY configEntry.
- * @param[in, out] pChannel A pointer to the channel to switch to. If channel
+ * @param[in,out] pChannel A pointer to the channel to switch to. If channel
  *   is valid, the function must just return. If channel is forbidden, the
  *   function must update it with the closest valid channel. The highest
  *   channel must be selected in case of two valid channels being equidistant
- *   to a forbiden channel.
+ *   to a forbidden channel.
  * @return A status code indicating success of the function call. It must
  *   return RAIL_STATUS_INVALID_PARAMETER for failure or RAIL_STATUS_NO_ERROR
  *   for success.
  *
  * This function must fail if no valid channel has been found. If so, RAIL will
  * abort the mode switch.
+ *
+ * @note This callback will only be called on platforms where
+ *   \ref RAIL_IEEE802154_SUPPORTS_G_MODESWITCH is true, \ref
+ *   RAIL_IEEE802154_G_OPTION_WISUN_MODESWITCH was successfully enabled,
+ *   and a valid mode switch PHY header is received.
  */
 RAIL_Status_t RAILCb_IEEE802154_IsModeSwitchNewChannelValid(uint32_t currentBaseFreq,
                                                             uint8_t newPhyModeId,
                                                             const RAIL_ChannelConfigEntry_t *configEntryNewPhyModeId,
                                                             uint16_t *pChannel);
-#endif//RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
 
 /// When receiving packets, accept 802.15.4 BEACON frame types.
 #define RAIL_IEEE802154_ACCEPT_BEACON_FRAMES       (0x01)
@@ -1243,7 +1268,6 @@ RAIL_Status_t RAILCb_IEEE802154_IsModeSwitchNewChannelValid(uint32_t currentBase
 #define RAIL_IEEE802154_ACCEPT_COMMAND_FRAMES      (0x08)
 // Reserved for possible future use:               (0x10)
 /// When receiving packets, accept 802.15.4-2015 Multipurpose frame types.
-/// (Not supported on EFR32XG1.)
 #define RAIL_IEEE802154_ACCEPT_MULTIPURPOSE_FRAMES (0x20)
 
 /// In standard operation, accept BEACON, DATA and COMMAND frames.
@@ -1261,10 +1285,11 @@ RAIL_Status_t RAILCb_IEEE802154_IsModeSwitchNewChannelValid(uint32_t currentBase
  * @return A status code indicating success of the function call.
  *
  * This function will fail if 802.15.4 hardware acceleration is not currently
- * enabled or framesMask requests an unsupported frame type.
+ * enabled by calling \ref RAIL_IEEE802154_Init() or framesMask requests an
+ * unsupported frame type.
  * This setting may be changed at any time when 802.15.4 hardware
  * acceleration is enabled. Only Beacon, Data, ACK, Command, and Multipurpose
- * (except on EFR32XG1) frames may be received.
+ * frames may be received.
  * The RAIL_IEEE802154_ACCEPT_XXX_FRAMES defines may be combined to create a
  * bitmask to pass into this function.
  *
@@ -1283,7 +1308,7 @@ RAIL_Status_t RAIL_IEEE802154_AcceptFrames(RAIL_Handle_t railHandle,
  * (\ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND).
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in] enable True to enable, false to disable.
+ * @param[in] enable true to enable, false to disable.
  * @return A status code indicating success of the function call.
  *
  * Normally, \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND is triggered after
@@ -1309,7 +1334,8 @@ RAIL_Status_t RAIL_IEEE802154_AcceptFrames(RAIL_Handle_t railHandle,
  * Enhanced ACK.
  *
  * This function will fail if 802.15.4 hardware acceleration is not
- * currently enabled, or on platforms that do not support this feature.
+ * currently enabled by calling \ref RAIL_IEEE802154_Init(),
+ * or on platforms that do not support this feature.
  * This setting may be changed at any time when 802.15.4 hardware
  * acceleration is enabled.
  */
@@ -1321,7 +1347,7 @@ RAIL_Status_t RAIL_IEEE802154_EnableEarlyFramePending(RAIL_Handle_t railHandle,
  * (\ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND) for MAC Data frames.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in] enable True to enable, false to disable.
+ * @param[in] enable true to enable, false to disable.
  * @return A status code indicating success of the function call.
  *
  * Normally \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND is triggered only
@@ -1334,8 +1360,9 @@ RAIL_Status_t RAIL_IEEE802154_EnableEarlyFramePending(RAIL_Handle_t railHandle,
  * Data frames which require an Enhanced ACK.
  *
  * This function will fail if 802.15.4 hardware acceleration is not
- * currently enabled. This setting may be changed at any time when
- * 802.15.4 hardware acceleration is enabled.
+ * currently enabled by calling \ref RAIL_IEEE802154_Init().
+ * This setting may be changed at any time when 802.15.4 hardware acceleration
+ * is enabled.
  */
 RAIL_Status_t RAIL_IEEE802154_EnableDataFramePending(RAIL_Handle_t railHandle,
                                                      bool enable);
@@ -1367,19 +1394,18 @@ RAIL_Status_t RAIL_IEEE802154_EnableDataFramePending(RAIL_Handle_t railHandle,
  * modify the outgoing Immediate ACK.
 
  * @note This function is used to set the Frame Pending bit but its meaning
- * depends on the value of
- * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
- * while transmitting ACK.
- * If \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
- * is not set, then Frame Pending bit is set in outgoing ACK.
- * Whereas, if \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
- * is set, then Frame Pending bit is cleared in outgoing ACK.
- *
- * Therefore, this function is to be called if the frame is pending when
- * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
- * is not set or if there is no frame pending when
- * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
- * is set.
+ *   depends on the value of
+ *   \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ *   while transmitting ACK.
+ *   If \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ *   is not set, then Frame Pending bit is set in outgoing ACK.
+ *   Whereas, if \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ *   is set, then Frame Pending bit is cleared in outgoing ACK.
+ *   Therefore, this function is to be called if the frame is pending when
+ *   \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ *   is not set or if there is no frame pending when
+ *   \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ *   is set.
  */
 RAIL_Status_t RAIL_IEEE802154_SetFramePending(RAIL_Handle_t railHandle);
 
@@ -1404,7 +1430,13 @@ RAIL_Status_t RAIL_IEEE802154_GetAddress(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] ackData Pointer to ACK data to transmit
- * @param[in] ackDataLen Length of ACK data, in bytes
+ *   This may be NULL, in which case it's assumed the data has already
+ *   been emplaced into the ACK buffer and RAIL just needs to be told
+ *   how many bytes are there. Use \ref RAIL_GetAutoAckFifo() to get
+ *   the address of RAIL's AutoACK buffer in RAM and its size.
+ * @param[in] ackDataLen Length of ACK data, in bytes.
+ *   If this exceeds \ref RAIL_AUTOACK_MAX_LENGTH the function
+ *   will return \ref RAIL_STATUS_INVALID_PARAMETER.
  * @return A status code indicating success of the function call.
  *
  * This function sets the AutoACK data to use in acknowledging the frame
@@ -1423,7 +1455,33 @@ RAIL_Status_t RAIL_IEEE802154_GetAddress(RAIL_Handle_t railHandle,
  */
 RAIL_Status_t RAIL_IEEE802154_WriteEnhAck(RAIL_Handle_t railHandle,
                                           const uint8_t *ackData,
-                                          uint8_t ackDataLen);
+                                          uint16_t ackDataLen);
+
+/**
+ * Set a separate RX packet to TX state transition turnaround time for
+ * sending an Enhanced ACK.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in,out] pRxToEnhAckTx Pointer to the turnaround transition requested
+ *   for Enhanced ACKs. It will be updated with the actual time set.
+ *   Requesting a time of 0 will sync the Enhanced ACK turnaround time with
+ *   that used for immediate ACKs (and output 0). Requesting a time of \ref
+ *   RAIL_TRANSITION_TIME_KEEP will output the current Enhanced ACK timing
+ *   parameter (0 if it is the same as that used for Immediate ACKs).
+ * @return Status code indicating a success of the function call.
+ *   An error will not update the pRxToEnhAckTx output parameter.
+ *
+ * Normally Immediate and Enhanced ACKs are both sent using the
+ * \ref RAIL_IEEE802154_Config_t::timings rxToTx turnaround time.
+ * If the stack needs more time to prepare an Enhanced ACK, it can
+ * call this function after \ref RAIL_IEEE802154_Init() to set a
+ * longer turnaround time used just for Enhanced ACK transmits.
+ *
+ * This function will fail on platforms that lack
+ * \ref RAIL_IEEE802154_SUPPORTS_E_ENHANCED_ACK.
+ */
+RAIL_Status_t RAIL_IEEE802154_SetRxToEnhAckTx(RAIL_Handle_t railHandle,
+                                              RAIL_TransitionTime_t *pRxToEnhAckTx);
 
 /**
  * Convert RSSI into 802.15.4 Link Quality Indication (LQI) metric
@@ -1567,7 +1625,7 @@ RAIL_Status_t RAIL_IEEE802154_EnableSignalDetection(RAIL_Handle_t railHandle,
 
 /**
  * @brief Backward compatible name for the \ref
- * RAIL_IEEE802154_EnableSignalDetection API.
+ *   RAIL_IEEE802154_EnableSignalDetection API.
  */
 #define RAIL_IEEE802154_EnableSignalIdentifier RAIL_IEEE802154_EnableSignalDetection
 
@@ -1601,13 +1659,13 @@ RAIL_Status_t RAIL_IEEE802154_ConfigCcaMode(RAIL_Handle_t railHandle,
  * Allow certain malformed MAC Header frames to be received.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in] enable True to enable, false to disable.
+ * @param[in] enable true to enable, false to disable.
  * @return A status code indicating success of the function call.
  *
  * When allowed, certain MAC header formats that 802.15.4 deems
  * illegal will be received rather than filtered. This is to
  * support interoperablity with an old spec-violating 802.15.4
- * peer and is only supported on certain Series-2 platforms.
+ * peer and is only supported on certain EFR32 Series 2 platforms.
  *
  * @note \ref RAIL_IEEE802154_SetPanCoordinator() must also be
  *   enabled to receive malformed frames lacking destination
@@ -1615,33 +1673,100 @@ RAIL_Status_t RAIL_IEEE802154_ConfigCcaMode(RAIL_Handle_t railHandle,
  */
 RAIL_Status_t RAIL_IEEE802154_AllowMalformed(RAIL_Handle_t railHandle,
                                              bool allow);
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * Configure RX channel switching for 802.15.4.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @param[in] pConfig A pointer to \ref RAIL_IEEE802154_RxChannelSwitchingCfg_t structure.
+ * @param[in] pConfig A pointer to \ref RAIL_IEEE802154_RxChannelSwitchingCfg_t
+ *   structure. Use NULL to disable any switching previously set up.
  * @return Status code indicating success of the function call.
  *
- * This function configures RX channel switching, allowing reception of 2.4Ghz 802.15.4
- * signals on two specified radio channels. This function must be called once before
- * \ref RAIL_StartRx and/or enabling \ref RAIL_RX_OPTION_CHANNEL_SWITCHING.
+ * This function configures RX channel switching, allowing reception of 2.4Ghz
+ * 802.15.4 signals on two different radio channels within the same PHY.
+ * (If the two channels are same, the function behaves the same as if
+ * pConfig was NULL.)
+ * This function should be
+ * called once before \ref RAIL_StartRx and/or enabling
+ * \ref RAIL_RX_OPTION_CHANNEL_SWITCHING.
  *
- * @note IEEE 802.15.4 must be enabled, \ref RAIL_IEEE802154_Init, and radio must be
- *   in idle state when configuring RX channel switching. This function requires a DMA channel,
- *   see \ref RAIL_UseDma, and one must be allocated if not done already.
+ * When \ref RAIL_RX_OPTION_CHANNEL_SWITCHING is enabled,
+ * channel switching will occur during normal listening but is suspended
+ * (and the radio is idled) when starting any kind of transmit, including
+ * scheduled or CSMA transmits. It remains suspended after a \ref
+ * RAIL_TX_OPTION_WAIT_FOR_ACK transmit until the ACK is received or
+ * times out.
  *
- * @note When RX channel switching is active, receive sensitivity and performance are
- *   slightly impacted.
+ * When \ref RAIL_RX_OPTION_CHANNEL_SWITCHING is disabled after switching
+ * has been active, the radio could be left listening on either channel,
+ * so the application should call \ref RAIL_StartRx() to put it on the
+ * desired non-switching channel.
+ *
+ * @note IEEE 802.15.4 must be enabled via \ref RAIL_IEEE802154_Init, and the
+ *   radio must be in the idle state when configuring RX channel switching.
+ *   A DMA channel must be allocated with \ref RAIL_UseDma; otherwise this API
+ *   will return \ref RAIL_STATUS_INVALID_CALL.
+ *   This feature also requires a PRS channel, internally allocated by the RAIL
+ *   library, to use and hold onto for future use. If no PRS channel is
+ *   available, the function returns \ref RAIL_STATUS_INVALID_PARAMETER.
+ *
+ * @note When RX channel switching is active, receive sensitivity and performance
+ *   are slightly impacted.
+ *
+ * @note This function internally uses \ref RAIL_EnableCacheSynthCal to
+ *   enable/disable the sequencer cache to store the synth calibration value.
+ *
+ * @note Switching is cancelled on any PHY change, so this function would
+ *   need to be re-called to reestablish switching after such a change.
  */
 RAIL_Status_t RAIL_IEEE802154_ConfigRxChannelSwitching(RAIL_Handle_t railHandle,
                                                        const RAIL_IEEE802154_RxChannelSwitchingCfg_t *pConfig);
 
 /** @} */ // end of IEEE802.15.4
 
+/// @addtogroup Calibration
+/// @brief IEEE802154 protocol-specific APIs for calibrating the radio.
+/// @{
+
+/**
+ * Calibrate image rejection for IEEE 802.15.4 2.4 GHz.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] imageRejection The result of the image rejection calibration.
+ * @return A status code indicating success of the function call.
+ *
+ * Some chips have protocol-specific image rejection calibrations programmed
+ * into their flash. This function will either get the value from flash and
+ * apply it, or run the image rejection algorithm to find the value.
+ */
+RAIL_Status_t RAIL_IEEE802154_CalibrateIr2p4Ghz(RAIL_Handle_t railHandle,
+                                                uint32_t *imageRejection);
+
+/**
+ * Calibrate image rejection for IEEE 802.15.4 915 MHz and 868 MHz.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] imageRejection The result of the image rejection calibration.
+ * @return A status code indicating success of the function call.
+ *
+ * Some chips have protocol-specific image rejection calibrations programmed
+ * into their flash. This function will either get the value from flash and
+ * apply it, or run the image rejection algorithm to find the value.
+ *
+ * @deprecated Please use \ref RAIL_CalibrateIrAlt instead.
+ */
+RAIL_Status_t RAIL_IEEE802154_CalibrateIrSubGhz(RAIL_Handle_t railHandle,
+                                                uint32_t *imageRejection);
+
+/// @} // End of group Calibration
+
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef RAIL_INTERNAL_BUILD
+#include "rail_ieee802154_internal.h"
 #endif
 
 #endif // __RAIL_IEEE802154_H__

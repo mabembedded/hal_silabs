@@ -3,7 +3,7 @@
  * @brief EFR32MG24 MAILBOX register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,12 +42,12 @@
  *****************************************************************************/
 
 /** MAILBOX MSGPTRS Register Group Declaration. */
-typedef struct {
+typedef struct mailbox_msgptrs_typedef{
   __IOM uint32_t MSGPTR;                             /**< Message Pointer                                    */
 } MAILBOX_MSGPTRS_TypeDef;
 
 /** MAILBOX Register Declaration. */
-typedef struct {
+typedef struct mailbox_typedef{
   MAILBOX_MSGPTRS_TypeDef MSGPTRS[4U];          /**< Message Pointers                                   */
   uint32_t                RESERVED0[12U];       /**< Reserved for future use                            */
   __IOM uint32_t          IF;                   /**< Interrupt Flag register                            */
@@ -137,4 +137,4 @@ typedef struct {
 /** @} End of group EFR32MG24_MAILBOX */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_MAILBOX_H */
+#endif // EFR32MG24_MAILBOX_H

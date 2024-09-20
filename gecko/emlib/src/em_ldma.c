@@ -301,7 +301,7 @@ void LDMA_StartTransfer(int ch,
   CORE_ENTER_ATOMIC();
 
   /* Enable the channel interrupt. */
-  LDMA->IEN |= chMask;
+  BUS_RegMaskedSet(&LDMA->IEN, chMask);
 
   if (transfer->ldmaReqDis) {
     LDMA->REQDIS |= chMask;

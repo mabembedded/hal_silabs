@@ -1,498 +1,400 @@
-/**************************************************************************//**
- * @file
- * @brief CMSIS Compatible EFR32MG21 startup file in C for IAR EWARM
- ******************************************************************************
- * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
- ******************************************************************************
+/******************************************************************************
+* @file     startup_efr32mg21.c
+* @brief    CMSIS-Core(M) Device Startup File for
+*           Device EFR32MG21
+* @version  V2.1.0
+* @date     16. December 2020
+*******************************************************************************
+* # License
+*
+* The licensor of this software is Silicon Laboratories Inc. Your use of this
+* software is governed by the terms of Silicon Labs Master Software License
+* Agreement (MSLA) available at
+* www.silabs.com/about-us/legal/master-software-license-agreement. This
+* software is Third Party Software licensed by Silicon Labs from a third party
+* and is governed by the sections of the MSLA applicable to Third Party
+* Software and the additional terms set forth below.
+*
+******************************************************************************/
+/*
+ * Copyright (c) 2009-2021 Arm Limited. All rights reserved.
  *
- * SPDX-License-Identifier: Zlib
+ * SPDX-License-Identifier: Apache-2.0
  *
- * The licensor of this software is Silicon Laboratories Inc.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event will the authors be held liable for any damages
- * arising from the use of this software.
+ * www.apache.org/licenses/LICENSE-2.0
  *
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software
- *    in a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- *
- *****************************************************************************/
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <stdbool.h>
-#include "em_device.h"        /* The correct device header file. */
+#include "em_device.h"
 
-#pragma language=extended
-#pragma segment="CSTACK"
+#ifdef BOOTLOADER_ENABLE
+#include "api/btl_interface.h"
 
-/* IAR start function */
-extern void __iar_program_start(void);
-/* CMSIS init function */
-extern void SystemInit(void);
+#endif // BOOTLOADER_ENABLE
+#ifdef SL_APP_PROPERTIES
+#include "api/application_properties.h"
 
-/* Auto defined by linker */
-extern unsigned char CSTACK$$Limit;
+#endif // SL_APP_PROPERTIES
 
-__weak void Reset_Handler(void)
-{
-  SystemInit();
-  __iar_program_start();
-}
+#define TOTAL_INTERRUPTS    (16 + EXT_IRQ_COUNT)
 
+#ifdef BOOTLOADER_ENABLE
+extern MainBootloaderTable_t mainStageTable;
+extern void SystemInit2(void);
+
+/*----------------------------------------------------------------------------
+ * Exception / Interrupt Handler Function Prototype
+ *----------------------------------------------------------------------------*/
+typedef void (*VECTOR_TABLE_Type)(void);
+#endif
+
+#ifdef SL_APP_PROPERTIES
+extern ApplicationProperties_t sl_app_properties;
+
+/*----------------------------------------------------------------------------
+ * Exception / Interrupt Handler Function Prototype
+ *----------------------------------------------------------------------------*/
+typedef void (*VECTOR_TABLE_Type)(void);
+#endif
+
+/*---------------------------------------------------------------------------
+ * External References
+ *---------------------------------------------------------------------------*/
+extern uint32_t __INITIAL_SP;
+#if defined (SL_TRUSTZONE_SECURE)
+extern uint32_t __STACK_LIMIT;
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+extern uint64_t __STACK_SEAL;
+#endif // __ARM_FEATURE_CMSE
+#endif // SL_TRUSTZONE_SECURE
+
+extern __NO_RETURN void __PROGRAM_START(void);
+
+#if defined (__START) && defined (__GNUC__)
+extern int  __START(void) __attribute__((noreturn));    /* main entry point */
+void Copy_Table();
+void Zero_Table();
+#endif // __START
+#if !defined(SL_LEGACY_LINKER)
+#if defined (__GNUC__)
+// Function to copy RAM functions from Flash to RAM at startup time
+void CopyRamFuncs();
+#endif
+#endif
+
+/*---------------------------------------------------------------------------
+ * Internal References
+ *---------------------------------------------------------------------------*/
+__NO_RETURN void Reset_Handler(void);
+void Default_Handler(void);
+
+#if defined (__GNUC__)
+#ifndef __STACK_SIZE
+#define __STACK_SIZE    0x00000400
+#endif // __STACK_SIZE
+
+#ifndef __HEAP_SIZE
+#define __HEAP_SIZE    0x00000C00
+#endif // __HEAP_SIZE
+#endif // __GNUC__
+
+/*----------------------------------------------------------------------------
+ * Exception / Interrupt Handler
+ *----------------------------------------------------------------------------*/
+/* Cortex-M Processor Exceptions */
+void NMI_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void HardFault_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void MemManage_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void BusFault_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void UsageFault_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SecureFault_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void DebugMon_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SVC_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void PendSV_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SysTick_Handler(void) __attribute__ ((weak, alias("Default_Handler")));
+#ifndef SL_APP_PROPERTIES
 /* Provide a dummy value for the sl_app_properties symbol. */
-void sl_app_properties(void);   /* Prototype to please MISRA checkers. */
-__weak void sl_app_properties(void)
-{
-}
+void sl_app_properties(void);    /* Prototype to please MISRA checkers. */
+void sl_app_properties(void) __attribute__ ((weak, alias("Default_Handler")));
+#endif
 
-__weak void NMI_Handler(void)
-{
-  while (true) {
-  }
-}
+/* Part Specific Interrupts */
+void SETAMPERHOST_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SEMBRX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SEMBTX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SMU_SECURE_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SMU_PRIVILEGED_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void EMU_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void TIMER0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void TIMER1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void TIMER2_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void TIMER3_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void RTCC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void USART0_RX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void USART0_TX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void USART1_RX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void USART1_TX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void USART2_RX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void USART2_TX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void ICACHE0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void BURTC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void LETIMER0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SYSCFG_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void LDMA_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void LFXO_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void LFRCO_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void ULFRCO_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO_ODD_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO_EVEN_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void I2C0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void I2C1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void EMUDG_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void EMUSE_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void AGC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void BUFC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void FRC_PRI_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void FRC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void MODEM_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void PROTIMER_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void RAC_RSM_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void RAC_SEQ_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void PRORTC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SYNTH_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void ACMP0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void ACMP1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void WDOG0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void WDOG1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void HFXO00_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void HFRCO0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void HFRCOEM23_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void CMU_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void AES_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void IADC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void MSC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void DPLL0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SW0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SW1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SW2_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void SW3_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void KERNEL0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void KERNEL1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void M33CTI0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void M33CTI1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 
-__weak void HardFault_Handler(void)
-{
-  while (true) {
-  }
-}
+/*----------------------------------------------------------------------------
+ * Exception / Interrupt Vector table
+ *----------------------------------------------------------------------------*/
 
-__weak void MemManage_Handler(void)
-{
-  while (true) {
-  }
-}
+#if defined (__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif // __GNUC__
 
-__weak void BusFault_Handler(void)
-{
-  while (true) {
-  }
-}
+#if defined (__ICCARM__)
+#pragma data_alignment=512
+extern const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS];
+const tVectorEntry        __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
+#elif defined(__GNUC__)
+extern const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS];
+const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __attribute__((aligned(512)))
+__VECTOR_TABLE_ATTRIBUTE = {
+#else
+extern const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS];
+const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
+#endif
+  { .topOfStack = &__INITIAL_SP },            /*      Initial Stack Pointer     */
+  { Reset_Handler },                          /*      Reset Handler             */
+  { NMI_Handler },                            /*      -14 NMI Handler           */
+  { HardFault_Handler },                      /*      -13 Hard Fault Handler    */
+  { MemManage_Handler },                      /*      -12 MPU Fault Handler     */
+  { BusFault_Handler },                       /*      -11 Bus Fault Handler     */
+  { UsageFault_Handler },                     /*      -10 Usage Fault Handler   */
+  { SecureFault_Handler },                    /*      -9 Secure Fault Handler   */
+  { Default_Handler },                        /*      Reserved                  */
+  { Default_Handler },                        /*      Reserved                  */
+#ifdef BOOTLOADER_ENABLE
+  { (VECTOR_TABLE_Type) & mainStageTable },
+#else
+  { Default_Handler },                         /*      Reserved                  */
+#endif
+  { SVC_Handler },                             /*      -5 SVCall Handler         */
+  { DebugMon_Handler },                        /*      -4 Debug Monitor Handler  */
+#ifdef SL_APP_PROPERTIES
+  { (VECTOR_TABLE_Type) & sl_app_properties }, /*      Application properties    */
+#else
+  { sl_app_properties },                       /*      Application properties    */
+#endif
+  { PendSV_Handler },                          /*      -2 PendSV Handler         */
+  { SysTick_Handler },                         /*      -1 SysTick Handler        */
 
-__weak void UsageFault_Handler(void)
-{
-  while (true) {
-  }
-}
-
-__weak void SVC_Handler(void)
-{
-  while (true) {
-  }
-}
-
-__weak void DebugMon_Handler(void)
-{
-  while (true) {
-  }
-}
-
-__weak void PendSV_Handler(void)
-{
-  while (true) {
-  }
-}
-
-__weak void SysTick_Handler(void)
-{
-  while (true) {
-  }
-}
-__weak void SETAMPERHOST_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SEMBRX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SEMBTX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SMU_SECURE_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SMU_PRIVILEGED_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void EMU_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void TIMER0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void TIMER1_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void TIMER2_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void TIMER3_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void RTCC_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void USART0_RX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void USART0_TX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void USART1_RX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void USART1_TX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void USART2_RX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void USART2_TX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void ICACHE0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void BURTC_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void LETIMER0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SYSCFG_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void LDMA_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void LFXO_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void LFRCO_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void ULFRCO_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void GPIO_ODD_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void GPIO_EVEN_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void I2C0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void I2C1_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void EMUDG_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void EMUSE_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void AGC_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void BUFC_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void FRC_PRI_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void FRC_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void MODEM_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void PROTIMER_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void RAC_RSM_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void RAC_SEQ_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void PRORTC_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SYNTH_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void ACMP0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void ACMP1_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void WDOG0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void WDOG1_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void HFXO00_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void HFRCO0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void HFRCOEM23_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void CMU_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void AES_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void IADC_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void MSC_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void DPLL0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SW0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SW1_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SW2_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void SW3_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void KERNEL0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void KERNEL1_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void M33CTI0_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void M33CTI1_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-
-#pragma data_alignment=256
-#pragma location = ".intvec"
-const tVectorEntry __vector_table[] = {
-  { .topOfStack = &CSTACK$$Limit },    /* Initial Stack Pointer.
-                                        * With IAR, the CSTACK is defined
-                                        * via project options settings.   */
-  { Reset_Handler },
-  { NMI_Handler },
-  { HardFault_Handler },
-  { MemManage_Handler },
-  { BusFault_Handler },
-  { UsageFault_Handler },
-  { 0 },
-  { 0 },
-  { 0 },
-  { 0 },
-  { SVC_Handler },
-  { DebugMon_Handler },
-  { sl_app_properties },
-  { PendSV_Handler },
-  { SysTick_Handler },
-  { SETAMPERHOST_IRQHandler },   /* -16 - SETAMPERHOST */
-  { SEMBRX_IRQHandler },         /* -15 - SEMBRX */
-  { SEMBTX_IRQHandler },         /* -14 - SEMBTX */
-  { SMU_SECURE_IRQHandler },     /* -13 - SMU_SECURE */
-  { SMU_PRIVILEGED_IRQHandler }, /* -12 - SMU_PRIVILEGED */
-  { EMU_IRQHandler },            /* -11 - EMU */
-  { TIMER0_IRQHandler },         /* -10 - TIMER0 */
-  { TIMER1_IRQHandler },         /* -9 - TIMER1 */
-  { TIMER2_IRQHandler },         /* -8 - TIMER2 */
-  { TIMER3_IRQHandler },         /* -7 - TIMER3 */
-  { RTCC_IRQHandler },           /* -6 - RTCC */
-  { USART0_RX_IRQHandler },      /* -5 - USART0_RX */
-  { USART0_TX_IRQHandler },      /* -4 - USART0_TX */
-  { USART1_RX_IRQHandler },      /* -3 - USART1_RX */
-  { USART1_TX_IRQHandler },      /* -2 - USART1_TX */
-  { USART2_RX_IRQHandler },      /* -1 - USART2_RX */
-  { USART2_TX_IRQHandler },      /* 00 - USART2_TX */
-  { ICACHE0_IRQHandler },        /* 01 - ICACHE0 */
-  { BURTC_IRQHandler },          /* 02 - BURTC */
-  { LETIMER0_IRQHandler },       /* 03 - LETIMER0 */
-  { SYSCFG_IRQHandler },         /* 04 - SYSCFG */
-  { LDMA_IRQHandler },           /* 05 - LDMA */
-  { LFXO_IRQHandler },           /* 06 - LFXO */
-  { LFRCO_IRQHandler },          /* 07 - LFRCO */
-  { ULFRCO_IRQHandler },         /* 08 - ULFRCO */
-  { GPIO_ODD_IRQHandler },       /* 09 - GPIO_ODD */
-  { GPIO_EVEN_IRQHandler },      /* 10 - GPIO_EVEN */
-  { I2C0_IRQHandler },           /* 11 - I2C0 */
-  { I2C1_IRQHandler },           /* 12 - I2C1 */
-  { EMUDG_IRQHandler },          /* 13 - EMUDG */
-  { EMUSE_IRQHandler },          /* 14 - EMUSE */
-  { AGC_IRQHandler },            /* 15 - AGC */
-  { BUFC_IRQHandler },           /* 16 - BUFC */
-  { FRC_PRI_IRQHandler },        /* 17 - FRC_PRI */
-  { FRC_IRQHandler },            /* 18 - FRC */
-  { MODEM_IRQHandler },          /* 19 - MODEM */
-  { PROTIMER_IRQHandler },       /* 20 - PROTIMER */
-  { RAC_RSM_IRQHandler },        /* 21 - RAC_RSM */
-  { RAC_SEQ_IRQHandler },        /* 22 - RAC_SEQ */
-  { PRORTC_IRQHandler },         /* 23 - PRORTC */
-  { SYNTH_IRQHandler },          /* 24 - SYNTH */
-  { ACMP0_IRQHandler },          /* 25 - ACMP0 */
-  { ACMP1_IRQHandler },          /* 26 - ACMP1 */
-  { WDOG0_IRQHandler },          /* 27 - WDOG0 */
-  { WDOG1_IRQHandler },          /* 28 - WDOG1 */
-  { HFXO00_IRQHandler },         /* 29 - HFXO00 */
-  { HFRCO0_IRQHandler },         /* 30 - HFRCO0 */
-  { HFRCOEM23_IRQHandler },      /* 31 - HFRCOEM23 */
-  { CMU_IRQHandler },            /* 32 - CMU */
-  { AES_IRQHandler },            /* 33 - AES */
-  { IADC_IRQHandler },           /* 34 - IADC */
-  { MSC_IRQHandler },            /* 35 - MSC */
-  { DPLL0_IRQHandler },          /* 36 - DPLL0 */
-  { SW0_IRQHandler },            /* 37 - SW0 */
-  { SW1_IRQHandler },            /* 38 - SW1 */
-  { SW2_IRQHandler },            /* 39 - SW2 */
-  { SW3_IRQHandler },            /* 40 - SW3 */
-  { KERNEL0_IRQHandler },        /* 41 - KERNEL0 */
-  { KERNEL1_IRQHandler },        /* 42 - KERNEL1 */
-  { M33CTI0_IRQHandler },        /* 43 - M33CTI0 */
-  { M33CTI1_IRQHandler },        /* 44 - M33CTI1 */
+  /* External interrupts */
+  { SETAMPERHOST_IRQHandler },                     /* 00 = SETAMPERHOST */
+  { SEMBRX_IRQHandler },                           /* 01 = SEMBRX */
+  { SEMBTX_IRQHandler },                           /* 02 = SEMBTX */
+  { SMU_SECURE_IRQHandler },                       /* 03 = SMU_SECURE */
+  { SMU_PRIVILEGED_IRQHandler },                   /* 04 = SMU_PRIVILEGED */
+  { EMU_IRQHandler },                              /* 05 = EMU */
+  { TIMER0_IRQHandler },                           /* 06 = TIMER0 */
+  { TIMER1_IRQHandler },                           /* 07 = TIMER1 */
+  { TIMER2_IRQHandler },                           /* 08 = TIMER2 */
+  { TIMER3_IRQHandler },                           /* 09 = TIMER3 */
+  { RTCC_IRQHandler },                             /* 10 = RTCC */
+  { USART0_RX_IRQHandler },                        /* 11 = USART0_RX */
+  { USART0_TX_IRQHandler },                        /* 12 = USART0_TX */
+  { USART1_RX_IRQHandler },                        /* 13 = USART1_RX */
+  { USART1_TX_IRQHandler },                        /* 14 = USART1_TX */
+  { USART2_RX_IRQHandler },                        /* 15 = USART2_RX */
+  { USART2_TX_IRQHandler },                        /* 16 = USART2_TX */
+  { ICACHE0_IRQHandler },                          /* 17 = ICACHE0 */
+  { BURTC_IRQHandler },                            /* 18 = BURTC */
+  { LETIMER0_IRQHandler },                         /* 19 = LETIMER0 */
+  { SYSCFG_IRQHandler },                           /* 20 = SYSCFG */
+  { LDMA_IRQHandler },                             /* 21 = LDMA */
+  { LFXO_IRQHandler },                             /* 22 = LFXO */
+  { LFRCO_IRQHandler },                            /* 23 = LFRCO */
+  { ULFRCO_IRQHandler },                           /* 24 = ULFRCO */
+  { GPIO_ODD_IRQHandler },                         /* 25 = GPIO_ODD */
+  { GPIO_EVEN_IRQHandler },                        /* 26 = GPIO_EVEN */
+  { I2C0_IRQHandler },                             /* 27 = I2C0 */
+  { I2C1_IRQHandler },                             /* 28 = I2C1 */
+  { EMUDG_IRQHandler },                            /* 29 = EMUDG */
+  { EMUSE_IRQHandler },                            /* 30 = EMUSE */
+  { AGC_IRQHandler },                              /* 31 = AGC */
+  { BUFC_IRQHandler },                             /* 32 = BUFC */
+  { FRC_PRI_IRQHandler },                          /* 33 = FRC_PRI */
+  { FRC_IRQHandler },                              /* 34 = FRC */
+  { MODEM_IRQHandler },                            /* 35 = MODEM */
+  { PROTIMER_IRQHandler },                         /* 36 = PROTIMER */
+  { RAC_RSM_IRQHandler },                          /* 37 = RAC_RSM */
+  { RAC_SEQ_IRQHandler },                          /* 38 = RAC_SEQ */
+  { PRORTC_IRQHandler },                           /* 39 = PRORTC */
+  { SYNTH_IRQHandler },                            /* 40 = SYNTH */
+  { ACMP0_IRQHandler },                            /* 41 = ACMP0 */
+  { ACMP1_IRQHandler },                            /* 42 = ACMP1 */
+  { WDOG0_IRQHandler },                            /* 43 = WDOG0 */
+  { WDOG1_IRQHandler },                            /* 44 = WDOG1 */
+  { HFXO00_IRQHandler },                           /* 45 = HFXO00 */
+  { HFRCO0_IRQHandler },                           /* 46 = HFRCO0 */
+  { HFRCOEM23_IRQHandler },                        /* 47 = HFRCOEM23 */
+  { CMU_IRQHandler },                              /* 48 = CMU */
+  { AES_IRQHandler },                              /* 49 = AES */
+  { IADC_IRQHandler },                             /* 50 = IADC */
+  { MSC_IRQHandler },                              /* 51 = MSC */
+  { DPLL0_IRQHandler },                            /* 52 = DPLL0 */
+  { SW0_IRQHandler },                              /* 53 = SW0 */
+  { SW1_IRQHandler },                              /* 54 = SW1 */
+  { SW2_IRQHandler },                              /* 55 = SW2 */
+  { SW3_IRQHandler },                              /* 56 = SW3 */
+  { KERNEL0_IRQHandler },                          /* 57 = KERNEL0 */
+  { KERNEL1_IRQHandler },                          /* 58 = KERNEL1 */
+  { M33CTI0_IRQHandler },                          /* 59 = M33CTI0 */
+  { M33CTI1_IRQHandler },                          /* 60 = M33CTI1 */
 };
+
+#if defined (__GNUC__)
+#pragma GCC diagnostic pop
+#endif // __GNUC__
+
+#if defined (__START) && defined (__GNUC__)
+void Copy_Table()
+{
+  uint32_t        *pSrc, *pDest;
+  extern uint32_t __etext;
+  extern uint32_t __data_start__;
+  extern uint32_t __data_end__;
+  pSrc  = &__etext;
+  pDest = &__data_start__;
+
+  for (; pDest < &__data_end__; ) {
+    *pDest++ = *pSrc++;
+  }
+}
+
+void Zero_Table()
+{
+  uint32_t        *pDest;
+  extern uint32_t __bss_start__;
+  extern uint32_t __bss_end__;
+  pDest = &__bss_start__;
+
+  for (; pDest < &__bss_end__; ) {
+    *pDest++ = 0UL;
+  }
+}
+#endif // __START
+
+#if !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER)
+#if defined (__GNUC__)
+void CopyRamFuncs()
+{
+  extern uint32_t __lma_ramfuncs_start__;
+  extern uint32_t __lma_ramfuncs_end__;
+  extern uint32_t __ramfuncs_start__;
+  uint32_t        size = &__lma_ramfuncs_end__ - &__lma_ramfuncs_start__;
+
+  FlashToRamCopy(&__lma_ramfuncs_start__, &__ramfuncs_start__, size);
+}
+#endif
+#endif
+
+/*---------------------------------------------------------------------------
+ * Reset Handler called on controller reset
+ *---------------------------------------------------------------------------*/
+__NO_RETURN void Reset_Handler(void)
+{
+#if defined (SL_TRUSTZONE_SECURE)
+  __set_MSPLIM((uint32_t) (&__STACK_LIMIT));
+
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+  __TZ_set_STACKSEAL_S((uint32_t *) (&__STACK_SEAL));
+#endif // __ARM_FEATURE_CMSE
+#endif // SL_TRUSTZONE_SECURE
+
+  #ifndef __NO_SYSTEM_INIT
+  SystemInit();                    /* CMSIS System Initialization */
+  #endif
+
+#ifdef BOOTLOADER_ENABLE
+  SystemInit2();
+#endif // BOOTLOADER_ENABLE
+#if !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER)
+#if defined (__GNUC__)
+  CopyRamFuncs();
+#endif
+#endif
+#if defined (__GNUC__) && defined (__START)
+  Copy_Table();
+  Zero_Table();
+  __START();
+#else
+  __PROGRAM_START();               /* Enter PreMain (C library entry point) */
+#endif // __GNUC__
+}
+
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wmissing-noreturn"
+#endif // __ARMCC_VERSION
+
+/*----------------------------------------------------------------------------
+ * Default Handler for Exceptions / Interrupts
+ *----------------------------------------------------------------------------*/
+void Default_Handler(void)
+{
+  while (true) {
+  }
+}
+
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+  #pragma clang diagnostic pop
+#endif // __ARMCC_VERSION

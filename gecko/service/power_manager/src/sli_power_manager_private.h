@@ -30,6 +30,7 @@
 
 #include "sl_power_manager.h"
 #include "sl_slist.h"
+#include "sl_code_classification.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -57,6 +58,7 @@ extern "C" {
 
 #define SLI_POWER_MANAGER_EM_TABLE_SIZE  2
 
+#define SLI_POWER_MANAGER_EM4_ENTRY_WAIT_LOOPS 200
 /*******************************************************************************
  *****************************   DATA TYPES   *********************************
  ******************************************************************************/
@@ -73,19 +75,25 @@ typedef struct {
 
 void sli_power_manager_init_hardware(void);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_apply_em(sl_power_manager_em_t em);
 
 void sli_power_manager_debug_init(void);
 
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_save_states(void);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_handle_pre_deepsleep_operations(void);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_restore_high_freq_accuracy_clk(void);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sli_power_manager_is_high_freq_accuracy_clk_ready(bool wait);
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_restore_states(void);
 
 /*******************************************************************************
@@ -101,6 +109,7 @@ uint32_t sli_power_manager_get_default_high_frequency_minimum_offtime(void);
 /*******************************************************************************
  * Restores the Low Frequency clocks according to which LF oscillators are used.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_low_frequency_restore(void);
 
 /***************************************************************************//**
@@ -109,6 +118,7 @@ void sli_power_manager_low_frequency_restore(void);
  *
  * @return true if HFXO is used, else false.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sli_power_manager_is_high_freq_accuracy_clk_used(void);
 #endif
 
@@ -124,6 +134,7 @@ void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
  *
  * @return Delay for the complete wake-up process with full restore.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sli_power_manager_get_wakeup_process_time_overhead(void);
 
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
@@ -136,6 +147,40 @@ uint32_t sli_power_manager_get_wakeup_process_time_overhead(void);
  ******************************************************************************/
 bool sli_power_manager_get_clock_restore_status(void);
 #endif
+
+/***************************************************************************//**
+ * Update Energy Mode 4 configurations.
+ ******************************************************************************/
+void sli_power_manager_init_em4(void);
+
+/***************************************************************************//**
+ * Enter energy mode 4 (EM4).
+ *
+ * @note  You should not expect to return from this function. Once the device
+ *        enters EM4, only a power on reset or external reset pin can wake the
+ *        device.
+ *
+ * @note  On xG22 devices, this function re-configures the IADC if EM4 entry
+ *        is possible.
+ ******************************************************************************/
+void sli_power_manager_enter_em4(void);
+
+/***************************************************************************//**
+ *   When EM4 pin retention is set to power_manager_pin_retention_latch,
+ *   then pins are retained through EM4 entry and wakeup. The pin state is
+ *   released by calling this function. The feature allows peripherals or
+ *   GPIO to be re-initialized after EM4 exit (reset), and when
+ *   initialization is done, this function can release pins and return
+ *   control to the peripherals or GPIO.
+ ******************************************************************************/
+void sli_power_manager_em4_unlatch_pin_retention(void);
+
+/***************************************************************************//**
+ * Fetches current energy mode
+ *
+ * @return Returns current energy mode
+ ******************************************************************************/
+sl_power_manager_em_t sli_power_manager_get_current_em(void);
 
 #ifdef __cplusplus
 }

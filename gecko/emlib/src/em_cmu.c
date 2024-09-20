@@ -74,7 +74,8 @@
 #define CMU_MAX_SRAM_FREQ_1WS             80000000UL
 
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
 #define CMU_MAX_FREQ_0WS_1V1              40000000UL
 
 #define CMU_MAX_FREQ_0WS_1V0              40000000UL
@@ -697,7 +698,8 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
   bool restoreTrace;
 #endif
@@ -743,7 +745,8 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       restoreTrace = CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk;
       if (restoreTrace) {
@@ -761,7 +764,8 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       if (restoreTrace) {
         CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -1437,7 +1441,7 @@ void sli_em_cmu_SYSCLKInitPreClockSelect(void)
  * @note This function is needed for macro expansion of CMU_CLOCK_SELECT_SET when
  *       the clock is SYSCLK.
  ******************************************************************************/
-void sli_em_cmu_SYSCLKInitPostClockSelect(void)
+void sli_em_cmu_SYSCLKInitPostClockSelect(bool optimize_divider)
 {
   // Update CMSIS core clock variable and set optimum wait-states.
   CMU_UpdateWaitStates(SystemCoreClockGet(), VSCALE_DEFAULT);
@@ -1447,8 +1451,10 @@ void sli_em_cmu_SYSCLKInitPostClockSelect(void)
   EMU_VScaleEM01ByClock(0, true);
 #endif
 
-  // Set optimal PCLK divisor
-  pclkDivOptimize();
+  if (optimize_divider) {
+    // Set optimal PCLK divisor
+    pclkDivOptimize();
+  }
 #if (defined(CMU_SYSCLKCTRL_RHCLKPRESC) \
   && (_SILICON_LABS_EFR32_RADIO_TYPE != _SILICON_LABS_EFR32_RADIO_NONE))
   // Set optimal RHCLK prescaler
@@ -1542,7 +1548,8 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
   bool restoreTrace;
 #endif
@@ -1979,7 +1986,8 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       restoreTrace = CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk;
       if (restoreTrace) {
@@ -1997,7 +2005,8 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
-        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
+        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
+        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
         case cmuSelect_SYSCLK:
           tmp = CMU_TRACECLKCTRL_CLKSEL_SYSCLK;
           break;
@@ -2023,7 +2032,8 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       if (restoreTrace) {
         CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -3021,7 +3031,6 @@ void CMU_HFXOInit(const CMU_HFXOInit_TypeDef *hfxoInit)
                     | (hfxoInit->ctuneXoAna      << _HFXO_XTALCTRL_CTUNEXOANA_SHIFT)
                     | (hfxoInit->ctuneXiAna      << _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)
                     | (hfxoInit->coreBiasAna     << _HFXO_XTALCTRL_COREBIASANA_SHIFT);
-
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
   // See [PM-2871] for details.
@@ -3361,7 +3370,7 @@ sl_status_t CMU_HFXOCTuneSet(uint32_t ctune)
  * @note
      This function only returns the CTUNE XI value. The XO value can be
      different and can be found using the delta (difference between XI and XO).
-     See @ref CMU_HFXOCTuneDeltaGet to retrieve the delta value.
+     See @ref CMU_HFXOCTuneCurrentDeltaGet to retrieve the delta value.
  *****************************************************************************/
 uint32_t CMU_HFXOCTuneGet(void)
 {
@@ -3413,7 +3422,8 @@ uint32_t CMU_HFXOCTuneGet(void)
  *
  * @note
  *   The delta between XI and XO is applicable for the series 2 EFR32xG2x
- *   devices only.
+ *   devices only. Neither XI nor XO is actually modified by this function,
+ *   CMU_HFXOCTuneSet() needs to be called for the change to be propagated.
  *****************************************************************************/
 void CMU_HFXOCTuneDeltaSet(int32_t delta)
 {
@@ -3422,7 +3432,8 @@ void CMU_HFXOCTuneDeltaSet(int32_t delta)
 
 /**************************************************************************//**
  * @brief
- *   Get the HFXO crystal tuning delta.
+ *   Get the HFXO crystal tuning delta. It can be default recommended delta value
+ *   or value set by CMU_HFXOCTuneDeltaSet.
  *
  * @return
  *   Chip dependent crystal capacitor bank tuning delta.
@@ -3430,6 +3441,27 @@ void CMU_HFXOCTuneDeltaSet(int32_t delta)
 int32_t CMU_HFXOCTuneDeltaGet(void)
 {
   return (int32_t)ctuneDelta;
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Get the current delta between HFXO XI and XO.
+ *
+ * @return
+ *   the current delta between HFXO XI and XO.
+ *****************************************************************************/
+int32_t CMU_HFXOCTuneCurrentDeltaGet(void)
+{
+  uint32_t ctune;
+  uint32_t ctuneXO;
+  int32_t ctuneCurrentDelta;
+
+  ctune = ((HFXO0->XTALCTRL & _HFXO_XTALCTRL_CTUNEXIANA_MASK)
+           >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT);
+  ctuneXO = ((HFXO0->XTALCTRL & _HFXO_XTALCTRL_CTUNEXOANA_MASK)
+             >> _HFXO_XTALCTRL_CTUNEXOANA_SHIFT);
+  ctuneCurrentDelta = (int32_t)ctuneXO - (int32_t)ctune;
+  return ctuneCurrentDelta;
 }
 
 /**************************************************************************//**

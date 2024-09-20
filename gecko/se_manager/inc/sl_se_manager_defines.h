@@ -453,9 +453,9 @@ extern "C" {
 /// the context objects to a known safe state initially when the context object
 /// is declared.
 #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
-#define SL_SE_COMMAND_CONTEXT_INIT           { SE_COMMAND_DEFAULT(0), false }
+#define SL_SE_COMMAND_CONTEXT_INIT           { SLI_SE_MAILBOX_COMMAND_DEFAULT(0), false }
 #else
-#define SL_SE_COMMAND_CONTEXT_INIT           { SE_COMMAND_DEFAULT(0) }
+#define SL_SE_COMMAND_CONTEXT_INIT           { SLI_SE_MAILBOX_COMMAND_DEFAULT(0) }
 #endif
 
 /// @} (end addtogroup sl_se_manager_core)
@@ -489,7 +489,7 @@ extern "C" {
 // -------------------------------
 // Defines for Root code functionality
 
-#define SL_SE_COMMAND_CONTEXT_INIT           { SE_COMMAND_DEFAULT(0) }
+#define SL_SE_COMMAND_CONTEXT_INIT           { SLI_SE_MAILBOX_COMMAND_DEFAULT(0) }
 #define SL_SE_ROOT_CONFIG_MCU_SETTINGS_SHIFT                       16U
 
 #endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)

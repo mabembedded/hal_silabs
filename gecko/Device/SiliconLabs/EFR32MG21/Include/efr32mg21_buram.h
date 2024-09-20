@@ -3,7 +3,7 @@
  * @brief EFR32MG21 BURAM register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,12 +42,12 @@
  *****************************************************************************/
 
 /** BURAM RET Register Group Declaration. */
-typedef struct {
+typedef struct buram_ret_typedef{
   __IOM uint32_t REG;                                /**< Retention Register                                 */
 } BURAM_RET_TypeDef;
 
 /** BURAM Register Declaration. */
-typedef struct {
+typedef struct buram_typedef{
   BURAM_RET_TypeDef RET[32U];                   /**< RetentionReg                                       */
   uint32_t          RESERVED0[992U];            /**< Reserved for future use                            */
   BURAM_RET_TypeDef RET_SET[32U];               /**< RetentionReg                                       */
@@ -77,4 +77,4 @@ typedef struct {
 /** @} End of group EFR32MG21_BURAM */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_BURAM_H */
+#endif // EFR32MG21_BURAM_H

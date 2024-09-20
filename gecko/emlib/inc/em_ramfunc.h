@@ -31,6 +31,8 @@
 #ifndef EM_RAMFUNC_H
 #define EM_RAMFUNC_H
 
+#include "sl_code_classification.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -127,25 +129,25 @@ extern "C" {
 
 #elif defined(__ICCARM__)
 /* IAR Embedded Workbench */
-#define SL_RAMFUNC_DECLARATOR          __ramfunc
+#define SL_RAMFUNC_DECLARATOR          SL_CODE_RAM
 #define SL_RAMFUNC_DEFINITION_BEGIN    SL_RAMFUNC_DECLARATOR
 #define SL_RAMFUNC_DEFINITION_END
 
 #elif defined(__GNUC__) && (defined(__CROSSWORKS_ARM) || defined(__SES_ARM))
 /* Rowley Crossworks and Segger Embedded Studio */
-#define SL_RAMFUNC_DECLARATOR          __attribute__ ((section(".fast")))
+#define SL_RAMFUNC_DECLARATOR          SL_CODE_RAM
 #define SL_RAMFUNC_DEFINITION_BEGIN    SL_RAMFUNC_DECLARATOR
 #define SL_RAMFUNC_DEFINITION_END
 
-#elif defined(__GNUC__) && defined(__ZEPHYR__)
+#elif defined(__GNUC__) && defined(CONFIG_SOC_FAMILY_EXX32)
 /* Zephyr environment */
-#define SL_RAMFUNC_DECLARATOR          __attribute__ ((section(".ramfunc")))
+#define SL_RAMFUNC_DECLARATOR          SL_CODE_RAM
 #define SL_RAMFUNC_DEFINITION_BEGIN    SL_RAMFUNC_DECLARATOR
 #define SL_RAMFUNC_DEFINITION_END
 
 #elif defined(__GNUC__)
 /* Simplicity Studio, Atollic and Vanilla armgcc */
-#define SL_RAMFUNC_DECLARATOR          __attribute__ ((section(".ram")))
+#define SL_RAMFUNC_DECLARATOR          SL_CODE_RAM
 #define SL_RAMFUNC_DEFINITION_BEGIN    SL_RAMFUNC_DECLARATOR
 #define SL_RAMFUNC_DEFINITION_END
 

@@ -40,7 +40,8 @@ extern "C" {
 /// @addtogroup MFM Multi-Level Frequency Modulation
 /// @ingroup Protocol_Specific
 /// @brief MFM configuration routines
-/// Note that this feature is only supported on EFR32xG23 devices.
+///
+/// @note This feature is only supported on EFR32xG23 devices.
 ///
 /// This feature can be used to directly control the TX interpolation filter
 /// input to allow for a more flexible frequency modulation scheme than the
@@ -70,7 +71,6 @@ extern "C" {
 /// Use \ref RAIL_StopTx() to finish transmitting.
 ///
 /// @code{.c}
-///
 /// uint8_t txCount = 0;
 ///
 /// typedef struct RAIL_MFM_Config_App {

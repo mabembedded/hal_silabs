@@ -40,19 +40,6 @@ extern "C" {
 
 #define RAIL_PA_CURVES_PIECEWISE_SEGMENTS (9U)
 
-#define RAIL_PA_CURVES_2P4GIG_HP_VBAT_MAX_POWER      110
-#define RAIL_PA_CURVES_2P4GIG_HP_VBAT_MIN_POWER      -200
-#define RAIL_PA_CURVES_2P4GIG_HP_VBAT_CURVES \
-  { { 255, 110, 40 },                        \
-    { 240, 3711, -193393 },                  \
-    { 79, 922, 11434 },                      \
-    { 38, 373, 27315 },                      \
-    { 21, 246, 25172 },                      \
-    { 13, 140, 19809 },                      \
-    { 7, 76, 14005 },                        \
-    { 4, 46, 9999 },                         \
-    { 4, 44, 9753 } }
-
 #define RAIL_PA_CURVES_SUBGIG_HP_VBAT_MAX_POWER      130
 #define RAIL_PA_CURVES_SUBGIG_HP_VBAT_MIN_POWER      -200
 #define RAIL_PA_CURVES_SUBGIG_HP_VBAT_CURVES \
@@ -109,11 +96,6 @@ extern "C" {
 // Macro to declare the variables needed to initialize RAIL_TxPowerCurvesConfig_t for use in
 // RAIL_InitTxPowerCurves, assuming battery powered operation
 #define RAIL_DECLARE_TX_POWER_VBAT_CURVES_ALT                      \
-  static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseData2p4gHp = { \
-    RAIL_PA_CURVES_2P4GIG_HP_VBAT_MAX_POWER,                       \
-    RAIL_PA_CURVES_2P4GIG_HP_VBAT_MIN_POWER,                       \
-    RAIL_PA_CURVES_2P4GIG_HP_VBAT_CURVES,                          \
-  };                                                               \
   static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHp = {     \
     RAIL_PA_CURVES_SUBGIG_HP_VBAT_MAX_POWER,                       \
     RAIL_PA_CURVES_SUBGIG_HP_VBAT_MIN_POWER,                       \
@@ -140,41 +122,6 @@ extern "C" {
 #define RAIL_DECLARE_TX_POWER_CURVES_CONFIG_ALT                                \
   {                                                                            \
     .curves = {                                                                \
-      {                                                                        \
-        .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,                       \
-        .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \
-        .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,                                 \
-        .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,                                 \
-        .conversion = { .powerCurve = &RAIL_piecewiseData2p4gHp },             \
-      },                                                                       \
-      {                                                                        \
-        .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,                       \
-        .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \
-        .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,                                 \
-        .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,                                 \
-        .conversion = { .powerCurve = &RAIL_piecewiseData2p4gHp },             \
-      },                                                                       \
-      {                                                                        \
-        .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,                       \
-        .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \
-        .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,                                 \
-        .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,                                 \
-        .conversion = { .powerCurve = &RAIL_piecewiseData2p4gHp },             \
-      },                                                                       \
-      {                                                                        \
-        .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,                       \
-        .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \
-        .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,                                 \
-        .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,                                 \
-        .conversion = { .powerCurve = &RAIL_piecewiseData2p4gHp },             \
-      },                                                                       \
-      {                                                                        \
-        .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,                       \
-        .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \
-        .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,                                 \
-        .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,                                 \
-        .conversion = { .powerCurve = &RAIL_piecewiseData2p4gHp },             \
-      },                                                                       \
       {                                                                        \
         .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,                       \
         .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \

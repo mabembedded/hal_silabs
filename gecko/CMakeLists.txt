@@ -77,6 +77,7 @@ if(${CONFIG_SOC_GECKO_HAS_RADIO})
         platform/radio/rail_lib/protocol/ble
         platform/radio/rail_lib/protocol/ieee802154
         platform/radio/rail_lib/protocol/zwave
+        platform/radio/rail_lib/protocol/sidewalk
       )
       zephyr_sources(platform/radio/rail_lib/plugin/rail_util_protocol/sl_rail_util_protocol.c)
     endif()
@@ -87,7 +88,11 @@ endif()
 zephyr_include_directories(
   Device/SiliconLabs/${SILABS_GECKO_DEVICE}/Include
   common/inc
+  common/config
   emlib/inc
+  service/clock_manager/inc
+  service/device_manager/inc
+  service/hfxo_manager/inc
   service/device_init/config/s2
   service/device_init/config/s2/sdid${CONFIG_SOC_GECKO_SDID}
   service/device_init/inc
@@ -128,6 +133,8 @@ zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/power_manager/src/sl_
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/power_manager/src/sl_power_manager_hal_s2.c)
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/hfxo_manager/src/sl_hfxo_manager.c)
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/hfxo_manager/src/sl_hfxo_manager_hal_s2.c)
+zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     service/device_init/src/sl_device_init_lfxo_s2.c)
+
 
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_DEV_INIT     common/src/sl_slist.c)
 zephyr_sources_ifdef(CONFIG_SOC_GECKO_CORE         emlib/src/em_core.c)
@@ -165,3 +172,4 @@ zephyr_sources_ifdef(CONFIG_SOC_SERIES_EFM32JG12B  Device/SiliconLabs/EFM32JG12B
 zephyr_sources_ifdef(CONFIG_SOC_SERIES_EFR32MG21   Device/SiliconLabs/EFR32MG21/Source/system_efr32mg21.c)
 zephyr_sources_ifdef(CONFIG_SOC_SERIES_EFM32PG1B   Device/SiliconLabs/EFM32PG1B/Source/system_efm32pg1b.c)
 zephyr_sources_ifdef(CONFIG_SOC_SERIES_EFR32MG24   Device/SiliconLabs/EFR32MG24/Source/system_efr32mg24.c)
+zephyr_sources_ifdef(CONFIG_SOC_SERIES_EFR32FG23   Device/SiliconLabs/EFR32FG23/Source/system_efr32fg23.c common/src/sl_core_cortexm.c)

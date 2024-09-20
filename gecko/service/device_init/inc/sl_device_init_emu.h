@@ -30,6 +30,10 @@
 #ifndef SL_DEVICE_INIT_EMU_H
 #define SL_DEVICE_INIT_EMU_H
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#warning "Power Manager is present and handles EMU initialization. Remove device_init_emu from project to avoid conflicts"
+#endif
+
 #include "sl_status.h"
 
 #ifdef __cplusplus

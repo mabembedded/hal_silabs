@@ -38,7 +38,7 @@
 /// @{
 
 #include "sl_se_manager_defines.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -138,7 +138,7 @@ typedef struct {
  *   sl_se_set_yield().
  ******************************************************************************/
 typedef struct sl_se_command_context_t {
-  SE_Command_t  command;             ///< SE mailbox command struct
+  sli_se_mailbox_command_t  command;             ///< SE mailbox command struct
 #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
   bool          yield;               ///< If true, yield the CPU core while
                                      ///< waiting for the SE mailbox command
@@ -318,6 +318,10 @@ typedef struct {
   uint32_t tamper_status;
   /// Currently active tamper sources.
   uint32_t tamper_status_raw;
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  uint8_t rom_revision;
+  uint8_t otp_patch_sequence;
+#endif
 } sl_se_status_t;
 
 /// @} (end addtogroup sl_se_manager_util)
@@ -481,6 +485,72 @@ typedef sl_se_hash_type_t sl_se_pbkdf2_prf_type_t;
 #endif
 
 /// @} (end addtogroup sl_se_manager_key_derivation)
+
+#if defined(_SILICON_LABS_32B_SERIES_3)
+
+/// @addtogroup sl_se_manager_extmem
+/// @{
+
+/// SE Crypto algorithms (ciphers, AEADs, MACs, hashes, etc) used for
+/// the code region write function.
+typedef enum {
+  SL_SE_ALG_AES_CTR,               ///< Counter mode AES cipher
+  SL_SE_ALG_SHA_256,               ///< SHA2-256
+} sl_se_crypto_alg_t;
+
+typedef struct {
+  sl_se_cipher_operation_t mode;   ///< encryption or decryption
+  sl_se_key_descriptor_t *key;     ///< Key to be used for encryption or decryption
+  unsigned char *iv;               ///< Initial Vector/Nonce
+  size_t iv_len;                   ///< Initial Vector/Nonce length
+  unsigned char *add;              ///< Additional data
+  size_t add_len;                  ///< Additional data length
+  unsigned char *tag;              ///< Tag
+  size_t tag_len;                  ///< Tag length
+} sl_se_aead_info_t;
+
+typedef struct {
+  sl_se_cipher_operation_t mode;   ///< encryption or decryption
+  sl_se_key_descriptor_t *key;     ///< Key to be used for encryption or decryption
+} sl_se_cipher_info_t;
+
+typedef struct {
+  unsigned char *digest;           ///< Pointer to message digest buffer
+  size_t digest_size;              ///< Size of message digest
+} sl_se_hash_info_t;
+
+typedef union {
+  sl_se_aead_info_t   aead;
+  sl_se_cipher_info_t cipher;
+  sl_se_hash_info_t   hash;
+} sl_se_crypto_alg_specific_info_t;
+
+/// Information associated with cryupto related operations
+typedef struct {
+  sl_se_crypto_alg_t *alg;         ///< SE Crypto algorithm
+  sl_se_crypto_alg_specific_info_t alg_specific_info;
+} sl_se_crypto_operation_t;
+
+/// Security level of code region
+typedef enum {
+  SL_SE_CODE_REGION_SECURITY_LEVEL_PLAINTEXT = 0,
+  SL_SE_CODE_REGION_SECURITY_LEVEL_ENCRYPTED_ONLY,
+  SL_SE_CODE_REGION_SECURITY_LEVEL_ENCRYPTED_AUTHENTICATED,
+} sl_se_code_region_security_level_t;
+
+/// Code region configuration
+typedef struct {
+  unsigned int region_idx;         ///< Index of code region
+  unsigned int region_size;        ///< Size of code region
+  sl_se_code_region_security_level_t security_level;   ///< Security level of region
+  bool auto_secure_boot_enabled;   ///< SE driven secure boot enabled (if true)
+  bool bank_swapping_enabled;      ///< Bank swapping enabled (if true)
+  bool active_banked_region;       ///< Active banked region (if true)
+} sl_code_region_config_t;
+
+/// @} (end addtogroup sl_se_manager_extmem)
+
+#endif // defined(_SILICON_LABS_32B_SERIES_3)
 
 #endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 

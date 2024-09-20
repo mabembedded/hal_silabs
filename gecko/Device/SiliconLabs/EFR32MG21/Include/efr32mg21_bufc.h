@@ -3,7 +3,7 @@
  * @brief EFR32MG21 BUFC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** BUFC BUF Register Group Declaration. */
-typedef struct {
+typedef struct bufc_buf_typedef{
   __IOM uint32_t CTRL;                               /**< Buffer Control                                     */
   __IOM uint32_t ADDR;                               /**< Buffer Address                                     */
   __IOM uint32_t WRITEOFFSET;                        /**< Write Offset                                       */
@@ -58,7 +58,7 @@ typedef struct {
 } BUFC_BUF_TypeDef;
 
 /** BUFC Register Declaration. */
-typedef struct {
+typedef struct bufc_typedef{
   __IM uint32_t    IPVERSION;                   /**< IP Version                                         */
   __IOM uint32_t   EN;                          /**< Enable peripheral clock to this module             */
   BUFC_BUF_TypeDef BUF[4U];                     /**< Data Buffer                                        */
@@ -434,4 +434,4 @@ typedef struct {
 /** @} End of group EFR32MG21_BUFC */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_BUFC_H */
+#endif // EFR32MG21_BUFC_H

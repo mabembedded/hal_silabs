@@ -30,9 +30,9 @@
 #ifndef SL_SE_MANAGER_ENTROPY_H
 #define SL_SE_MANAGER_ENTROPY_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -52,7 +52,7 @@
 
 #include "sl_se_manager_key_handling.h"
 #include "sl_se_manager_types.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include "sl_status.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -92,6 +92,6 @@ sl_status_t sl_se_get_random(sl_se_command_context_t *cmd_ctx,
 /// @} (end addtogroup sl_se_manager_entropy)
 /// @} (end addtogroup sl_se)
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_ENTROPY_H

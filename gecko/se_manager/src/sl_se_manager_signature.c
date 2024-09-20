@@ -34,7 +34,7 @@
 
 #include "sl_se_manager.h"
 #include "sli_se_manager_internal.h"
-#include "em_se.h"
+#include "sli_se_manager_mailbox.h"
 #include <string.h>
 
 /// @addtogroup sl_se_manager
@@ -59,7 +59,7 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
   uint32_t command_word = SLI_SE_COMMAND_SIGNATURE_SIGN;
 
@@ -101,23 +101,23 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
   // Add key parameters to command
   sli_add_key_parameters(cmd_ctx, key, status);
   // Message size (number of bytes)
-  SE_addParameter(se_cmd, message_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, message_len);
   // Add key metadata block to command
   sli_add_key_metadata(cmd_ctx, key, status);
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_DataTransfer_t message_buffer = SE_DATATRANSFER_DEFAULT(message, message_len);
-  SE_addDataInput(se_cmd, &message_buffer);
+  sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_mailbox_command_add_input(se_cmd, &message_buffer);
 
   // EdDSA requires the message twice
-  SE_DataTransfer_t repeated_message_buffer = SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_datatransfer_t repeated_message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
-    SE_addDataInput(se_cmd, &repeated_message_buffer);
+    sli_se_mailbox_command_add_input(se_cmd, &repeated_message_buffer);
   }
 
-  SE_DataTransfer_t signature_buffer = SE_DATATRANSFER_DEFAULT(signature, signature_len);
-  SE_addDataOutput(se_cmd, &signature_buffer);
+  sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature, signature_len);
+  sli_se_mailbox_command_add_output(se_cmd, &signature_buffer);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -142,7 +142,7 @@ sl_status_t sl_se_ecc_verify(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
   uint32_t command_word = SLI_SE_COMMAND_SIGNATURE_VERIFY;
 
@@ -185,23 +185,23 @@ sl_status_t sl_se_ecc_verify(sl_se_command_context_t *cmd_ctx,
   // Add key parameters to command
   sli_add_key_parameters(cmd_ctx, key, status);
   // Message size (number of bytes)
-  SE_addParameter(se_cmd, message_len);
+  sli_se_mailbox_command_add_parameter(se_cmd, message_len);
   // Add key metadata block to command
   sli_add_key_metadata(cmd_ctx, key, status);
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  SE_DataTransfer_t message_buffer = SE_DATATRANSFER_DEFAULT(message,
-                                                             message_len);
-  SE_DataTransfer_t signature_buffer = SE_DATATRANSFER_DEFAULT(signature,
-                                                               signature_len);
+  sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message,
+                                                                     message_len);
+  sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature,
+                                                                       signature_len);
 
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
-    SE_addDataInput(se_cmd, &signature_buffer);
-    SE_addDataInput(se_cmd, &message_buffer);
+    sli_se_mailbox_command_add_input(se_cmd, &signature_buffer);
+    sli_se_mailbox_command_add_input(se_cmd, &message_buffer);
   } else {
-    SE_addDataInput(se_cmd, &message_buffer);
-    SE_addDataInput(se_cmd, &signature_buffer);
+    sli_se_mailbox_command_add_input(se_cmd, &message_buffer);
+    sli_se_mailbox_command_add_input(se_cmd, &signature_buffer);
   }
 
   return sli_se_execute_and_wait(cmd_ctx);

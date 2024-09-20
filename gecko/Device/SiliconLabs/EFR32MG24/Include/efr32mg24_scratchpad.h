@@ -3,7 +3,7 @@
  * @brief EFR32MG24 SCRATCHPAD register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** SCRATCHPAD Register Declaration. */
-typedef struct {
+typedef struct scratchpad_typedef{
   __IOM uint32_t SREG0;                         /**< Scratchpad Register 0                              */
   __IOM uint32_t SREG1;                         /**< Scratchpad Register 1                              */
   uint32_t       RESERVED0[1022U];              /**< Reserved for future use                            */
@@ -84,4 +84,4 @@ typedef struct {
 /** @} End of group EFR32MG24_SCRATCHPAD */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_SCRATCHPAD_H */
+#endif // EFR32MG24_SCRATCHPAD_H

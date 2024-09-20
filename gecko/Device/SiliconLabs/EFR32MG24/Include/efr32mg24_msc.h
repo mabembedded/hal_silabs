@@ -3,7 +3,7 @@
  * @brief EFR32MG24 MSC register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@
  *****************************************************************************/
 
 /** MSC Register Declaration. */
-typedef struct {
+typedef struct msc_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
   __IOM uint32_t READCTRL;                      /**< Read Control Register                              */
   __IOM uint32_t RDATACTRL;                     /**< Read Data Control Register                         */
@@ -318,17 +318,17 @@ typedef struct {
 #define _MSC_STATUS_WDATAREADY_MASK               0x8UL                                          /**< Bit mask for MSC_WDATAREADY                 */
 #define _MSC_STATUS_WDATAREADY_DEFAULT            0x00000001UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
 #define MSC_STATUS_WDATAREADY_DEFAULT             (_MSC_STATUS_WDATAREADY_DEFAULT << 3)          /**< Shifted mode DEFAULT for MSC_STATUS         */
-#define MSC_STATUS_ERASEABORTED                   (0x1UL << 4)                                   /**< The Current Flash Erase Operation Aborte    */
+#define MSC_STATUS_ERASEABORTED                   (0x1UL << 4)                                   /**< Erase Operation Aborted                     */
 #define _MSC_STATUS_ERASEABORTED_SHIFT            4                                              /**< Shift value for MSC_ERASEABORTED            */
 #define _MSC_STATUS_ERASEABORTED_MASK             0x10UL                                         /**< Bit mask for MSC_ERASEABORTED               */
 #define _MSC_STATUS_ERASEABORTED_DEFAULT          0x00000000UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
 #define MSC_STATUS_ERASEABORTED_DEFAULT           (_MSC_STATUS_ERASEABORTED_DEFAULT << 4)        /**< Shifted mode DEFAULT for MSC_STATUS         */
-#define MSC_STATUS_PENDING                        (0x1UL << 5)                                   /**< Write command is in queue                   */
+#define MSC_STATUS_PENDING                        (0x1UL << 5)                                   /**< Write Command In Queue                      */
 #define _MSC_STATUS_PENDING_SHIFT                 5                                              /**< Shift value for MSC_PENDING                 */
 #define _MSC_STATUS_PENDING_MASK                  0x20UL                                         /**< Bit mask for MSC_PENDING                    */
 #define _MSC_STATUS_PENDING_DEFAULT               0x00000000UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
 #define MSC_STATUS_PENDING_DEFAULT                (_MSC_STATUS_PENDING_DEFAULT << 5)             /**< Shifted mode DEFAULT for MSC_STATUS         */
-#define MSC_STATUS_TIMEOUT                        (0x1UL << 6)                                   /**< Write command timeout flag                  */
+#define MSC_STATUS_TIMEOUT                        (0x1UL << 6)                                   /**< Write Command Timeout                       */
 #define _MSC_STATUS_TIMEOUT_SHIFT                 6                                              /**< Shift value for MSC_TIMEOUT                 */
 #define _MSC_STATUS_TIMEOUT_MASK                  0x40UL                                         /**< Bit mask for MSC_TIMEOUT                    */
 #define _MSC_STATUS_TIMEOUT_DEFAULT               0x00000000UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
@@ -543,4 +543,4 @@ typedef struct {
 /** @} End of group EFR32MG24_MSC */
 /** @} End of group Parts */
 
-#endif /* EFR32MG24_MSC_H */
+#endif // EFR32MG24_MSC_H

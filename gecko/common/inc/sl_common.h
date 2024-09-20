@@ -89,6 +89,10 @@ extern "C" {
 #if !defined(__GNUC__)
 /* Not GCC compilers */
 
+/** @brief Macros for giving the compiler hints about the likelihood of a branch. */
+#define SL_BRANCH_LIKELY(x)   (x)
+#define SL_BRANCH_UNLIKELY(x) (x)
+
 /** @brief Macro for getting minimum value. */
 #define SL_MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -150,6 +154,10 @@ extern "C" {
 
 #else // !defined(__GNUC__)
 /* GCC compilers */
+
+/** @brief Macros for giving the compiler hints about the likelihood of a branch. */
+#define SL_BRANCH_LIKELY(x)   __builtin_expect(!!(x), 1)
+#define SL_BRANCH_UNLIKELY(x) __builtin_expect(!!(x), 0)
 
 /** @brief A macro for getting the minimum value. No side-effects, a and b are evaluated one time only. */
 #define SL_MIN(a, b) __extension__({ __typeof__(a)_a = (a); __typeof__(b)_b = (b); _a < _b ? _a : _b; })
@@ -265,6 +273,12 @@ extern "C" {
 #define SL_DEPRECATED_API_SDK_4_4
 #else
 #define SL_DEPRECATED_API_SDK_4_4 __attribute__ ((deprecated))
+#endif
+
+#ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_2024_6
+#define SL_DEPRECATED_API_SDK_2024_6
+#else
+#define SL_DEPRECATED_API_SDK_2024_6 __attribute__ ((deprecated))
 #endif
 /** @endcond */
 

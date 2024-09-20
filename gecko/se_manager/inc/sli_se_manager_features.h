@@ -61,6 +61,7 @@
 #define _SILICON_LABS_SECURITY_FEATURE_SE    (0)
 #define _SILICON_LABS_SECURITY_FEATURE_VAULT (1)
 #define _SILICON_LABS_SECURITY_FEATURE_ROT   (2)
+#define _SILICON_LABS_SECURITY_FEATURE_BASE  (3)
 #define _SILICON_LABS_SECURITY_FEATURE       _SILICON_LABS_SECURITY_FEATURE_VAULT
 
 #define SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE
@@ -93,7 +94,7 @@
 
 #if (defined(_SILICON_LABS_SECURITY_FEATURE)                                  \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))
+  && (defined(_SILICON_LABS_32B_SERIES_2_CONFIG) && _SILICON_LABS_32B_SERIES_2_CONFIG >= 3))
 // Reading the latest cached tamper reset cause requires SE version 2.2.1 or above.
   #define SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE
 // The option to keep the tamper alive during sleep is only configurable for SE with major version 2
