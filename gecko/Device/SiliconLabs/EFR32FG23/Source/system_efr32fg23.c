@@ -143,8 +143,10 @@ extern const tVectorEntry __VECTOR_TABLE[16 + EXT_IRQ_COUNT];
  *****************************************************************************/
 void SystemInit(void)
 {
+#if 0
 #if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
   SCB->VTOR = (uint32_t) (&__VECTOR_TABLE[0]);
+#endif
 #endif
 
 #if defined(UNALIGNED_SUPPORT_DISABLE)
@@ -174,13 +176,38 @@ void SystemInit(void)
   SMU->PPUSATD1_CLR = (_SMU_PPUSATD1_MASK & ~SMU_PPUSATD1_SMU);
 #endif
 
+typedef struct
+{
+  __IOM uint32_t CTRL;                   /*!< Offset: 0x000 (R/W)  SAU Control Register */
+  __IM  uint32_t TYPE;                   /*!< Offset: 0x004 (R/ )  SAU Type Register */
+#if defined (__SAUREGION_PRESENT) && (__SAUREGION_PRESENT == 1U)
+  __IOM uint32_t RNR;                    /*!< Offset: 0x008 (R/W)  SAU Region Number Register */
+  __IOM uint32_t RBAR;                   /*!< Offset: 0x00C (R/W)  SAU Region Base Address Register */
+  __IOM uint32_t RLAR;                   /*!< Offset: 0x010 (R/W)  SAU Region Limit Address Register */
+#else
+        uint32_t RESERVED0[3];
+#endif
+  __IOM uint32_t SFSR;                   /*!< Offset: 0x014 (R/W)  Secure Fault Status Register */
+  __IOM uint32_t SFAR;                   /*!< Offset: 0x018 (R/W)  Secure Fault Address Register */
+} SAU_Type;
+
+#define SAU_CTRL_ALLNS_Pos                  1U                                            /*!< SAU CTRL: ALLNS Position */
+#define SAU_CTRL_ALLNS_Msk                 (1UL << SAU_CTRL_ALLNS_Pos)                    /*!< SAU CTRL: ALLNS Mask */
+
+  #define SAU_BASE          (SCS_BASE +  0x0DD0UL)                     /*!< Security Attribution Unit */
+  #define SAU               ((SAU_Type       *)     SAU_BASE         ) /*!< Security Attribution Unit */
+  SAU->CTRL = SAU_CTRL_ALLNS_Msk;
+  __DSB();
+  __ISB();
+
+
   // SAU treats all accesses as non-secure
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   SAU->CTRL = SAU_CTRL_ALLNS_Msk;
   __DSB();
   __ISB();
-//#else
-//  #error "The startup code requires access to the CMSE toolchain extension to set proper SAU settings."
+#else
+  //#error "The startup code requires access to the CMSE toolchain extension to set proper SAU settings."
 #endif // __ARM_FEATURE_CMSE
 
 // Clear and Enable the SMU PPUSEC and BMPUSEC interrupt.
@@ -189,6 +216,11 @@ void SystemInit(void)
   NVIC_EnableIRQ(SMU_SECURE_IRQn);
   SMU->IEN = SMU_IEN_PPUSEC | SMU_IEN_BMPUSEC;
 #endif //SL_TRUSTZONE_SECURE
+}
+
+void z_arm_platform_init(void)
+{
+  SystemInit();
 }
 
 #if !defined(SL_LEGACY_LINKER)
