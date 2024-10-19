@@ -16,4 +16,5 @@ zephyr_include_directories(
 
 zephyr_sources(                                src/sl_se_manager.c)
 zephyr_sources(                                src/sl_se_manager_util.c)
+zephyr_sources(                                src/sli_se_manager_mailbox.c)
 zephyr_sources_ifdef(CONFIG_ENTROPY_GECKO_SE   src/sl_se_manager_entropy.c)
